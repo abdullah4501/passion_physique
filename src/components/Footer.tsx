@@ -1,5 +1,5 @@
 import { Phone, Mail, Instagram, Facebook } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo-footer.png';
 
 const Footer = () => {
   const quickLinks1 = [
@@ -38,11 +38,8 @@ const Footer = () => {
           {/* Company Info */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-6">
-              <img src={logo} alt="Passion Physique" className="w-12 h-12" />
-              <div className="text-white font-bold text-xl">
-                <div>passion</div>
-                <div className="text-primary">physique</div>
-              </div>
+              <img src={logo} alt="Passion Physique"  />
+              
             </div>
             
             <p className="text-white/80 text-sm mb-8 leading-relaxed">
