@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import bg from "@/assets/bg/plans.png";
+import bg from "@/assets/bg/Plans.png";
 
 const PricingSection = () => {
   const basicPlan = {
