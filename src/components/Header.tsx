@@ -18,24 +18,22 @@ const Header = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <header className="fixed top-0 left-0 right-0 z-50 ">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Passion Physique" className="w-8 h-8" />
-            <span className="text-xl font-bold text-foreground">
-              PASSION <span className="text-primary">PHYSIQUE</span>
-            </span>
+            <img src={logo} alt="Passion Physique" />
+            
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-8 main-navbar">
             {navItems.map((item, index) => (
               <a
                 key={index}
                 href="#"
-                className="text-foreground hover:text-primary transition-colors duration-300 text-sm font-medium uppercase tracking-wide"
+                className="text-foreground hover:text-primary transition-colors duration-300 text-[14px] font-semibold tracking-wide"
               >
                 {item}
               </a>
@@ -44,7 +42,7 @@ const Header = () => {
 
           {/* CTA Button */}
           <div className="hidden lg:block">
-            <Button className="hero-button">
+            <Button className="hero-button px-[25px]">
               LOGIN OR REGISTER
             </Button>
           </div>

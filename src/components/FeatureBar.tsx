@@ -1,21 +1,22 @@
 import { Heart, Zap, Target, TrendingUp } from 'lucide-react';
+import icon from '@/assets/icon.png';
 
 const FeatureBar = () => {
   const features = [
     {
-      icon: <Zap className="w-8 h-8" />,
+      icon: <img src={icon} className="w-[40px] h-[40px]" />,
       title: "SCIENCE-BACKED TRAINING"
     },
     {
-      icon: <Heart className="w-8 h-8" />,
+      icon: <img src={icon} className="w-[40px] h-[40px]" />,
       title: "PASSIONATE COACHING"
     },
     {
-      icon: <Target className="w-8 h-8" />,
+      icon: <img src={icon} className="w-[40px] h-[40px]" />,
       title: "SUSTAINABLE RESULTS"
     },
     {
-      icon: <TrendingUp className="w-8 h-8" />,
+      icon: <img src={icon} className="w-[40px] h-[40px]" />,
       title: "BODY TRANSFORMATION"
     }
   ];
@@ -33,9 +34,9 @@ const FeatureBar = () => {
               <div className="text-white">
                 {feature.icon}
               </div>
-              <h3 className="text-white font-semibold text-sm uppercase tracking-wide text-center md:text-left">
+              <a href="#" className="text-[#f0f0f0] font-light uppercase tracking-wide text-center md:text-left">
                 {feature.title}
-              </h3>
+              </a>
             </div>
           ))}
         </div>

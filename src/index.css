@@ -117,8 +117,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    @apply bg-background text-foreground font-montserrat;
   }
 }
 
@@ -165,3 +164,22 @@
     box-shadow: var(--glow-shadow);
   }
 }
+
+.main-navbar a{
+  letter-spacing: 1.6px;
+  color: #F0F0F0;
+}
+
+.hero-button{
+  border-radius: 0 !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+}
+
+.section-heading {
+    color: white;
+    font-weight: 500;    
+    font-size: 30px;
+    line-height: 38px;
+  }
+  

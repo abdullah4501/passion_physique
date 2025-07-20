@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import heroImage from '@/assets/hero-bg.jpg';
+import heroImage from '@/assets/hero-bg.png';
 
 const HeroSection = () => {
   return (
@@ -16,7 +16,7 @@ const HeroSection = () => {
       />
       
       {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-black/70 z-10" />
+      <div className="absolute inset-0 z-10" />
       
       {/* Content */}
       <div className="relative z-20 text-center px-4 max-w-6xl mx-auto">
@@ -31,16 +31,10 @@ const HeroSection = () => {
           program is personalized, rooted in research, & built to help you achieve sustainable fitness results.
         </p>
         
-        <Button className="hero-button animate-fade-in hover:animate-glow">
+        <Button className="hero-button animate-fade-in hover:animate-glow px-[25px]">
           START YOUR JOURNEY
         </Button>
         
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white/50 rounded-full mt-2 animate-pulse" />
-          </div>
-        </div>
       </div>
       
         {/* Navigation Dots */}
