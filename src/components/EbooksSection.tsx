@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import download from '@/assets/icons/download.png'; // Download icon as image
 import ebookCover1 from '@/assets/ebooks/ebook-1.png';
-import ebookCover2 from '@/assets/ebooks/ebook-1.png';
+import ebookCover2 from '@/assets/ebooks/ebook-2.png';
 import ebookCover3 from '@/assets/ebooks/ebook-1.png';
 import ebookCover4 from '@/assets/ebooks/ebook-1.png';
 
@@ -37,7 +37,7 @@ const ebooks = [
 ];
 
 const EbooksSection = () => (
-  <section className="py-20 bg-[#18191b] min-h-screen">
+  <section className="py-20 min-h-screen">
     <div className="container mx-auto px-6 max-w-7xl">
       {/* Header */}
       <div className="text-center mb-[56px]">
@@ -51,13 +51,13 @@ const EbooksSection = () => (
       </div>
 
       {/* Books Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[40px] mb-[40px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[40px] mb-[20px]">
         {ebooks.map((ebook, i) => (
           <div key={ebook.id} className="flex flex-col items-start">
             {/* Book Cover Card */}
             <div className="bg-[#2E2E2E] w-full flex flex-col items-center justify-center px-[60px] py-[25px] overflow-hidden">
               <img
-                src={ebook.cover}
+                src={ebook.isForAll ? ebook.cover : ebookCover2}
                 alt={ebook.title}
                 className="w-[180px] h-[240px] object-contain"
                 style={{ aspectRatio: '3/4' }}
