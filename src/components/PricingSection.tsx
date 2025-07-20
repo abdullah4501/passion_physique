@@ -38,8 +38,8 @@ const PricingSection = () => {
               sustainable results and long-term success—whether you're aiming for fat loss, muscle gain, or overall health.
             </p>
             
-            <Button className="bg-primary text-[12px] hover:bg-primary/90 text-white px-8 py-3 rounded font-semibold transition-all duration-300 rounded-none">
-              VIEW ALL PLANS
+            <Button className="hero-button px-[45px]">
+              READ MORE
             </Button>
           </div>
           

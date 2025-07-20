@@ -22,7 +22,7 @@ const AboutSection = () => {
   ];
 
   return (
-    <section className="py-20 bg-[#000000]">
+    <section className="py-[60px] bg-[#000000]">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3  items-center">
           {/* Content */}

@@ -7,6 +7,7 @@ import EbooksSection from '@/components/EbooksSection';
 import SessionSection from '@/components/SessionSection';
 import WorkoutLibrarySection from '@/components/WorkoutLibrarySection';
 import Footer from '@/components/Footer';
+import GallerySection from '@/components/GallerySection';
 
 const Index = () => {
   return (
@@ -20,6 +21,7 @@ const Index = () => {
         <EbooksSection />
         <SessionSection />
         <WorkoutLibrarySection />
+        <GallerySection />
       </main>
       <Footer />
     </div>

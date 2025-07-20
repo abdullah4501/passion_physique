@@ -19,20 +19,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-background border-t border-border">
-      {/* Image Gallery */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 h-40 mb-12">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="relative overflow-hidden">
-            <img 
-              src="/placeholder.svg" 
-              alt={`Gallery ${i}`}
-              className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-            />
-          </div>
-        ))}
-      </div>
-
+    <footer className="bg-[#1E1E1E] border-t border-border">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
           {/* Company Info */}

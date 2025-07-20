@@ -37,15 +37,15 @@ const ebooks = [
 ];
 
 const EbooksSection = () => (
-  <section className="py-20 min-h-screen">
-    <div className="container mx-auto px-6 max-w-7xl">
+  <section className="py-[60px] min-h-screen">
+    <div className=" mx-auto px-[45px]">
       {/* Header */}
       <div className="text-center mb-[56px]">
-        <h2 className="text-[40px] font-medium text-white mb-[24px]">
+        <h2 className="section-heading">
           Our Coaching <span className="text-primary">E-BOOKS</span>
         </h2>
         <p className="text-white text-[14px] font-light max-w-[750px] mx-auto leading-[24px] px-4">
-          Explore our curated collection of fitness eBooks designed to support your health and training goals. Enjoy 
+          Explore our curated collection of fitness eBooks designed to support your health and training goals. Enjoy
           exclusive free content for subscribed clients and access premium eBooks.
         </p>
       </div>
@@ -66,8 +66,7 @@ const EbooksSection = () => (
             {/* Info Row: badge, title, download, price */}
             <div className="flex items-center justify-between gap-2 w-full mt-5">
               {/* Badge */}
-              <span className={`text-[14px] font-semibold  tracking-[1px] ${
-                  ebook.isForAll ? 'text-[#ED232A]' : 'text-[#ED232A]'
+              <span className={`text-[14px] font-semibold  tracking-[1px] ${ebook.isForAll ? 'text-[#ED232A]' : 'text-[#ED232A]'
                 }`}
                 style={{ minWidth: "fit-content" }}
               >
@@ -95,10 +94,10 @@ const EbooksSection = () => (
         ))}
       </div>
       {/* Read More Button */}
-      <div className="text-center mt-8">
-            <Button className="bg-primary hover:bg-primary/90 text-white text-[12px] px-8 py-3 rounded font-semibold uppercase transition-all duration-300 rounded-none mt-10">
-              Read More
-            </Button>
+      <div className="text-center mt-[55px]">
+        <Button className="hero-button">
+          READ MORE
+        </Button>
       </div>
     </div>
   </section>

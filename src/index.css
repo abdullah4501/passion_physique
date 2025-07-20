@@ -120,8 +120,8 @@
     @apply bg-background text-foreground font-montserrat;
   }
 }
-.body{
-  background-color: #000000;
+.bg-background{
+  background-color: #000000 !important;
 }
 @layer components {
   .hero-button {
@@ -176,12 +176,14 @@
   border-radius: 0 !important;
   font-weight: 600 !important;
   font-size: 12px !important;
+  width: 200px;
+  margin-top: 15px;
 }
 
 .section-heading {
     color: white;
     font-weight: 500;    
-    font-size: 30px;
-    line-height: 38px;
+    font-size: 40px;
+    line-height: 40px;
   }
   
