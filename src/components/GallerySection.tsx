@@ -4,7 +4,7 @@ import gallery3 from '@/assets/gallery/IMG_1157.jpg';
 import gallery4 from '@/assets/gallery/IMG_8128.jpg';
 import gallery5 from '@/assets/gallery/IMG_0093.jpg';
 import gallery6 from '@/assets/gallery/IMG_1155.jpg';
-import instaIcon from '@/assets/gallery/instaIcon.png';
+import instaIcon from '@/assets/gallery/instaicon.png';
 
 const images = [
   gallery1, gallery2, gallery3, gallery4, gallery5, gallery6
