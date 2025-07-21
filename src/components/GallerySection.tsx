@@ -22,7 +22,7 @@ export default function GallerySection() {
   ];
 
   return (
-    <section className="w-full bg-black px-0 py-0 mt-[120px]">
+    <section className="w-full bg-black px-0 py-0 mt-[60px]">
       <div className="mx-auto overflow-hidden">
         <div
           className="

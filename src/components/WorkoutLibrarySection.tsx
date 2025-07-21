@@ -28,7 +28,7 @@ const WorkoutLibrarySection = () => {
   ];
 
   return (
-    <section className="py-[60px]">
+    <section className="pt-[120px] pb-[120px]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="section-heading">

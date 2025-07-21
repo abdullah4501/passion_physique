@@ -37,7 +37,7 @@ const ebooks = [
 ];
 
 const EbooksSection = () => (
-  <section className="py-[60px] min-h-screen">
+  <section className="py-[60px] mt-[60px] min-h-screen">
     <div className=" mx-auto px-[45px]">
       {/* Header */}
       <div className="text-center mb-[56px]">

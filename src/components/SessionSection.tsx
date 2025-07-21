@@ -23,7 +23,7 @@ const supplementFeatures = [
 
 export default function SessionSection() {
   return (
-    <section className="relative bg-[#1E1E1E] overflow-x-clip py-[60px]"> {/* Ensures images can overflow sides but not upwards */}
+    <section className="relative bg-[#1E1E1E] overflow-x-clip mb-[60px] mt-[60px]"> {/* Ensures images can overflow sides but not upwards */}
       <div className="container mx-auto flex flex-col py-0 my-[25px]">
         {/* First Row */}
         <div className="relative grid grid-cols-1 md:grid-cols-2 gap-[65px]">
@@ -61,7 +61,7 @@ export default function SessionSection() {
                 z-0
                 lg:absolute
                 lg:w-auto
-                lg:-top-[30px]
+                lg:-top-[60px]
                 lg:-right-[115px]
               "
 
@@ -84,7 +84,7 @@ export default function SessionSection() {
                 lg:absolute
                 lg:w-auto
                 w-full
-                lg:-bottom-[30px]
+                lg:-bottom-[60px]
                 lg:-left-[115px]
               "
             />
