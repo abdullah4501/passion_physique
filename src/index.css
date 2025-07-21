@@ -171,6 +171,10 @@
   letter-spacing: 1.6px;
   color: #F0F0F0;
 }
+.main-navbar a.active{
+  color: #FF3131;
+  border-bottom: 1px solid #FF3131;
+}
 
 .hero-button{
   border-radius: 0 !important;

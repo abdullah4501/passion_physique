@@ -3,25 +3,25 @@ import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
+const navItems = [
+  { label: 'Home', href: '/' },
+  { label: 'About Us', href: '/about' },
+  { label: 'Plans', href: '/plans' },
+  { label: 'Books', href: '/books' },
+  { label: '1-on-1 Session', href: '/session' },
+  { label: 'Supplement Guidance', href: '/supplement' },
+  { label: 'Library', href: '/library' },
+  { label: 'FAQs', href: '/faqs' },
+];
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-
-  const navItems = [
-    'Home',
-    'About Us', 
-    'Plans',
-    'Books',
-    '1-on-1 Session',
-    'Supplement Guidance',
-    'Library',
-    'FAQs'
-  ];
+  const [currentPath, setCurrentPath] = useState('/');
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 0);
-    };
+    setCurrentPath(window.location.pathname);
+    const handleScroll = () => setScrolled(window.scrollY > 0);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -40,10 +40,13 @@ const Header = () => {
             {navItems.map((item, index) => (
               <a
                 key={index}
-                href="#"
-                className="text-foreground hover:text-primary transition-colors duration-300 text-[14px] font-semibold tracking-wide"
+                href={item.href}
+                className={`
+                  ${currentPath === item.href ? 'active text-primary' : 'text-[#F0F0F0]'}
+                  hover:text-primary transition-colors duration-300 text-[14px] font-semibold tracking-wide
+                `}
               >
-                {item}
+                {item.label}
               </a>
             ))}
           </nav>
@@ -67,14 +70,17 @@ const Header = () => {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="lg:hidden py-4 border-t border-border animate-fade-in bg-[#000000]">
-            <nav className="flex flex-col gap-4">
+            <nav className="flex flex-col gap-4 main-navbar">
               {navItems.map((item, index) => (
                 <a
                   key={index}
-                  href="#"
-                  className="text-foreground hover:text-primary transition-colors duration-300 text-sm font-medium uppercase tracking-wide py-2"
+                  href={item.href}
+                  className={`
+                    ${currentPath === item.href ? 'active text-primary' : 'text-[#F0F0F0]'}
+                    hover:text-primary transition-colors duration-300 text-sm font-medium uppercase tracking-wide py-2
+                  `}
                 >
-                  {item}
+                  {item.label}
                 </a>
               ))}
               <Button className="hero-button mt-4">
