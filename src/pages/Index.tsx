@@ -22,10 +22,10 @@ const Index = () => (
     <Header />
     <main>
       <HeroSection />
-      <SectionWrapper variants={hardBounceIn}><FeatureBar /></SectionWrapper>
-      <SectionWrapper variants={slideSkew}><AboutSection /></SectionWrapper>
-      <SectionWrapper variants={fadeUp}><PricingSection /></SectionWrapper>
-      <SectionWrapper variants={flipIn}><EbooksSection /></SectionWrapper>
+      <FeatureBar />
+      <AboutSection />
+      <PricingSection />
+      <EbooksSection />
       <SessionSection />
       <SectionWrapper variants={slideSkew}><WorkoutLibrarySection /></SectionWrapper>
       <GallerySection />
