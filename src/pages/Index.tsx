@@ -8,24 +8,30 @@ import SessionSection from '@/components/SessionSection';
 import WorkoutLibrarySection from '@/components/WorkoutLibrarySection';
 import Footer from '@/components/Footer';
 import GallerySection from '@/components/GallerySection';
+import SectionWrapper from '@/components/SectionWrapper';
 
-const Index = () => {
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main>
-        <HeroSection />
-        <FeatureBar />
-        <AboutSection />
-        <PricingSection />
-        <EbooksSection />
-        <SessionSection />
-        <WorkoutLibrarySection />
-        <GallerySection />
-      </main>
-      <Footer />
-    </div>
-  );
-};
+import {
+  fadeUp,
+  hardBounceIn,
+  slideSkew,
+  flipIn
+} from '@/components/sectionAnimations';
+
+const Index = () => (
+  <div className="min-h-screen bg-background">
+    <Header />
+    <main>
+      <HeroSection />
+      <SectionWrapper variants={hardBounceIn}><FeatureBar /></SectionWrapper>
+      <SectionWrapper variants={slideSkew}><AboutSection /></SectionWrapper>
+      <SectionWrapper variants={fadeUp}><PricingSection /></SectionWrapper>
+      <SectionWrapper variants={flipIn}><EbooksSection /></SectionWrapper>
+      <SessionSection />
+      <SectionWrapper variants={slideSkew}><WorkoutLibrarySection /></SectionWrapper>
+      <GallerySection />
+    </main>
+    <Footer />
+  </div>
+);
 
 export default Index;

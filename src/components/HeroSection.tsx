@@ -2,6 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
+import { motion, AnimatePresence } from 'framer-motion'; // << add this!
 import heroImage from '@/assets/hero-bg.png';
 import heroImage2 from '@/assets/hero-bg.png';
 import heroImage3 from '@/assets/hero-bg.png';
@@ -22,7 +23,7 @@ const slides = [
   },
   {
     id: 2,
-    backgroundImage: heroImage2, // changed!
+    backgroundImage: heroImage2,
     title: (
       <>
         <span className="text-primary">UNLOCK</span> YOUR POTENTIAL,
@@ -35,7 +36,7 @@ const slides = [
   },
   {
     id: 3,
-    backgroundImage: heroImage3, // changed!
+    backgroundImage: heroImage3,
     title: (
       <>
         <span className="text-primary">ELEVATE</span> YOUR FITNESS,
@@ -47,6 +48,16 @@ const slides = [
     buttonText: "DISCOVER MORE"
   }
 ];
+
+const headingVariants = {
+  hidden: { opacity: 0, y: 40, scale: 0.97 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.75, ease: [0.42, 0, 0.2, 1] } }
+};
+
+const textVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { delay: 0.15, duration: 0.6, ease: [0.42, 0, 0.2, 1] } }
+};
 
 const HeroSection = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel(
@@ -102,18 +113,43 @@ const HeroSection = () => {
                   }}
                 />
                 {/* Content */}
-                <div
-                  className={`relative z-20 text-center px-4 w-full mx-auto transition-all duration-1000 ease-out`}
-                >
-                  <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
-                    {slide.title}
-                  </h1>
-                  <p className="text-[16px] text-white mb-8 max-w-[55%] mx-auto leading-[26px]">
-                    {slide.description}
-                  </p>
-                  <Button className="hero-button hover:animate-glow px-[25px] transition-all duration-300 hover:scale-105">
-                    {slide.buttonText}
-                  </Button>
+                <div className="relative z-20 text-center px-4 w-full mx-auto transition-all duration-1000 ease-out">
+                  <AnimatePresence mode="wait">
+                    {isActive && (
+                      <>
+                        <motion.h1
+                          key={`heading-${index}`}
+                          className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6"
+                          initial="hidden"
+                          animate="visible"
+                          exit="hidden"
+                          variants={headingVariants}
+                        >
+                          {slide.title}
+                        </motion.h1>
+                        <motion.p
+                          key={`desc-${index}`}
+                          className="text-[16px] text-white mb-8 max-w-[55%] mx-auto leading-[26px]"
+                          initial="hidden"
+                          animate="visible"
+                          exit="hidden"
+                          variants={textVariants}
+                        >
+                          {slide.description}
+                        </motion.p>
+                        <motion.div
+                          key={`btn-${index}`}
+                          initial={{ opacity: 0, scale: 0.92 }}
+                          animate={{ opacity: 1, scale: 1, transition: { delay: 0.32, duration: 0.45, ease: [0.42, 0, 0.2, 1] } }}
+                          exit={{ opacity: 0, scale: 0.92 }}
+                        >
+                          <Button className="hero-button hover:animate-glow px-[25px] transition-all duration-300 hover:scale-105">
+                            {slide.buttonText}
+                          </Button>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             );
