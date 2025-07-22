@@ -5,7 +5,7 @@ import logo from '@/assets/logo.png';
 
 const navItems = [
   { label: 'Home', href: '/' },
-  { label: 'About Us', href: '/about' },
+  { label: 'About Us', href: '/about-us' },
   { label: 'Plans', href: '/plans' },
   { label: 'Books', href: '/books' },
   { label: '1-on-1 Session', href: '/session' },
@@ -36,7 +36,7 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8 main-navbar">
+          <nav className="hidden lg:flex items-center gap-[30px] main-navbar">
             {navItems.map((item, index) => (
               <a
                 key={index}

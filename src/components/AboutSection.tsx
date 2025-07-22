@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Users, Activity } from 'lucide-react';
 import trainerImage from '@/assets/trainer-image.png';
 import icon1 from "@/assets/about/icon1.png"
 import icon2 from "@/assets/about/icon2.png"

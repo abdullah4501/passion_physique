@@ -88,7 +88,7 @@ const HeroSection = () => {
   );
 
   return (
-    <section className="relative min-h-screen overflow-hidden">
+    <section className="relative min-h-[screen] overflow-hidden">
       <div className="embla" ref={emblaRef}>
         <div className="embla__container flex">
           {slides.map((slide, index) => {

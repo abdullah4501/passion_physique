@@ -52,7 +52,7 @@ export default function SessionSection() {
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={textLeft}
-            className="flex flex-col justify-center lg:pr-[55px] lg:py-[85px] py-20 z-10"
+            className="flex flex-col justify-center lg:px-[55px] lg:py-[85px] py-20 z-10"
           >
             <h2 className="text-white text-[34px] font-medium mb-2 leading-[44px]">
               1-on-1 Session<br />
@@ -94,21 +94,20 @@ export default function SessionSection() {
                 lg:absolute
                 lg:w-auto
                 lg:-top-[60px]
-                lg:-right-[115px]
               "
             />
           </motion.div>
         </div>
 
         {/* Second Row */}
-        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-[65px] mt-10">
+        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-[65px] ">
           {/* Image Block */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={imgLeft}
-            className="relative flex items-center justify-center md:static"
+            className="relative flex items-center justify-center md:static md:order-1 order-2"
           >
             <img
               src={image2}
@@ -122,7 +121,6 @@ export default function SessionSection() {
                 lg:w-auto
                 w-full
                 lg:-bottom-[60px]
-                lg:-left-[115px]
               "
             />
           </motion.div>
@@ -132,7 +130,7 @@ export default function SessionSection() {
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={textRight}
-            className="flex flex-col justify-center lg:pl-[55px] lg:py-[85px] py-20  z-10"
+            className="flex flex-col justify-center lg:px-[55px] lg:py-[85px] py-20  z-10 md:order-2 order-1"
           >
             <h2 className="text-white text-[34px] font-medium mb-2 leading-[44px]">Our Supplement<br />
               <span className="text-[#ED232A]">GUIDANCE</span>
