@@ -193,4 +193,17 @@ body{
     font-size: 40px;
     line-height: 48px;
   }
-  
+  .vat_info h4{
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .vat_info p{
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 25px;
+  }
+  .vat_info ul{
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 25px;
+  }

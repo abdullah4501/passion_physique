@@ -101,7 +101,7 @@ const CoachingPlan = () => {
                         {plans.map((plan, idx) => (
                             <div
                                 key={plan.name}
-                                className="bg-[#2E2E2E] p-[45px] transition-all duration-300 hover:scale-105 flex flex-col justify-around h-full"
+                                className="bg-[#2E2E2E] p-[45px] transition-all duration-300 hover:scale-105 flex flex-col justify-around h-full "
                             >
                                 <div>
                                     <div className="flex justify-between items-start mb-4">
@@ -150,7 +150,7 @@ const CoachingPlan = () => {
                                     <th className="bg-[#FF3131] text-white text-[20px] font-medium py-3 px-3 border border-r-[#ffffff]">FULL PLAN</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-[#222] text-base">
+                            <tbody className="bg-[#222] opacity-70 text-base">
                                 <tr>
                                     <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Diet Plan</td>
                                     <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Personalized</td>
@@ -197,22 +197,22 @@ const CoachingPlan = () => {
                 </div>
             </section>
             <section className="w-full py-[125px] bg-black">
-                <div className="max-w-[1100px] mx-auto px-5">
+                <div className="container vat_info px-5 ">
                     {/* VAT Information */}
                     <div className="mb-12">
-                        <h4 className="text-white font-semibold text-[22px] mb-2">VAT Information</h4>
-                        <p className="text-white text-[18px] font-normal mb-2">
+                        <h4 className="text-white   mb-2">VAT Information</h4>
+                        <p className="text-white   mb-2">
                             The Passion Physique is a newly established UAE company, registered on 15 May 2025 under Sharjah Media City (SHAMS). In accordance with Federal Decree-Law No. 8 of 2017 on VAT, UAE-based businesses must register for VAT if their taxable turnover exceeds AED 375,000. There is also an optional (voluntary) VAT registration threshold of AED 187,500.
                         </p>
-                        <p className="text-white text-[18px] font-normal">
+                        <p className="text-white  ">
                             Our current revenue is below that voluntary threshold, so we are not VAT-registered, and no VAT is charged on our services.
                         </p>
                     </div>
 
                     {/* European B2C Clients */}
                     <div className="mb-12">
-                        <h4 className="text-white font-semibold text-[22px] mb-2">For European B2C clients:</h4>
-                        <ul className="text-white text-[18px] font-normal list-disc list-inside mb-2 space-y-1">
+                        <h4 className="text-white   mb-2">For European B2C clients:</h4>
+                        <ul className="text-white   list-disc list-inside mb-2 space-y-1">
                             <li>
                                 Under EU VAT rules for digital services, non-EU businesses may be required to register for VAT in the EU only if their total revenue from EU consumers exceeds €10,000 per year (Directive 2006/112/EC, Articles 58 &amp; 59).
                             </li>
@@ -223,28 +223,26 @@ const CoachingPlan = () => {
                                 All services are billed under UAE export rules as VAT-exempt international digital services.
                             </li>
                         </ul>
-                        <p className="text-white text-[18px] font-normal">
+                        <p className="text-white  ">
                             We continuously monitor our revenue thresholds, and if EU VAT obligations become applicable, our policies will be updated accordingly.
                         </p>
                     </div>
 
                     {/* Payment Methods */}
                     <div>
-                        <h4 className="text-white font-semibold text-[22px] mb-2">Payment Methods &amp; Fees</h4>
-                        <p className="text-white text-[18px] font-normal mb-2">We accept payments via:</p>
-                        <ul className="text-white text-[18px] font-normal list-disc list-inside mb-2 space-y-1">
+                        <h4 className="text-white   mb-2">Payment Methods &amp; Fees</h4>
+                        <p className="text-white   mb-2">We accept payments via:</p>
+                        <ul className="text-white   list-disc list-inside mb-2 space-y-1">
                             <li>UAE Bank Transfer (SEPA)</li>
                             <li>Payoneer</li>
                             <li>Stripe</li>
                         </ul>
-                        <p className="text-white text-[18px] font-normal">
+                        <p className="text-white  ">
                             Please note: Payments made through Payoneer or Stripe may incur an additional processing fee of 3% to 6%, depending on the method and currency used. To avoid this fee, we recommend using direct UAE bank transfer when possible.
                         </p>
                     </div>
                 </div>
             </section>
-
-
             <Footer />
         </>
     );

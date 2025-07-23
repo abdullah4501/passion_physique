@@ -7,7 +7,7 @@ const navItems = [
   { label: 'Home', href: '/' },
   { label: 'About Us', href: '/about-us' },
   { label: 'Plans', href: '/plans' },
-  { label: 'Books', href: '/books' },
+  { label: 'Books', href: '/e-books' },
   { label: '1-on-1 Session', href: '/session' },
   { label: 'Supplement Guidance', href: '/supplement' },
   { label: 'Library', href: '/library' },
