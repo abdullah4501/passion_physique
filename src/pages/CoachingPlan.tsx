@@ -128,74 +128,122 @@ const CoachingPlan = () => {
                     </div>
                 </div>
             </section>
-            <section className="relative w-full py-24" style={{
+            <section className="relative w-full py-[125px]" style={{
                 backgroundImage: `url(${bg})`, // replace with your bg path
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat'
             }}>
-                    <div className=" container z-10">
-                        {/* Heading */}
-                        <h2 className="section-heading text-center mb-12">
-                            Basic VS Full <span className="text-primary">COACHING PLANS</span>
-                        </h2>
+                <div className=" container z-10">
+                    {/* Heading */}
+                    <h2 className="section-heading text-center mb-[55px]">
+                        Basic VS Full <span className="text-primary">COACHING PLANS</span>
+                    </h2>
 
-                        {/* Table */}
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-separate border-spacing-0 text-white min-w-[700px]">
-                                <thead>
-                                    <tr>
-                                        <th className="bg-[#FF3131] text-white text-[20px] font-medium py-2 px-3 border border-r-[#ffffff] ">FEATURE</th>
-                                        <th className="bg-[#FF3131] text-white text-[20px] font-medium py-2 px-3 border border-r-[#ffffff]">BASIC PLAN</th>
-                                        <th className="bg-[#FF3131] text-white text-[20px] font-medium py-2 px-3 border border-r-[#ffffff]">FULL PLAN</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-[#222] text-base">
-                                    <tr>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Diet Plan</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Personalized</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Personalized</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Supplement Guidance</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Cardio & Recovery Protocols</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Posing Feedback</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Workout Plan</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Not Included</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Fully Personalized</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Coaching Access</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">2x mandatory chats per week + from checks</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">4x mandatory chats per week + from checks</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Workout Library Access</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Progress Tracking & Adjustments</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Weekly Updates</td>
-                                        <td className="py-2 text-[16px] px-3 border border-[#292929] text-center">Weekly Updates</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    {/* Table */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full border-separate border-spacing-0 text-white min-w-[700px]">
+                            <thead>
+                                <tr>
+                                    <th className="bg-[#FF3131] text-white text-[20px] font-medium py-3 px-3 border border-r-[#ffffff] ">FEATURE</th>
+                                    <th className="bg-[#FF3131] text-white text-[20px] font-medium py-3 px-3 border border-r-[#ffffff]">BASIC PLAN</th>
+                                    <th className="bg-[#FF3131] text-white text-[20px] font-medium py-3 px-3 border border-r-[#ffffff]">FULL PLAN</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-[#222] text-base">
+                                <tr>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Diet Plan</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Personalized</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Personalized</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Supplement Guidance</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Cardio & Recovery Protocols</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Posing Feedback</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Workout Plan</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Not Included</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Fully Personalized</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Coaching Access</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">2x mandatory chats per week + from checks</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">4x mandatory chats per week + from checks</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Workout Library Access</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Progress Tracking & Adjustments</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Weekly Updates</td>
+                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Weekly Updates</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
+                </div>
             </section>
+            <section className="w-full py-[125px] bg-black">
+                <div className="max-w-[1100px] mx-auto px-5">
+                    {/* VAT Information */}
+                    <div className="mb-12">
+                        <h4 className="text-white font-semibold text-[22px] mb-2">VAT Information</h4>
+                        <p className="text-white text-[18px] font-normal mb-2">
+                            The Passion Physique is a newly established UAE company, registered on 15 May 2025 under Sharjah Media City (SHAMS). In accordance with Federal Decree-Law No. 8 of 2017 on VAT, UAE-based businesses must register for VAT if their taxable turnover exceeds AED 375,000. There is also an optional (voluntary) VAT registration threshold of AED 187,500.
+                        </p>
+                        <p className="text-white text-[18px] font-normal">
+                            Our current revenue is below that voluntary threshold, so we are not VAT-registered, and no VAT is charged on our services.
+                        </p>
+                    </div>
+
+                    {/* European B2C Clients */}
+                    <div className="mb-12">
+                        <h4 className="text-white font-semibold text-[22px] mb-2">For European B2C clients:</h4>
+                        <ul className="text-white text-[18px] font-normal list-disc list-inside mb-2 space-y-1">
+                            <li>
+                                Under EU VAT rules for digital services, non-EU businesses may be required to register for VAT in the EU only if their total revenue from EU consumers exceeds €10,000 per year (Directive 2006/112/EC, Articles 58 &amp; 59).
+                            </li>
+                            <li>
+                                Since our current annual revenue from EU-based clients is below this threshold, no VAT is applied to your purchases at this time.
+                            </li>
+                            <li>
+                                All services are billed under UAE export rules as VAT-exempt international digital services.
+                            </li>
+                        </ul>
+                        <p className="text-white text-[18px] font-normal">
+                            We continuously monitor our revenue thresholds, and if EU VAT obligations become applicable, our policies will be updated accordingly.
+                        </p>
+                    </div>
+
+                    {/* Payment Methods */}
+                    <div>
+                        <h4 className="text-white font-semibold text-[22px] mb-2">Payment Methods &amp; Fees</h4>
+                        <p className="text-white text-[18px] font-normal mb-2">We accept payments via:</p>
+                        <ul className="text-white text-[18px] font-normal list-disc list-inside mb-2 space-y-1">
+                            <li>UAE Bank Transfer (SEPA)</li>
+                            <li>Payoneer</li>
+                            <li>Stripe</li>
+                        </ul>
+                        <p className="text-white text-[18px] font-normal">
+                            Please note: Payments made through Payoneer or Stripe may incur an additional processing fee of 3% to 6%, depending on the method and currency used. To avoid this fee, we recommend using direct UAE bank transfer when possible.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
 
             <Footer />
         </>
