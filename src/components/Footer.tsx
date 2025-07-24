@@ -8,19 +8,19 @@ import X from '@/assets/icons/x-twitter.png';
 
 const Footer = () => {
   const quickLinks1 = [
-    "Homepage",
-    "About Us", 
-    "Coaching Plans",
-    "E-books",
-    "1-on-1 Q&A Video Call",
-    "Supplement Guidance"
+    { label: 'Homepage', href: '/' },
+  { label: 'About Us', href: '/about-us' },
+  { label: 'Coaching Plans', href: '/plans' },
+  { label: 'E-Books', href: '/e-books' },
+  { label: '1-on-1 Session', href: '/sessions' },
+  { label: 'Supplement Guidance', href: '/supplement-guidance' },
   ];
 
   const quickLinks2 = [
-    "1-on-1 Q&A Video Call",
-    "Privacy Policy",
-    "Terms, Conditions & Refund Policy", 
-    "FAQs"
+    { label: '1-on-1 Q&A Video Call', href: '/' },
+    { label: 'Privacy Policy', href: '/privacy-policy' },
+    { label: 'Terms, Conditions & Refund Policy', href: '/terms-and-conditions' },
+    { label: 'FAQs', href: '/faqs' },
   ];
 
   return (
@@ -55,8 +55,8 @@ const Footer = () => {
               <ul className="space-y-3">
                 {quickLinks1.map((link, index) => (
                   <li key={index}>
-                    <a href="#" className="text-white/80 hover:text-primary transition-colors text-sm">
-                      {link}
+                    <a href={link.href} className="text-white/80 hover:text-primary transition-colors text-sm">
+                      {link.label}
                     </a>
                   </li>
                 ))}
@@ -68,8 +68,8 @@ const Footer = () => {
               <ul className="space-y-3">
                 {quickLinks2.map((link, index) => (
                   <li key={index}>
-                    <a href="#" className="text-white/80 hover:text-primary transition-colors text-sm">
-                      {link}
+                    <a href={link.href} className="text-white/80 hover:text-primary transition-colors text-sm">
+                      {link.label}
                     </a>
                   </li>
                 ))}

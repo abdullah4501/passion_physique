@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import bg from "@/assets/bg/Plans.png";
+import bg from "@/assets/gallery/PlansBg.png";
 import { motion } from 'framer-motion';
 
 const pricingCards = [
@@ -89,7 +89,7 @@ const PricingSection = () => {
               <motion.div
                 key={plan.name}
                 variants={cardVariants}
-                className={`${plan.cardClass} p-6 transition-all duration-300 hover:scale-105 shadow-lg shadow-black/30`}
+                className={`${plan.cardClass} px-[45px] py-[40px] transition-all duration-300 hover:scale-105 shadow-lg shadow-black/30`}
                 whileHover={{ scale: 1.06, boxShadow: "0 8px 40px 0 rgba(0,0,0,0.25)" }}
               >
                 <div className="flex justify-between items-start mb-4">

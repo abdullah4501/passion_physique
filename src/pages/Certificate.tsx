@@ -1,6 +1,6 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import bannerImg from '@/assets/ebooks/bg.png';
+import bannerImg from '@/assets/bg/workoutBg.png';
 import Book1 from '@/assets/ebooks/ebook-1.png';
 import Book2 from '@/assets/ebooks/ebook-2.png';
 import DownloadIcon from '@/assets/icons/download.png';

@@ -68,7 +68,6 @@ const CoachingPlan = () => {
     return (
         <>
             <Header />
-            {/* About Us Banner Section */}
             <section className="relative w-full h-[45vh] flex items-center justify-center overflow-hidden">
                 {/* Banner Image */}
                 <img
@@ -94,14 +93,14 @@ const CoachingPlan = () => {
                     </div>
                 </div>
             </section>
-            <section className="py-20 relative overflow-hidden">
+            <section className="py-[120px] relative overflow-hidden">
                 <div className="container mx-auto px-4 relative z-10">
                     {/* 2 columns on large screens, 1 column on mobile/tablet */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
                         {plans.map((plan, idx) => (
                             <div
                                 key={plan.name}
-                                className="bg-[#2E2E2E] p-[45px] transition-all duration-300 hover:scale-105 flex flex-col justify-around h-full "
+                                className="bg-[#2E2E2E] px-[45px] py-[40px] transition-all duration-300 hover:scale-105 flex flex-col justify-around h-full "
                             >
                                 <div>
                                     <div className="flex justify-between items-start mb-4">
@@ -128,7 +127,7 @@ const CoachingPlan = () => {
                     </div>
                 </div>
             </section>
-            <section className="relative w-full py-[125px]" style={{
+            <section className="relative w-full py-[120px]" style={{
                 backgroundImage: `url(${bg})`, // replace with your bg path
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',

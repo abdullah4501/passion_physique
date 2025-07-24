@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import image1 from "@/assets/session/image1.png";
+import image1 from "@/assets/session/image3.png";
 import image2 from "@/assets/session/image2.png";
 import symbol from "@/assets/icons/symbol.png";
 import { motion } from 'framer-motion';
@@ -141,7 +141,7 @@ export default function SessionSection() {
             <div className="grid grid-cols-2 gap-y-3 gap-x-8 mb-8 max-w-[440px]">
               {supplementFeatures.map((feature, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <img src={symbol} className="inline-block w-[9px] h-[9px] " />
+                  <img src={symbol} className="inline-block " />
                   <span className="text-white text-[15px] leading-[32px]">{feature}</span>
                 </div>
               ))}

@@ -79,9 +79,9 @@ const WorkoutLibrarySection = () => {
         </div>
 
         <div className="text-center">
-        <Button className="hero-button px-[45px]">
+          <Button className="hero-button px-[45px]">
               READ MORE
-            </Button>
+          </Button>
         </div>
       </div>
     </section>
