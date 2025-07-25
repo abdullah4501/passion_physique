@@ -13,6 +13,7 @@ import SupplementGuidance from "./pages/SupplementGuidance";
 import WorkoutLibrary from "./pages/WorkoutLibrary";
 import Faq from "./pages/Faq";
 import TermsConditions from "./pages/TermsConditions";
+import Certificate from "./pages/Certificate";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="workout-library" element={<WorkoutLibrary />} />
           <Route path="faqs" element={<Faq />} />
           <Route path="terms-and-conditions" element={<TermsConditions />} />
+          <Route path="certificate" element={<Certificate />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

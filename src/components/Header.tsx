@@ -12,6 +12,7 @@ const navItems = [
   { label: 'Supplement Guidance', href: '/supplement-guidance' },
   { label: 'Library', href: '/workout-library' },
   { label: 'FAQs', href: '/faqs' },
+  { label: 'Certificate', href: '/certificate' },
 ];
 
 const Header = () => {

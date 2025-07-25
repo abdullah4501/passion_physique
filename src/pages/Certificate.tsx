@@ -9,36 +9,39 @@ import { Button } from '@/components/ui/button';
 const Ebooks = () => {
     const plans = [
         {
-            name: "Coaching E-Book 1",
-            price: "50.00",
+            name: "Business_License",
             description: "Lorem ipsum dolor sit amet consectetur. Posuere pretium bibendum nulla facilisis ligula. Sit habitasse congue ultrices condimentum in duis.",
-            note: "FOR ALL",
             img: Book1,
-            forAll: true,
         },
         {
-            name: "Coaching E-Book 2",
-            price: "70.00",
+            name: "Corporate Registration Certificat",
             description: "Lorem ipsum dolor sit amet consectetur. Posuere pretium bibendum nulla facilisis ligula. Sit habitasse congue ultrices condimentum in duis.",
-            note: "FOR MEMBERS ONLY",
             img: Book2,
-            forAll: false,
+            
         },
         {
-            name: "Coaching E-Book 3",
-            price: "70.00",
+            name: "NASM PCB",
             description: "Lorem ipsum dolor sit amet consectetur. Posuere pretium bibendum nulla facilisis ligula. Sit habitasse congue ultrices condimentum in duis.",
-            note: "FOR MEMBERS ONLY",
             img: Book2,
-            forAll: false,
+            
         },
         {
-            name: "Coaching E-Book 4",
-            price: "70.00",
+            name: "J3U Level 1 Certification",
             description: "Lorem ipsum dolor sit amet consectetur. Posuere pretium bibendum nulla facilisis ligula. Sit habitasse congue ultrices condimentum in duis.",
-            note: "FOR MEMBERS ONLY",
             img: Book2,
-            forAll: false,
+            
+        },
+        {
+            name: "PN Level 1 Certificate",
+            description: "Lorem ipsum dolor sit amet consectetur. Posuere pretium bibendum nulla facilisis ligula. Sit habitasse congue ultrices condimentum in duis.",
+            img: Book2,
+            
+        },
+        {
+            name: "NASM EIRINI",
+            description: "Lorem ipsum dolor sit amet consectetur. Posuere pretium bibendum nulla facilisis ligula. Sit habitasse congue ultrices condimentum in duis.",
+            img: Book2,
+            
         },
     ];
     return (
@@ -59,12 +62,12 @@ const Ebooks = () => {
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center justify-center w-full">
                     <h1 className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none">
-                        <span className="text-primary">Coaching</span>{" "}
-                        <span className="text-white">E-Books</span>
+                        <span className="text-primary">Our</span>{" "}
+                        <span className="text-white">CERTIFICATE</span>
                     </h1>
                     <div className="flex flex-col items-center">
                         <span className="text-white font-bold text-[26px] leading-[26px]">
-                            Home / Coaching E-Books
+                            Home / Certificate
                         </span>
                     </div>
                 </div>
@@ -99,9 +102,6 @@ const Ebooks = () => {
                                     {/* Top: Badge, Title, Download, Price */}
                                     <div className="flex flex-row items-start justify-between">
                                         <div>
-                                            <span className={`block text-[14px] font-semibold mb-1 uppercase tracking-wide text-primary`}>
-                                                {plan.forAll ? "FOR ALL" : "FOR MEMBERS ONLY"}
-                                            </span>
                                             <span className="block text-white text-[20px] font-normal mb-1">{plan.name}</span>
                                         </div>
                                         <div className="flex flex-col items-center gap-3">
@@ -112,9 +112,6 @@ const Ebooks = () => {
                                                 className="w-6 h-6 object-contain"
                                                 draggable={false}
                                             />
-                                            <span className="text-white text-[17px] font-normal ml-2">
-                                                €{plan.price}
-                                            </span>
                                         </div>
                                     </div>
                                     {/* Description */}
