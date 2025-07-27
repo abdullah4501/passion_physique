@@ -65,7 +65,7 @@ const HeroSection = () => {
       loop: true,
       duration: 30
     },
-    // [Autoplay({ delay: 5000, stopOnInteraction: false })]
+    [Autoplay({ delay: 5000, stopOnInteraction: false })]
   );
 
   const [selectedIndex, setSelectedIndex] = React.useState(0);
