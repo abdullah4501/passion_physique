@@ -27,7 +27,7 @@ const Index = () => (
       <PricingSection />
       <EbooksSection />
       <SessionSection />
-      <SectionWrapper variants={slideSkew}><WorkoutLibrarySection /></SectionWrapper>
+      <WorkoutLibrarySection />
       <GallerySection />
     </main>
     <Footer />
