@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion, AnimatePresence } from 'framer-motion'; // << add this!
-import heroImage from '@/assets/hero-bg.png';
+import heroImage from '@/assets/hero-bg2.png';
 import heroImage2 from '@/assets/hero-bg.png';
 import heroImage3 from '@/assets/hero-bg.png';
 
@@ -65,7 +65,7 @@ const HeroSection = () => {
       loop: true,
       duration: 30
     },
-    [Autoplay({ delay: 5000, stopOnInteraction: false })]
+    // [Autoplay({ delay: 5000, stopOnInteraction: false })]
   );
 
   const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -96,7 +96,7 @@ const HeroSection = () => {
             return (
               <div
                 key={slide.id}
-                className={`embla__slide relative min-h-screen flex items-center justify-center flex-[0_0_100%] transition-all duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+                className={`embla__slide relative min-h-[80vh] flex items-center justify-center flex-[0_0_100%] transition-all duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] ${
                   isActive
                     ? "opacity-100 translate-x-0 z-20"
                     : "opacity-0 pointer-events-none -translate-x-10 z-10"
@@ -110,16 +110,17 @@ const HeroSection = () => {
                     backgroundImage: `url(${slide.backgroundImage})`,
                     backgroundSize: 'cover',
                     backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
                   }}
                 />
                 {/* Content */}
-                <div className="relative z-20 text-center px-4 w-full mx-auto transition-all duration-1000 ease-out">
+                <div className="relative z-20 text-center md:px-4 px-0 w-full mx-auto transition-all duration-1000 ease-out">
                   <AnimatePresence mode="wait">
                     {isActive && (
                       <>
                         <motion.h1
                           key={`heading-${index}`}
-                          className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6"
+                          className="lg:text-[66px] md:text-[45px] text-[30px] font-bold text-white mb-0 lg:leading-[80px] md:leading-[60px] leading-[40px] mb-2"
                           initial="hidden"
                           animate="visible"
                           exit="hidden"
@@ -129,7 +130,7 @@ const HeroSection = () => {
                         </motion.h1>
                         <motion.p
                           key={`desc-${index}`}
-                          className="text-[16px] text-white mb-8 max-w-[55%] mx-auto leading-[26px]"
+                          className="text-[16px] text-white mb-8 lg:max-w-[55%] mx-auto leading-[26px]"
                           initial="hidden"
                           animate="visible"
                           exit="hidden"

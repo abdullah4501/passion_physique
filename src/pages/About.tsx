@@ -26,12 +26,12 @@ const About = () => {
 
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center justify-center w-full">
-                    <h1 className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none">
+                    <h1 className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none page-title">
                         <span className="text-primary">About</span>{" "}
                         <span className="text-white">Us</span>
                     </h1>
                     <div className="flex flex-col items-center">
-                        <span className="text-white font-bold text-[26px] leading-[26px]">
+                        <span className="text-white font-bold text-[26px] leading-[26px] breadcrumbs">
                             Home / About Us
                         </span>
                     </div>

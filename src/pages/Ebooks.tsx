@@ -58,12 +58,12 @@ const Ebooks = () => {
 
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center justify-center w-full">
-                    <h1 className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none">
+                    <h1 className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none page-title">
                         <span className="text-primary">Coaching</span>{" "}
                         <span className="text-white">E-Books</span>
                     </h1>
                     <div className="flex flex-col items-center">
-                        <span className="text-white font-bold text-[26px] leading-[26px]">
+                        <span className="text-white font-bold text-[26px] leading-[26px] breadcrumbs">
                             Home / Coaching E-Books
                         </span>
                     </div>
@@ -81,7 +81,7 @@ const Ebooks = () => {
                         {plans.map((plan, idx) => (
                             <div
                                 key={idx}
-                                className="bg-[#2E2E2E] px-[45px] py-[40px] flex flex-row items-center rounded-none shadow-none p-6 relative min-h-[180px] gap-4"
+                                className="bg-[#2E2E2E] md:px-[45px] px-[15px] py-[40px] flex md:flex-row flex-col items-center rounded-none shadow-none p-6 relative min-h-[180px] gap-4"
                                 style={{ minHeight: 180 }}
                             >
                                 {/* Book Cover */}
@@ -109,7 +109,7 @@ const Ebooks = () => {
                                             <img
                                                 src={DownloadIcon}
                                                 alt="Download"
-                                                className="w-6 h-6 object-contain"
+                                                className=" object-contain"
                                                 draggable={false}
                                             />
                                             <span className="text-white text-[17px] font-normal ml-2">
@@ -118,7 +118,7 @@ const Ebooks = () => {
                                         </div>
                                     </div>
                                     {/* Description */}
-                                    <div className="text-white text-[14px] font-normal mt-2 mb-0 leading-[24px] pr-[25px]">
+                                    <div className="text-white text-[14px] font-normal mt-2 mb-0 leading-[24px] pr-0 md:pr-[25px]">
                                         {plan.description}
                                     </div>
                                 </div>

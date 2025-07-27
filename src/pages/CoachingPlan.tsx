@@ -82,12 +82,12 @@ const CoachingPlan = () => {
 
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center justify-center w-full">
-                    <h1 className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none">
+                    <h1 className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none page-title">
                         <span className="text-primary">Coaching</span>{" "}
                         <span className="text-white">Plans</span>
                     </h1>
                     <div className="flex flex-col items-center">
-                        <span className="text-white font-bold text-[26px] leading-[26px]">
+                        <span className="text-white font-bold text-[26px] leading-[26px] breadcrumbs">
                             Home / Coaching Plans
                         </span>
                     </div>
@@ -100,25 +100,25 @@ const CoachingPlan = () => {
                         {plans.map((plan, idx) => (
                             <div
                                 key={plan.name}
-                                className="bg-[#2E2E2E] px-[45px] py-[40px] transition-all duration-300 hover:scale-105 flex flex-col justify-around h-full "
+                                className="bg-[#2E2E2E] md:px-[45px] px-[15px] py-[40px] transition-all duration-300 hover:scale-105 md:flex-row flex-col justify-between h-full "
                             >
                                 <div>
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="flex-1 pr-[45px]">
+                                    <div className="flex justify-between items-start mb-4 md:flex-row flex-col">
+                                        <div className="flex-1 md:pr-6 pr-0 ">
                                             <h3 className="text-[26px] font-light text-white mb-3">{plan.name}</h3>
-                                            <p className="text-white text-[14px] font-light leading-relaxed mb-4 pr-[45px]">
+                                            <p className="text-white text-[14px] font-light leading-relaxed mb-4 md:pr-6 pr-0">
                                                 {plan.description}
                                             </p>
                                         </div>
-                                        <div className="text-right flex-shrink-0">
+                                        <div className="text-right pricing-info">
                                             <div className="text-[36px] font-light text-white">€{plan.price}</div>
                                             <div className="text-white text-[18px] font-light">{plan.period}</div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between md:flex-row flex-col">
                                     <p className="text-primary text-[14px] font-medium">{plan.note}</p>
-                                    <Button className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none">
+                                    <Button className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none md:w-auto w-full md:mt-0 mt-4">
                                         JOIN NOW
                                     </Button>
                                 </div>
@@ -144,51 +144,51 @@ const CoachingPlan = () => {
                         <table className="w-full border-separate border-spacing-0 text-white min-w-[700px]">
                             <thead>
                                 <tr>
-                                    <th className="bg-[#FF3131] text-white text-[20px] font-medium py-3 px-3 border border-r-[#ffffff] ">FEATURE</th>
-                                    <th className="bg-[#FF3131] text-white text-[20px] font-medium py-3 px-3 border border-r-[#ffffff]">BASIC PLAN</th>
-                                    <th className="bg-[#FF3131] text-white text-[20px] font-medium py-3 px-3 border border-r-[#ffffff]">FULL PLAN</th>
+                                    <th className="bg-[#FF3131] text-white md:text-[20px] text-[16px] font-medium py-3 px-3 border border-r-[#ffffff] ">FEATURE</th>
+                                    <th className="bg-[#FF3131] text-white md:text-[20px] text-[16px] font-medium py-3 px-3 border border-r-[#ffffff]">BASIC PLAN</th>
+                                    <th className="bg-[#FF3131] text-white md:text-[20px] text-[16px] font-medium py-3 px-3 border border-r-[#ffffff]">FULL PLAN</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-[#222] opacity-70 text-base">
                                 <tr>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Diet Plan</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Personalized</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Personalized</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Diet Plan</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Personalized</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Personalized</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Supplement Guidance</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Supplement Guidance</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Cardio & Recovery Protocols</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Cardio & Recovery Protocols</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Posing Feedback</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Posing Feedback</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Workout Plan</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Not Included</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Fully Personalized</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Workout Plan</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Not Included</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Fully Personalized</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Coaching Access</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">2x mandatory chats per week + from checks</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">4x mandatory chats per week + from checks</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Coaching Access</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">2x mandatory chats per week + from checks</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">4x mandatory chats per week + from checks</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Workout Library Access</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Workout Library Access</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
                                 </tr>
                                 <tr>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Progress Tracking & Adjustments</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Weekly Updates</td>
-                                    <td className="py-3 text-[16px] px-3 border border-[#292929] text-center">Weekly Updates</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Progress Tracking & Adjustments</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Weekly Updates</td>
+                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Weekly Updates</td>
                                 </tr>
                             </tbody>
                         </table>

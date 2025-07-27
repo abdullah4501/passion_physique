@@ -29,7 +29,7 @@ const Header = () => {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${scrolled ? 'bg-[#000000]' : ''}`}>
-      <div className=" mx-auto px-[45px]">
+      <div className=" mx-auto lg:px-[45px] px-[20px]">
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <div className="flex items-center gap-2">
@@ -68,9 +68,10 @@ const Header = () => {
           </button>
         </div>
 
+      </div>
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-border animate-fade-in bg-[#000000]">
+          <div className="lg:hidden py-4 px-[20px] h-screen border-t border-border animate-fade-in bg-[#000000]">
             <nav className="flex flex-col gap-4 main-navbar">
               {navItems.map((item, index) => (
                 <a
@@ -90,7 +91,6 @@ const Header = () => {
             </nav>
           </div>
         )}
-      </div>
     </header>
   );
 };

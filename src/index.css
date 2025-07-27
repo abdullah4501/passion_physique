@@ -207,3 +207,39 @@ body{
     font-weight: 400;
     line-height: 25px;
   }
+
+  @media screen and (max-width: 425px) {
+    .section-heading {
+      font-size: 25px;
+      line-height: 30px;
+      margin-bottom: 8px !important;
+    }
+    .session-features {
+      grid-template-columns: 1fr;
+     }
+     .page-title {
+      font-size: 35px !important;
+
+     }
+     .breadcrumbs {
+      font-size: 16px !important;
+      line-height: 20px !important;
+      text-align: center;
+     }
+  }
+  @media screen and (max-width: 767.98px) {
+   .pricing-info {
+    width: 100%;
+    text-align: center !important;
+   }
+   .page-title {
+    font-size: 45px !important;
+    line-height: 45px !important;
+    text-align: center;
+   }
+   .breadcrumbs {
+    font-size: 18px !important;
+    line-height: 20px !important;
+   }
+    
+  }

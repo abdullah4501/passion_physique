@@ -52,7 +52,7 @@ export default function EbooksSection() {
   return (
     <section className="py-[60px] mt-[60px] min-h-screen">
       <motion.div
-        className="mx-auto px-[45px]"
+        className="mx-auto md:px-[45px] px-[15px]"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
@@ -63,7 +63,7 @@ export default function EbooksSection() {
           <h2 className="section-heading">
             Our Coaching <span className="text-primary">E-BOOKS</span>
           </h2>
-          <p className="text-white text-[14px] font-light max-w-[750px] mx-auto leading-[24px] px-4">
+          <p className="text-white text-[14px] font-light max-w-[750px] mx-auto leading-[24px] md:px-4 px-0">
             Explore our curated collection of fitness eBooks designed to support your health and training goals. Enjoy
             exclusive free content for subscribed clients and access premium eBooks.
           </p>

@@ -61,7 +61,7 @@ export default function SessionSection() {
             <p className="text-[#ffffff] text-[15px] leading-[25px] my-4  font-normal">
               This is a professional, science-based consultation designed to provide real clarity and practical direction for your fitness journey.
             </p>
-            <div className="grid grid-cols-2 gap-y-3 gap-x-8 mb-8 max-w-[440px]">
+            <div className="grid grid-cols-2 gap-y-3 gap-x-8 mb-8 max-w-[440px] session-features">
               {sessionFeatures.map((feature, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <img src={symbol} className="inline-block w-[9px] h-[9px]" />
@@ -138,7 +138,7 @@ export default function SessionSection() {
             <p className="text-[#ffffff] text-[15px] leading-[25px] my-4  font-normal">
               This is not a list of products — it&apos;s a science-based consultation tailored to your individual needs. We break down:
             </p>
-            <div className="grid grid-cols-2 gap-y-3 gap-x-8 mb-8 max-w-[440px]">
+            <div className="grid grid-cols-2 gap-y-3 gap-x-8 mb-8 max-w-[440px] session-features">
               {supplementFeatures.map((feature, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <img src={symbol} className="inline-block " />

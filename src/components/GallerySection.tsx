@@ -20,12 +20,13 @@ export default function GallerySection() {
         <motion.div
           className="
             grid
-            grid-cols-5
+            md:grid-cols-5
+            grid-cols-4
             grid-rows-2
             gap-2
             w-full
-            aspect-[1440/573]
-            min-h-[573px]
+            md:aspect-[1440/573]
+            aspect-0
           "
           initial="hidden"
           whileInView="visible"
@@ -34,7 +35,7 @@ export default function GallerySection() {
         >
           {/* 1. Big left image */}
           <motion.div
-            className="relative group cursor-pointer row-span-2 col-span-2"
+            className="relative group cursor-pointer md:row-span-2 row-span-1 col-span-2"
             variants={imageVariants}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
@@ -51,7 +52,7 @@ export default function GallerySection() {
           </motion.div>
           {/* 2. Top middle */}
           <motion.div
-            className="relative group cursor-pointer col-span-1 row-span-1"
+            className="relative group cursor-pointer md:col-span-1 col-span-2 row-span-1"
             variants={imageVariants}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
@@ -68,7 +69,7 @@ export default function GallerySection() {
           </motion.div>
           {/* 3. Top right */}
           <motion.div
-            className="relative group cursor-pointer col-span-1 row-span-1"
+            className="relative group cursor-pointer md:col-span-1 col-span-2 row-span-1"
             variants={imageVariants}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
@@ -85,7 +86,7 @@ export default function GallerySection() {
           </motion.div>
           {/* 4. Top far right */}
           <motion.div
-            className="relative group cursor-pointer col-span-1 row-span-1"
+            className="relative group cursor-pointer md:col-span-1 col-span-2 row-span-1"
             variants={imageVariants}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
@@ -102,7 +103,7 @@ export default function GallerySection() {
           </motion.div>
           {/* 5. Bottom mid */}
           <motion.div
-            className="relative group cursor-pointer col-span-1 row-span-1"
+            className="relative group cursor-pointer md:col-span-1 col-span-2 row-span-1"
             variants={imageVariants}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
