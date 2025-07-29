@@ -41,12 +41,13 @@ const ebooks = [
 // Animation variants
 const sectionFade = {
   hidden: { opacity: 0, y: 60 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.4, 0, 0.2, 1] } }
+  visible: { opacity: 1, y: 0 }
 };
+
 
 const cardFlip = {
   hidden: { opacity: 0, rotateY: 80, scale: 0.9 },
-  visible: { opacity: 1, rotateY: 0, scale: 1, transition: { duration: 0.85, ease: [0.43, 0.13, 0.23, 0.96] } }
+  visible: { opacity: 1, rotateY: 0, scale: 1 }
 };
 
 export default function EbooksSection() {

@@ -26,19 +26,19 @@ const supplementFeatures = [
 // Animation variants
 const textLeft = {
   hidden: { opacity: 0, x: -64 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: [0.4, 0, 0.2, 1] } }
+  visible: { opacity: 1, x: 0 }
 };
 const textRight = {
   hidden: { opacity: 0, x: 64 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: [0.4, 0, 0.2, 1] } }
+  visible: { opacity: 1, x: 0}
 };
 const imgRight = {
   hidden: { opacity: 0, x: 64, scale: 0.96 },
-  visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 0.85, ease: [0.4, 0, 0.2, 1] } }
+  visible: { opacity: 1, x: 0, scale: 1 }
 };
 const imgLeft = {
   hidden: { opacity: 0, x: -64, scale: 0.96 },
-  visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 0.85, ease: [0.4, 0, 0.2, 1] } }
+  visible: { opacity: 1, x: 0, scale: 1 }
 };
 
 export default function SessionSection() {
@@ -84,6 +84,7 @@ export default function SessionSection() {
             animate={textLeftControls}
             initial="hidden"
             variants={textLeft}
+            transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
             className="flex flex-col justify-center lg:px-[55px] lg:py-[85px] py-20 z-10"
           >
             <h2 className="text-white text-[34px] font-medium mb-2 leading-[44px]">
@@ -112,6 +113,7 @@ export default function SessionSection() {
             animate={imgRightControls}
             initial="hidden"
             variants={imgRight}
+            transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
             className="relative flex items-center justify-center md:static"
           >
             <img
@@ -137,6 +139,7 @@ export default function SessionSection() {
             animate={imgLeftControls}
             initial="hidden"
             variants={imgLeft}
+            transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
             className="relative flex items-center justify-center md:static md:order-1 order-2"
           >
             <img
@@ -159,6 +162,7 @@ export default function SessionSection() {
             animate={textRightControls}
             initial="hidden"
             variants={textRight}
+            transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
             className="flex flex-col justify-center lg:px-[55px] lg:py-[85px] py-20  z-10 md:order-2 order-1"
           >
             <h2 className="text-white text-[34px] font-medium mb-2 leading-[44px]">Our Supplement<br />

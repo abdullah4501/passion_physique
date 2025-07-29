@@ -65,7 +65,6 @@ const PricingSection = () => {
                     opacity: 1,
                     y: 0,
                     scale: 1,
-                    transition: { duration: 0.7, type: "spring", stiffness: 60, delay: idx * 0.13 }
                   }
                 }}
                 className={`${plan.cardClass} md:px-[45px] px-[15px] py-[40px] transition-all duration-300 hover:scale-105 shadow-lg shadow-black/30`}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import logo from '@/assets/logo.png';
+import { Link } from 'react-router-dom';
 
 const navItems = [
   { label: 'Home', href: '/' },
@@ -74,16 +75,16 @@ const Header = () => {
           <div className="lg:hidden py-4 px-[20px] h-screen border-t border-border animate-fade-in bg-[#000000]">
             <nav className="flex flex-col gap-4 main-navbar">
               {navItems.map((item, index) => (
-                <a
+                <Link
                   key={index}
-                  href={item.href}
+                  to={item.href}
                   className={`
                     ${currentPath === item.href ? 'active text-primary' : 'text-[#F0F0F0]'}
                     hover:text-primary transition-colors duration-300 text-sm font-medium uppercase tracking-wide py-2
                   `}
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
               <Button className="hero-button mt-4">
                 LOGIN OR REGISTER

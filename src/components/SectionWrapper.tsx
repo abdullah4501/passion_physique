@@ -33,7 +33,6 @@ const SectionWrapper = ({
       initial="hidden"
       animate={controls}
       variants={variants}
-      transition={transition}
       {...props}
     >
       {children}

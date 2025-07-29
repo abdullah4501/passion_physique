@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 // Animation for each gallery image (zoom-in, fade-up)
 const imageVariants = {
   hidden: { opacity: 0, y: 40, scale: 0.92 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.4, 0, 0.2, 1] } }
+  visible: { opacity: 1, y: 0, scale: 1 }
 };
 
 export default function GallerySection() {

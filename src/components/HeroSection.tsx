@@ -54,11 +54,11 @@ const slides = [
 
 const headingVariants = {
   hidden: { opacity: 0, y: 40, scale: 0.97 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.75, ease: [0.42, 0, 0.2, 1] } }
+  visible: { opacity: 1, y: 0, scale: 1 }
 };
 const textVariants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { delay: 0.15, duration: 0.6, ease: [0.42, 0, 0.2, 1] } }
+  visible: { opacity: 1, y: 0 }
 };
 
 import React, { useState } from 'react';
@@ -104,12 +104,14 @@ const HeroSection = () => {
                       <motion.h1
                         className="lg:text-[66px] md:text-[45px] text-[30px] font-bold text-white mb-0 lg:leading-[80px] md:leading-[60px] leading-[40px] mb-2"
                         variants={headingVariants}
+                        transition={{ delay: 0.15, duration: 0.6, ease: [0.42, 0, 0.2, 1] }}
                       >
                         {slide.title}
                       </motion.h1>
                       <motion.p
                         className="text-[16px] text-white mb-8 lg:max-w-[55%] mx-auto leading-[26px]"
                         variants={textVariants}
+                        transition={{ duration: 0.75, ease: [0.42, 0, 0.2, 1] }}
                       >
                         {slide.description}
                       </motion.p>
