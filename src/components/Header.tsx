@@ -40,16 +40,16 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center main-navbar">
             {navItems.map((item, index) => (
-              <a
+              <Link
                 key={index}
-                href={item.href}
+                to={item.href}
                 className={`
                   ${currentPath === item.href ? 'active text-primary' : 'text-[#F0F0F0]'}
                   hover:text-primary transition-colors duration-300 text-[14px] font-semibold tracking-wide
                 `}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
