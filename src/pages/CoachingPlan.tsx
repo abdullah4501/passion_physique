@@ -3,89 +3,99 @@ import bannerImg from '@/assets/gallery/plan_banner.png';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import bg from "@/assets/bg/Plans.png";
+import { motion, useAnimation, useInView } from 'framer-motion';
+import { useRef, useEffect, useState } from 'react';
 
+const plans = [
+    { name: "BASIC 12 M", price: "3000", period: "per month", description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.", note: "*Monthly 12 Basic" },
+    { name: "FULL 12 M", price: "4800", period: "per month", description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.", note: "*Monthly 12 Full" },
+    { name: "BASIC 6 M", price: "1600", period: "per month", description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.", note: "*Monthly 6 Basic" },
+    { name: "FULL 6 M", price: "2500", period: "per month", description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.", note: "*Monthly 6 Full" },
+    { name: "BASIC 3 M", price: "850", period: "per month", description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.", note: "*Monthly 3 Basic" },
+    { name: "FULL 3 M", price: "1300", period: "per month", description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.", note: "*Monthly 3 Full" },
+    { name: "BASIC 1 M", price: "300", period: "per month", description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.", note: "*Monthly 1 Basic" },
+    { name: "FULL 1 M", price: "450", period: "per month", description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.", note: "*Monthly 1 Full" },
+];
+
+// For heading
+const tableHeadingVariants = {
+    hidden: { opacity: 0, y: 32 },
+    visible: { opacity: 1, y: 0}
+};
+// For tbody container (to stagger children)
+const tbodyVariants = {
+    visible: {
+        transition: { staggerChildren: 0.09 }
+    }
+};
+// For each row
+const rowVariants = {
+    hidden: { opacity: 0, y: 28, scale: 0.98 },
+    visible: { opacity: 1, y: 0, scale: 1 }
+};
+
+// Animation variants
+const cardVariants = {
+    hidden: { opacity: 0, y: 48, scale: 0.96 },
+    visible: (i: number) => ({
+        opacity: 1, y: 0, scale: 1,
+
+    }),
+};
+const headingVariants = {
+    hidden: { opacity: 0, y: 42 },
+    visible: { opacity: 1, y: 0 }
+};
 
 const CoachingPlan = () => {
-    const plans = [
-        {
-            name: "BASIC 12 M",
-            price: "3000",
-            period: "per month",
-            description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.",
-            note: "*Monthly 12 Basic"
-        },
-        {
-            name: "FULL 12 M",
-            price: "4800",
-            period: "per month",
-            description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.",
-            note: "*Monthly 12 Full"
-        },
-        {
-            name: "BASIC 6 M",
-            price: "1600",
-            period: "per month",
-            description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.",
-            note: "*Monthly 6 Basic"
-        },
-        {
-            name: "FULL 6 M",
-            price: "2500",
-            period: "per month",
-            description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.",
-            note: "*Monthly 6 Full"
-        },
-        {
-            name: "BASIC 3 M",
-            price: "850",
-            period: "per month",
-            description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.",
-            note: "*Monthly 3 Basic"
-        },
-        {
-            name: "FULL 3 M",
-            price: "1300",
-            period: "per month",
-            description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.",
-            note: "*Monthly 3 Full"
-        },
-        {
-            name: "BASIC 1 M",
-            price: "300",
-            period: "per month",
-            description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.",
-            note: "*Monthly 1 Basic"
-        },
-        {
-            name: "FULL 1 M",
-            price: "450",
-            period: "per month",
-            description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.",
-            note: "*Monthly 1 Full"
-        },
-    ];
+    // Plans section animation
+    const plansRef = useRef(null);
+    const plansInView = useInView(plansRef, { once: false, margin: "-120px" });
+    const [controls, setControls] = useState(useAnimation());
+    useEffect(() => {
+        if (plansInView) controls.start("visible");
+        else controls.start("hidden");
+    }, [plansInView, controls]);
+
+    // Heading animation for "Basic VS Full COACHING PLANS"
+    const tableSectionRef = useRef(null);
+    const tableInView = useInView(tableSectionRef, { once: false, margin: "-100px" });
+    const headingControls = useAnimation();
+    const tbodyControls = useAnimation();
+
+    useEffect(() => {
+        if (tableInView) {
+            headingControls.start("visible");
+            tbodyControls.start("visible");
+        } else {
+            headingControls.start("hidden");
+            tbodyControls.start("hidden");
+        }
+    }, [tableInView, headingControls, tbodyControls]);
 
     return (
         <>
             <Header />
             <section className="relative w-full h-[45vh] flex items-center justify-center overflow-hidden">
-                {/* Banner Image */}
                 <img
                     src={bannerImg}
                     alt="Coaching Plan"
                     className="absolute inset-0 w-full h-full object-cover object-center"
                     draggable={false}
                 />
-
-                {/* Overlay for extra darkening (if needed) */}
                 <div className="absolute inset-0 " />
-
-                {/* Content */}
                 <div className="relative z-10 flex flex-col items-center justify-center w-full">
-                    <h1 className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none page-title">
+                    <motion.h1
+                        className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none page-title"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: false, margin: "-80px" }}
+                        variants={headingVariants}
+                        transition={{ duration: 0.75, ease: "easeInOut" }}
+                    >
                         <span className="text-primary">Coaching</span>{" "}
                         <span className="text-white">Plans</span>
-                    </h1>
+                    </motion.h1>
                     <div className="flex flex-col items-center">
                         <span className="text-white font-bold text-[26px] leading-[26px] breadcrumbs">
                             Home / Coaching Plans
@@ -95,12 +105,21 @@ const CoachingPlan = () => {
             </section>
             <section className="py-[120px] relative overflow-hidden">
                 <div className="container mx-auto px-4 relative z-10">
-                    {/* 2 columns on large screens, 1 column on mobile/tablet */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                    {/* Animated plans grid */}
+                    <div
+                        ref={plansRef}
+                        className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch"
+                    >
                         {plans.map((plan, idx) => (
-                            <div
+                            <motion.div
                                 key={plan.name}
-                                className="bg-[#2E2E2E] md:px-[45px] px-[15px] py-[40px] transition-all duration-300 hover:scale-105 md:flex-row flex-col justify-between h-full "
+                                className="bg-[#2E2E2E] md:px-[45px] px-[15px] py-[40px] transition-all duration-300 hover:scale-105 md:flex-row flex-col justify-between h-full"
+                                variants={cardVariants}
+                                transition={{ duration: 0.75, ease: "easeInOut" }}
+                                initial="hidden"
+                                animate={plansInView ? "visible" : "hidden"}
+                                custom={idx}
+                                whileHover={{ scale: 1.06, boxShadow: "0 8px 40px 0 rgba(0,0,0,0.25)" }}
                             >
                                 <div>
                                     <div className="flex justify-between items-start mb-4 md:flex-row flex-col">
@@ -122,75 +141,72 @@ const CoachingPlan = () => {
                                         JOIN NOW
                                     </Button>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
             </section>
-            <section className="relative w-full py-[120px]" style={{
-                backgroundImage: `url(${bg})`, // replace with your bg path
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
-            }}>
+            <section
+                className="relative w-full py-[120px]"
+                style={{
+                    backgroundImage: `url(${bg})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat'
+                }}
+                ref={tableSectionRef}
+            >
                 <div className=" container z-10">
                     {/* Heading */}
-                    <h2 className="section-heading text-center mb-[55px]">
+                    <motion.h2
+                        className="section-heading text-center mb-[55px]"
+                        variants={tableHeadingVariants}
+                        transition={{ duration: 0.55, ease: [0.42, 0, 0.2, 1] }}
+                        initial="hidden"
+                        animate={headingControls}
+                    >
                         Basic VS Full <span className="text-primary">COACHING PLANS</span>
-                    </h2>
-
-                    {/* Table */}
+                    </motion.h2>
                     <div className="overflow-x-auto">
+                        {/* The table stays the same */}
                         <table className="w-full border-separate border-spacing-0 text-white min-w-[700px]">
                             <thead>
                                 <tr>
                                     <th className="bg-[#FF3131] text-white md:text-[20px] text-[16px] font-medium py-3 px-3 border border-r-[#ffffff] ">FEATURE</th>
-                                    <th className="bg-[#FF3131] text-white md:text-[20px] text-[16px] font-medium py-3 px-3 border border-r-[#ffffff]">BASIC PLAN</th>
-                                    <th className="bg-[#FF3131] text-white md:text-[20px] text-[16px] font-medium py-3 px-3 border border-r-[#ffffff]">FULL PLAN</th>
+                                    <th className="bg-[#FF3131] text-white md:text-[20px] text-[16px] font-medium py-3 px-3 border border-r-[#ffffff] ">BASIC PLAN</th>
+                                    <th className="bg-[#FF3131] text-white md:text-[20px] text-[16px] font-medium py-3 px-3 border border-r-[#ffffff] ">FULL PLAN</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-[#222] opacity-70 text-base">
-                                <tr>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Diet Plan</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Personalized</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Personalized</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Supplement Guidance</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Cardio & Recovery Protocols</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Posing Feedback</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Workout Plan</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Not Included</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Fully Personalized</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Coaching Access</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">2x mandatory chats per week + from checks</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">4x mandatory chats per week + from checks</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Workout Library Access</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Included</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Progress Tracking & Adjustments</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Weekly Updates</td>
-                                    <td className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">Weekly Updates</td>
-                                </tr>
-                            </tbody>
+                            <motion.tbody
+                                variants={tbodyVariants}
+                                initial="hidden"
+                                animate={tbodyControls}
+                                className="bg-[#222] opacity-70 text-base"
+                            >
+                                {/* Each row animated */}
+                                {[
+                                    ["Diet Plan", "Personalized", "Personalized"],
+                                    ["Supplement Guidance", "Included", "Included"],
+                                    ["Cardio & Recovery Protocols", "Included", "Included"],
+                                    ["Posing Feedback", "Included", "Included"],
+                                    ["Workout Plan", "Not Included", "Fully Personalized"],
+                                    ["Coaching Access", "2x mandatory chats per week + from checks", "4x mandatory chats per week + from checks"],
+                                    ["Workout Library Access", "Included", "Included"],
+                                    ["Progress Tracking & Adjustments", "Weekly Updates", "Weekly Updates"],
+                                ].map((cells, idx) => (
+                                    <motion.tr
+                                        key={idx}
+                                        variants={rowVariants}
+                                        transition={{ duration: 0.45, ease: [0.42, 0, 0.2, 1] }}
+                                    >
+                                        {cells.map((cell, cidx) => (
+                                            <td key={cidx} className="py-3 md:text-[16px] text-[14px] px-3 border border-[#292929] text-center">
+                                                {cell}
+                                            </td>
+                                        ))}
+                                    </motion.tr>
+                                ))}
+                            </motion.tbody>
                         </table>
                     </div>
                 </div>
