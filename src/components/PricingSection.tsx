@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import bg from "@/assets/gallery/PlansBg.png";
-import { motion } from 'framer-motion';
+import SectionWrapper from '@/components/SectionWrapper'; // <-- Import this
 
 const pricingCards = [
   {
@@ -21,30 +21,6 @@ const pricingCards = [
   },
 ];
 
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.18,
-    }
-  }
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 40, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.7, type: "spring", stiffness: 60 }
-  }
-};
-
-const leftVariants = {
-  hidden: { opacity: 0, x: -60 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: [0.42,0,0.2,1] } }
-};
-
 const PricingSection = () => {
   return (
     <section className="py-20 relative overflow-hidden">
@@ -53,12 +29,13 @@ const PricingSection = () => {
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-          {/* Left Content */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={leftVariants}
+          
+          {/* LEFT Content (with fade from left) */}
+          <SectionWrapper
+            variants={{
+              hidden: { opacity: 0, x: -60 },
+              visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: [0.42,0,0.2,1] } }
+            }}
             className="lg:pr-[120px] lg:mb-0 mb-8"
           >
             <h2 className="section-heading">
@@ -75,22 +52,23 @@ const PricingSection = () => {
             <Button className="hero-button px-[45px]">
               READ MORE
             </Button>
-          </motion.div>
+          </SectionWrapper>
           
-          {/* Right Content - Pricing Cards with Animation */}
-          <motion.div
-            className="space-y-6"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-          >
+          {/* RIGHT Content - Pricing Cards */}
+          <div className="space-y-6">
             {pricingCards.map((plan, idx) => (
-              <motion.div
+              <SectionWrapper
                 key={plan.name}
-                variants={cardVariants}
+                variants={{
+                  hidden: { opacity: 0, y: 40, scale: 0.95 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    transition: { duration: 0.7, type: "spring", stiffness: 60, delay: idx * 0.13 }
+                  }
+                }}
                 className={`${plan.cardClass} md:px-[45px] px-[15px] py-[40px] transition-all duration-300 hover:scale-105 shadow-lg shadow-black/30`}
-                whileHover={{ scale: 1.06, boxShadow: "0 8px 40px 0 rgba(0,0,0,0.25)" }}
               >
                 <div className="flex md:flex-row flex-col justify-between items-start mb-4">
                   <div className="flex-1 md:pr-6 pr-0">
@@ -111,9 +89,9 @@ const PricingSection = () => {
                     JOIN NOW
                   </Button>
                 </div>
-              </motion.div>
+              </SectionWrapper>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

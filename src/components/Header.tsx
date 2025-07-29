@@ -32,12 +32,12 @@ const Header = () => {
       <div className=" mx-auto lg:px-[45px] px-[20px]">
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <div className="">
             <img src={logo} alt="Passion Physique" />
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-[30px] main-navbar">
+          <nav className="hidden lg:flex items-center main-navbar">
             {navItems.map((item, index) => (
               <a
                 key={index}

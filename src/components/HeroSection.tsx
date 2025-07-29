@@ -1,8 +1,11 @@
-import React, { useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
-import { motion, AnimatePresence } from 'framer-motion'; // << add this!
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, EffectFade, Pagination } from 'swiper/modules';
+import { motion, AnimatePresence } from 'framer-motion';
+import 'swiper/css';
+import 'swiper/css/effect-fade';
+import 'swiper/css/pagination';
+
 import heroImage from '@/assets/hero-bg2.png';
 import heroImage2 from '@/assets/hero-bg.png';
 import heroImage3 from '@/assets/hero-bg.png';
@@ -53,118 +56,88 @@ const headingVariants = {
   hidden: { opacity: 0, y: 40, scale: 0.97 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.75, ease: [0.42, 0, 0.2, 1] } }
 };
-
 const textVariants = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { delay: 0.15, duration: 0.6, ease: [0.42, 0, 0.2, 1] } }
 };
 
+import React, { useState } from 'react';
+
 const HeroSection = () => {
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
-      loop: true,
-      duration: 30
-    },
-    [Autoplay({ delay: 5000, stopOnInteraction: false })]
-  );
-
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    onSelect();
-    emblaApi.on('select', onSelect);
-    emblaApi.on('reInit', onSelect);
-  }, [emblaApi, onSelect]);
-
-  const scrollTo = useCallback(
-    (index) => emblaApi && emblaApi.scrollTo(index),
-    [emblaApi]
-  );
+  const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <section className="relative min-h-[screen] overflow-hidden">
-      <div className="embla" ref={emblaRef}>
-        <div className="embla__container flex">
-          {slides.map((slide, index) => {
-            const isActive = selectedIndex === index;
-            return (
+    <section className="relative min-h-screen overflow-hidden">
+      <Swiper
+        modules={[Autoplay, EffectFade, Pagination]}
+        effect="fade"
+        autoplay={{ delay: 6000, disableOnInteraction: false }}
+        loop
+        onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+        className="w-full h-full"
+      >
+        {slides.map((slide, idx) => (
+          <SwiperSlide key={slide.id}>
+            <div className="relative min-h-screen flex items-center justify-center">
+              {/* Background Image */}
               <div
-                key={slide.id}
-                className={`embla__slide relative min-h-[80vh] flex items-center justify-center flex-[0_0_100%] transition-all duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] ${
-                  isActive
-                    ? "opacity-100 translate-x-0 z-20"
-                    : "opacity-0 pointer-events-none -translate-x-10 z-10"
-                }`}
-                style={{ transitionProperty: "opacity, transform" }}
-              >
-                {/* Background Image */}
-                <div
-                  className="absolute inset-0 z-0 w-full transition-transform duration-1000 ease-out"
-                  style={{
-                    backgroundImage: `url(${slide.backgroundImage})`,
-                    backgroundSize: 'cover',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center',
-                  }}
-                />
-                {/* Content */}
-                <div className="relative z-20 text-center md:px-4 px-0 w-full mx-auto transition-all duration-1000 ease-out">
-                  <AnimatePresence mode="wait">
-                    {isActive && (
-                      <>
-                        <motion.h1
-                          key={`heading-${index}`}
-                          className="lg:text-[66px] md:text-[45px] text-[30px] font-bold text-white mb-0 lg:leading-[80px] md:leading-[60px] leading-[40px] mb-2"
-                          initial="hidden"
-                          animate="visible"
-                          exit="hidden"
-                          variants={headingVariants}
-                        >
-                          {slide.title}
-                        </motion.h1>
-                        <motion.p
-                          key={`desc-${index}`}
-                          className="text-[16px] text-white mb-8 lg:max-w-[55%] mx-auto leading-[26px]"
-                          initial="hidden"
-                          animate="visible"
-                          exit="hidden"
-                          variants={textVariants}
-                        >
-                          {slide.description}
-                        </motion.p>
-                        <motion.div
-                          key={`btn-${index}`}
-                          initial={{ opacity: 0, scale: 0.92 }}
-                          animate={{ opacity: 1, scale: 1, transition: { delay: 0.32, duration: 0.45, ease: [0.42, 0, 0.2, 1] } }}
-                          exit={{ opacity: 0, scale: 0.92 }}
-                        >
-                          <Button className="hero-button hover:animate-glow px-[25px] transition-all duration-300 hover:scale-105">
-                            {slide.buttonText}
-                          </Button>
-                        </motion.div>
-                      </>
-                    )}
-                  </AnimatePresence>
-                </div>
+                className="absolute inset-0 z-0 w-full h-full transition-transform duration-1000 ease-out"
+                style={{
+                  backgroundImage: `url(${slide.backgroundImage})`,
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'center',
+                }}
+              />
+
+              {/* Content */}
+              <div className="relative z-20 w-full mx-auto text-center px-2 md:px-4">
+                <AnimatePresence mode="wait">
+                  {activeIndex === idx && (
+                    <motion.div
+                      // This key makes sure the block is remounted on each slide, retriggering animation
+                      key={activeIndex}
+                      initial="hidden"
+                      animate="visible"
+                      exit="hidden"
+                    >
+                      <motion.h1
+                        className="lg:text-[66px] md:text-[45px] text-[30px] font-bold text-white mb-0 lg:leading-[80px] md:leading-[60px] leading-[40px] mb-2"
+                        variants={headingVariants}
+                      >
+                        {slide.title}
+                      </motion.h1>
+                      <motion.p
+                        className="text-[16px] text-white mb-8 lg:max-w-[55%] mx-auto leading-[26px]"
+                        variants={textVariants}
+                      >
+                        {slide.description}
+                      </motion.p>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.92 }}
+                        animate={{ opacity: 1, scale: 1, transition: { delay: 0.32, duration: 0.45, ease: [0.42, 0, 0.2, 1] } }}
+                        exit={{ opacity: 0, scale: 0.92 }}
+                      >
+                        <Button className="hero-button hover:animate-glow px-[25px] transition-all duration-300 hover:scale-105">
+                          {slide.buttonText}
+                        </Button>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            );
-          })}
-        </div>
-      </div>
-      {/* Navigation Dots */}
-      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+      {/* Custom navigation dots */}
+      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex gap-2 z-30">
         {slides.map((_, index) => (
           <button
             key={index}
-            onClick={() => scrollTo(index)}
+            onClick={() => document.querySelector('.swiper')?.swiper.slideToLoop(index)}
             className={`h-1 rounded-full transition-all duration-500 ease-out hover:scale-110 ${
-              selectedIndex === index
+              activeIndex === index
                 ? 'w-[80px] bg-primary shadow-lg shadow-primary/30'
                 : 'w-[30px] bg-white hover:bg-white/80'
             }`}

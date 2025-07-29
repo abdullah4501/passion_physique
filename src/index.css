@@ -171,8 +171,9 @@ body{
 }
 
 .main-navbar a{
-  letter-spacing: 1.6px;
+  letter-spacing: 1.2px;
   color: #F0F0F0;
+  margin-right: 30px;
 }
 .main-navbar a.active{
   color: #FF3131;
@@ -184,7 +185,6 @@ body{
   font-weight: 600 !important;
   font-size: 12px !important;
   width: 200px;
-  margin-top: 15px;
 }
 
 .section-heading {

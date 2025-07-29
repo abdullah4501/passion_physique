@@ -2,7 +2,8 @@ import { Button } from '@/components/ui/button';
 import image1 from "@/assets/session/image3.png";
 import image2 from "@/assets/session/image2.png";
 import symbol from "@/assets/icons/symbol.png";
-import { motion } from 'framer-motion';
+import { motion, useAnimation, useInView } from 'framer-motion';
+import { useRef, useEffect } from 'react';
 
 const sessionFeatures = [
   "Nutrition",
@@ -41,16 +42,47 @@ const imgLeft = {
 };
 
 export default function SessionSection() {
+  // 1st row animation controls
+  const row1Ref = useRef(null);
+  const row1InView = useInView(row1Ref, { once: false, margin: "-100px" });
+  const textLeftControls = useAnimation();
+  const imgRightControls = useAnimation();
+
+  useEffect(() => {
+    if (row1InView) {
+      textLeftControls.start("visible");
+      imgRightControls.start("visible");
+    } else {
+      textLeftControls.start("hidden");
+      imgRightControls.start("hidden");
+    }
+  }, [row1InView, textLeftControls, imgRightControls]);
+
+  // 2nd row animation controls
+  const row2Ref = useRef(null);
+  const row2InView = useInView(row2Ref, { once: false, margin: "-100px" });
+  const textRightControls = useAnimation();
+  const imgLeftControls = useAnimation();
+
+  useEffect(() => {
+    if (row2InView) {
+      textRightControls.start("visible");
+      imgLeftControls.start("visible");
+    } else {
+      textRightControls.start("hidden");
+      imgLeftControls.start("hidden");
+    }
+  }, [row2InView, textRightControls, imgLeftControls]);
+
   return (
-    <section className="relative bg-[#1E1E1E] overflow-x-clip mb-[60px] mt-[60px]">
+    <section className="relative bg-[#1E1E1E] overflow-x-clip mb-[120px] mt-[120px]">
       <div className="container mx-auto flex flex-col py-0 my-[25px]">
         {/* First Row */}
-        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-[65px]">
+        <div ref={row1Ref} className="relative grid grid-cols-1 md:grid-cols-2 gap-[65px]">
           {/* Text Block */}
           <motion.div
+            animate={textLeftControls}
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
             variants={textLeft}
             className="flex flex-col justify-center lg:px-[55px] lg:py-[85px] py-20 z-10"
           >
@@ -77,9 +109,8 @@ export default function SessionSection() {
           </motion.div>
           {/* Image Block */}
           <motion.div
+            animate={imgRightControls}
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
             variants={imgRight}
             className="relative flex items-center justify-center md:static"
           >
@@ -100,12 +131,11 @@ export default function SessionSection() {
         </div>
 
         {/* Second Row */}
-        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-[65px] ">
+        <div ref={row2Ref} className="relative grid grid-cols-1 md:grid-cols-2 gap-[65px] ">
           {/* Image Block */}
           <motion.div
+            animate={imgLeftControls}
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
             variants={imgLeft}
             className="relative flex items-center justify-center md:static md:order-1 order-2"
           >
@@ -126,9 +156,8 @@ export default function SessionSection() {
           </motion.div>
           {/* Text Block */}
           <motion.div
+            animate={textRightControls}
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
             variants={textRight}
             className="flex flex-col justify-center lg:px-[55px] lg:py-[85px] py-20  z-10 md:order-2 order-1"
           >

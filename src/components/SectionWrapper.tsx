@@ -16,11 +16,14 @@ const SectionWrapper = ({
   ...props
 }) => {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" }); // important!
+  // 👇 set once: false
+  const inView = useInView(ref, { once: false, margin: "-100px" }); 
+
   const controls = useAnimation();
 
   useEffect(() => {
     if (inView) controls.start("visible");
+    else controls.start("hidden"); // 👈 animate out when not in view
   }, [inView, controls]);
 
   return (

@@ -4,7 +4,8 @@ import ebookCover1 from '@/assets/ebooks/ebook-1.png';
 import ebookCover2 from '@/assets/ebooks/ebook-2.png';
 import ebookCover3 from '@/assets/ebooks/ebook-1.png';
 import ebookCover4 from '@/assets/ebooks/ebook-1.png';
-import { motion } from 'framer-motion';
+import { motion, useAnimation, useInView } from 'framer-motion';
+import { useRef, useEffect } from 'react';
 
 const ebooks = [
   {
@@ -49,15 +50,25 @@ const cardFlip = {
 };
 
 export default function EbooksSection() {
+  // section-level animation controller
+  const sectionRef = useRef(null);
+  const inView = useInView(sectionRef, { once: false, margin: "-100px" });
+  const controls = useAnimation();
+
+  useEffect(() => {
+    if (inView) controls.start("visible");
+    else controls.start("hidden");
+  }, [inView, controls]);
+
   return (
-    <section className="py-[60px] mt-[60px] min-h-screen">
-      <motion.div
-        className="mx-auto md:px-[45px] px-[15px]"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-        variants={sectionFade}
-      >
+    <motion.section
+      ref={sectionRef}
+      className="py-[60px] mt-[60px]"
+      initial="hidden"
+      animate={controls}
+      variants={sectionFade}
+    >
+      <div className="mx-auto md:px-[45px] px-[15px]">
         {/* Header */}
         <div className="text-center mb-[56px]">
           <h2 className="section-heading">
@@ -72,10 +83,11 @@ export default function EbooksSection() {
         {/* Books Grid */}
         <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[40px] mb-[20px]"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ staggerChildren: 0.13 }}
+          variants={{
+            visible: { transition: { staggerChildren: 0.13 } },
+          }}
+          initial={false}
+          animate={controls}
         >
           {ebooks.map((ebook, i) => (
             <motion.div
@@ -118,7 +130,7 @@ export default function EbooksSection() {
             READ MORE
           </Button>
         </div>
-      </motion.div>
-    </section>
+      </div>
+    </motion.section>
   );
 }

@@ -10,14 +10,14 @@ import { motion } from 'framer-motion';
 // Animation for each gallery image (zoom-in, fade-up)
 const imageVariants = {
   hidden: { opacity: 0, y: 40, scale: 0.92 },
-  visible: { opacity: 1, y: 0, scale: 1 }
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.7, ease: [0.4, 0, 0.2, 1] } }
 };
 
 export default function GallerySection() {
   return (
     <section className="w-full bg-black px-0 py-0 mt-[60px]">
       <div className="mx-auto overflow-hidden">
-        <motion.div
+        <div
           className="
             grid
             md:grid-cols-5
@@ -28,15 +28,14 @@ export default function GallerySection() {
             md:aspect-[1440/573]
             aspect-0
           "
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ staggerChildren: 0.12 }}
         >
           {/* 1. Big left image */}
           <motion.div
             className="relative group cursor-pointer md:row-span-2 row-span-1 col-span-2"
             variants={imageVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, margin: "-80px" }} // <- every time in view!
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
             <img src={gallery1} alt="" className="object-cover w-full h-full" draggable={false} />
@@ -54,6 +53,9 @@ export default function GallerySection() {
           <motion.div
             className="relative group cursor-pointer md:col-span-1 col-span-2 row-span-1"
             variants={imageVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, margin: "-80px" }}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
             <img src={gallery2} alt="" className="object-cover w-full h-full" draggable={false} />
@@ -71,6 +73,9 @@ export default function GallerySection() {
           <motion.div
             className="relative group cursor-pointer md:col-span-1 col-span-2 row-span-1"
             variants={imageVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, margin: "-80px" }}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
             <img src={gallery3} alt="" className="object-cover w-full h-full" draggable={false} />
@@ -88,6 +93,9 @@ export default function GallerySection() {
           <motion.div
             className="relative group cursor-pointer md:col-span-1 col-span-2 row-span-1"
             variants={imageVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, margin: "-80px" }}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
             <img src={gallery4} alt="" className="object-cover w-full h-full" draggable={false} />
@@ -105,6 +113,9 @@ export default function GallerySection() {
           <motion.div
             className="relative group cursor-pointer md:col-span-1 col-span-2 row-span-1"
             variants={imageVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, margin: "-80px" }}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
             <img src={gallery5} alt="" className="object-cover w-full h-full" draggable={false} />
@@ -122,6 +133,9 @@ export default function GallerySection() {
           <motion.div
             className="relative group cursor-pointer col-span-2 row-span-1"
             variants={imageVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, margin: "-80px" }}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
           >
             <img src={gallery6} alt="" className="object-cover w-full h-full" draggable={false} />
@@ -135,7 +149,7 @@ export default function GallerySection() {
               />
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
