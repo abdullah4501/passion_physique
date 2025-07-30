@@ -175,7 +175,7 @@ const CoachingPlan = () => {
                     >
                         Basic VS Full <span className="text-primary">COACHING PLANS</span>
                     </motion.h2>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto overflow-y-hidden">
                         {/* The table stays the same */}
                         <table className="w-full border-separate border-spacing-0 text-white min-w-[700px]">
                             <thead>
