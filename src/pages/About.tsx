@@ -7,7 +7,6 @@ import Footer from '@/components/Footer';
 import { motion, useAnimation, useInView } from 'framer-motion';
 import { useRef, useEffect } from 'react';
 
-// Animation Variants (same as you used elsewhere, TS-safe)
 const headingVariants = {
   hidden: { opacity: 0, y: 42 },
   visible: { opacity: 1, y: 0 }
