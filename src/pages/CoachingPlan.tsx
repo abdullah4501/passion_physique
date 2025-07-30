@@ -20,7 +20,7 @@ const plans = [
 // For heading
 const tableHeadingVariants = {
     hidden: { opacity: 0, y: 32 },
-    visible: { opacity: 1, y: 0}
+    visible: { opacity: 1, y: 0 }
 };
 // For tbody container (to stagger children)
 const tbodyVariants = {
@@ -96,11 +96,19 @@ const CoachingPlan = () => {
                         <span className="text-primary">Coaching</span>{" "}
                         <span className="text-white">Plans</span>
                     </motion.h1>
-                    <div className="flex flex-col items-center">
+                    <motion.div
+                        className="flex flex-col items-center"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: false, margin: "-80px" }}
+                        variants={headingVariants}
+                        transition={{ duration: 0.85, ease: [0.4, 0, 0.2, 1], delay: 0.08 }}
+                    >
                         <span className="text-white font-bold text-[26px] leading-[26px] breadcrumbs">
                             Home / Coaching Plans
                         </span>
-                    </div>
+                    </motion.div>
+
                 </div>
             </section>
             <section className="py-[120px] relative overflow-hidden">

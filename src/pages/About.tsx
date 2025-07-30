@@ -77,21 +77,29 @@ const About = () => {
         <div className="absolute inset-0 " />
         <div className="relative z-10 flex flex-col items-center justify-center w-full">
           <motion.h1
-              className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none page-title"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: false, margin: "-80px" }}
-              variants={headingVariants}
-              transition={{ duration: 0.75, ease: "easeInOut" }}
+            className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none page-title"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, margin: "-80px" }}
+            variants={headingVariants}
+            transition={{ duration: 0.75, ease: "easeInOut" }}
           >
             <span className="text-primary">About</span>{" "}
             <span className="text-white">Us</span>
           </motion.h1>
-          <div className="flex flex-col items-center">
+          <motion.div
+            className="flex flex-col items-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, margin: "-80px" }}
+            variants={headingVariants}
+            transition={{ duration: 0.85, ease: [0.4, 0, 0.2, 1], delay: 0.08 }}
+          >
             <span className="text-white font-bold text-[26px] leading-[26px] breadcrumbs">
               Home / About Us
             </span>
-          </div>
+          </motion.div>
+
         </div>
       </section>
       <section className="relative overflow-x-clip md:py-[120px] py-[60px]">

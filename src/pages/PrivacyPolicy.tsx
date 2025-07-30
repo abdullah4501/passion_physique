@@ -8,7 +8,7 @@ const titleVariants = {
     hidden: { opacity: 0, y: 40, scale: 0.97 },
     visible: { opacity: 1, y: 0, scale: 1 }
 };
-const TermsConditions = () => {
+const PrivacyPolicy = () => {
     // Animate hero title
     const heroRef = useRef(null);
     const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
@@ -35,8 +35,8 @@ const TermsConditions = () => {
                         animate={heroInView ? "visible" : "hidden"}
                         transition={{ duration: 0.85, ease: [0.42, 0, 0.2, 1] }}
                     >
-                        <span className="text-primary">Terms &</span>{" "}
-                        <span className="text-white">Conditions</span>
+                        <span className="text-primary">Privacy &</span>{" "}
+                        <span className="text-white">Data Policy</span>
                     </motion.h1>
                     <motion.div
                         variants={titleVariants}
@@ -46,7 +46,7 @@ const TermsConditions = () => {
                         className="flex flex-col items-center"
                     >
                         <span className="text-white font-bold text-[26px] leading-[26px] breadcrumbs">
-                            Home / Terms & Conditions
+                            Home / Privacy & Data Policy
                         </span>
                     </motion.div>
                 </div>
@@ -56,40 +56,27 @@ const TermsConditions = () => {
                     {/* Terms, Conditions & Refund Policy */}
                     <div className="mb-12 max-w-[1600px] mx-auto">
                         <h2 className="text-white font-bold text-[18px] mb-6">
-                            Terms, Conditions & Refund Policy
+                            Privacy & Data Policy
                         </h2>
                         <p className="text-[#ffffffc7] text-[16px] leading-[35px] mb-1">
-                            By enrolling in any service provided by The Passion Physique, you agree to the following terms:
+                            At The Passion Physique, all client data is treated as strictly confidential and handled with the
+                            highest level of care.
                         </p>
-                        <ol className="list-decimal pl-8 text-[#ffffffc7] text-[16px] leading-[35px] ">
+                        <ul className="list-disc pl-8 text-[#ffffffc7] text-[16px] leading-[35px] mb-8">
                             <li className="mb-3">
-                                All payments are final. No refunds will be issued under any circumstances, including partial use or early cancellation of any plan.
+                                I consider all personal information — including photos, videos, forms, and communication — as sensitive data.
                             </li>
                             <li className="mb-3">
-                                Services are personalized and time-based, and preparation begins immediately once payment is received.
+                                Only I, Petros Pasiollari, have access to this information. It will never be shared, published, or used without your explicit written consent.
                             </li>
                             <li className="mb-3">
-                                Decimal overpayments (e.g., cents or fils) made via bank transfer are non-refundable.
+                                No data is stored on public platforms or accessed by third parties.
                             </li>
-                            <li className="mb-3">
-                                Prices may vary depending on the EUR/AED exchange rate at the time of payment.
-                            </li>
-                            <li className="mb-3">
-                                Upon payment, you will immediately receive an invoice, followed by access to a private, customized questionnaire required to begin your plan.
-                            </li>
-                            <li className="mb-3">
-                                In accordance with Federal Decree-Law No. 8 of 2017 on VAT (UAE) and international consumer protection standards, every client has the legal right to receive an invoice after payment. Refusal to issue one may result in reporting to the UAE Federal Tax Authority (FTA) or the relevant authority in the client’s country.
-                            </li>
-                            <li className="mb-3">
-                                Trust is the foundation of this coaching relationship. I expect 100% honesty and transparency from each client to ensure accurate and effective program design.
-                            </li>
-                            <li className="mb-3">
-                                Any form of disrespect, dishonesty, or repeated non-cooperation may lead me to reconsider continuing the coaching partnership. No refunds will be provided in such cases.
-                            </li>
-                            <li className="mb-3">
-                                All coaching materials, plans, and communication are strictly confidential and may not be shared, copied, or published without my written permission (Petros Pasiollari).
-                            </li>
-                        </ol>
+                        </ul>
+                        <p className="text-[#ffffffc7] text-[16px] leading-[35px] mb-8">This approach reflects my long-term commitment to privacy. The development of my future blockchain-based Lift2Earn DApp is built on this very principle:<br /> <b>Clients should always retain full control over their personal data and progress.
+                        </b></p>
+                        <p className="text-[#ffffffc7] text-[16px] leading-[35px]">Your trust is my responsibility — and protecting your privacy is part of my mission</p>
+
                     </div>
                 </div>
             </section>
@@ -100,4 +87,4 @@ const TermsConditions = () => {
     );
 }
 
-export default TermsConditions;
+export default PrivacyPolicy;
