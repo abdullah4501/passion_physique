@@ -115,7 +115,7 @@ const Ebooks = () => {
             </section>
             <section className="bg-primary py-5">
                 <div className=" mx-auto ">
-                    <p className='uppercase text-white text-center font-[16px] font-bold'>If you are a member of The Passion Physique, please log in to access all books </p>
+                    <p className='uppercase text-white text-center text-[16px] font-bold'>If you are a member of The Passion Physique, please log in to access all books </p>
                 </div>
             </section>
             {/* Books Section */}

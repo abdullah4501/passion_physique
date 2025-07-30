@@ -93,7 +93,7 @@ const WorkoutLibrary = () => {
             </section>
             <section className="bg-primary py-5">
                 <div className=" mx-auto ">
-                    <p className='uppercase text-white text-center font-[16px] font-bold'>The WORKOUT LIBRARY IS AVAILABLE ONLY FOR members of The Passion Physique, Please JOIN OR LOGIN to access all books </p>
+                    <p className='uppercase text-white text-center text-[16px] font-bold'>The WORKOUT LIBRARY IS AVAILABLE ONLY FOR members of The Passion Physique, Please JOIN OR LOGIN to access all books </p>
                 </div>
             </section>
             {/* Workout Cards Section */}
