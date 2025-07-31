@@ -55,9 +55,9 @@ const Header = () => {
 
           {/* CTA Button */}
           <div className="hidden lg:block">
-            <Button className="hero-button px-[25px]">
+            <Link to={'/register'} className="hero-button px-[25px]">
               LOGIN OR REGISTER
-            </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
