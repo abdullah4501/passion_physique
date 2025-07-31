@@ -128,7 +128,7 @@ body{
 }
 @layer components {
   .hero-button {
-    @apply bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-md font-semibold uppercase tracking-wide transition-all duration-300 hover:shadow-glow;
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground tracking-wide transition-all duration-300 hover:shadow-glow;
   }
   
   .feature-item {
@@ -184,6 +184,8 @@ body{
   border-radius: 0 !important;
   font-weight: 600 !important;
   font-size: 12px !important;
+  padding-top: 11px;
+  padding-bottom: 11px;
   width: 200px;
 }
 

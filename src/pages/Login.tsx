@@ -1,33 +1,65 @@
+import React, { useState, useRef } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import bannerImg from '@/assets/gallery/register.png';
 import SectionImg from '@/assets/loginSection.png';
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const titleVariants = {
     hidden: { opacity: 0, y: 40, scale: 0.97 },
     visible: { opacity: 1, y: 0, scale: 1 }
 };
-const Register = () => {
-    // Animate hero title
+
+const Login = () => {
     const heroRef = useRef(null);
     const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
+
+    const [form, setForm] = useState({ email: '', password: '' });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+        setLoading(true);
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(form),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.msg || 'Login failed');
+            setSuccess('Login successful! Redirecting...');
+            localStorage.setItem('user', JSON.stringify(data.user));
+            setTimeout(() => navigate('/'), 1200); // Redirect after 1.2s
+        } catch (err) {
+            setError(err.message || 'Something went wrong');
+        }
+        setLoading(false);
+    };
+
     return (
         <>
             <Header />
             <section className="relative w-full h-[45vh] flex items-center justify-center overflow-hidden">
-                {/* Banner Image */}
                 <img
                     src={bannerImg}
-                    alt="terms and conditions"
+                    alt="login"
                     className="absolute inset-0 w-full h-full object-cover object-center"
                     draggable={false}
                 />
-                {/* Overlay for extra darkening (if needed) */}
-                <div className="absolute inset-0 " />
-                {/* Content */}
+                <div className="absolute inset-0" />
                 <div className="relative z-10 flex flex-col items-center justify-center w-full">
                     <motion.h1
                         ref={heroRef}
@@ -37,7 +69,7 @@ const Register = () => {
                         animate={heroInView ? "visible" : "hidden"}
                         transition={{ duration: 0.85, ease: [0.42, 0, 0.2, 1] }}
                     >
-                        <span className="text-primary">Login to </span>{" "}
+                        <span className="text-primary">Login to </span>
                         <span className="text-white">Your Account</span>
                     </motion.h1>
                     <motion.div
@@ -60,34 +92,8 @@ const Register = () => {
                     </h2>
                     <div className='grid grid-cols-1 lg:grid-cols-2 gap-[120px]'>
                         <div className="flex flex-col justify-center col-span-1">
-                            <form>
+                            <form onSubmit={handleSubmit}>
                                 <div className="flex flex-col gap-6 w-full">
-                                    <div>
-                                        <label className="block text-white font-[400] text-[16px] mb-2" htmlFor="firstName">
-                                            First Name*
-                                        </label>
-                                        <input
-                                            id="firstName"
-                                            type="text"
-                                            name="firstName"
-                                            className="w-full bg-[#333] text-white h-[42px] px-4 text-lg font-medium border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
-                                            autoComplete="off"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-white font-[400] text-[16px] mb-2" htmlFor="lastName">
-                                            Last Name*
-                                        </label>
-                                        <input
-                                            id="lastName"
-                                            type="text"
-                                            name="lastName"
-                                            className="w-full bg-[#333] text-white h-[42px] px-4 text-lg font-medium border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
-                                            autoComplete="off"
-                                            required
-                                        />
-                                    </div>
                                     <div>
                                         <label className="block text-white font-[400] text-[16px] mb-2" htmlFor="email">
                                             Email Address*
@@ -96,6 +102,8 @@ const Register = () => {
                                             id="email"
                                             type="email"
                                             name="email"
+                                            value={form.email}
+                                            onChange={handleChange}
                                             className="w-full bg-[#333] text-white h-[42px] px-4 text-lg font-medium border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                                             autoComplete="off"
                                             required
@@ -109,26 +117,31 @@ const Register = () => {
                                             id="password"
                                             type="password"
                                             name="password"
+                                            value={form.password}
+                                            onChange={handleChange}
                                             className="w-full bg-[#333] text-white h-[42px] px-4 text-lg font-medium border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                                             required
                                         />
                                     </div>
                                     <Link
-                                            to={"/"}
-                                            className="underline text-white hover:text-[#ff3c33] transition-all text-[16px]"
-                                        >
-                                            Forget your Password?
-                                        </Link>
+                                        to={"/"}
+                                        className="underline text-white hover:text-[#ff3c33] transition-all text-[16px]"
+                                    >
+                                        Forget your Password?
+                                    </Link>
+                                    {error && <p className="text-red-500 mt-2">{error}</p>}
+                                    {success && <p className="text-green-500 mt-2">{success}</p>}
                                     <button
                                         type="submit"
                                         className="w-full bg-[#ff3c33] hover:bg-[#e03228] text-white font-[700] text-[16px] h-[50px] transition-all duration-200 mt-2"
+                                        disabled={loading}
                                     >
-                                        Login
+                                        {loading ? 'Logging in...' : 'Login'}
                                     </button>
                                 </div>
                                 <div className="mt-6">
                                     <p className="text-white text-[16px] font-[400]">
-                                        You don't have an account yet!{' '}
+                                        You don't have an account yet?{' '}
                                         <Link
                                             to={"/Register"}
                                             className="underline text-white hover:text-[#ff3c33] transition-all"
@@ -144,15 +157,14 @@ const Register = () => {
                                 src={SectionImg}
                                 alt="Register Section"
                                 className="w-full h-auto"
-                                />
+                            />
                         </div>
                     </div>
                 </div>
             </section>
-
             <Footer />
         </>
     );
 }
 
-export default Register;
+export default Login;
