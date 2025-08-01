@@ -78,7 +78,7 @@ const Header = () => {
           <div className="hidden lg:block">
             {user ? (
               <div className="">
-                <Link to="/profile" className="hero-button px-[25px] hover:bg-red-700 flex items-center gap-3 text-center justify-center">
+                <Link to={`/profile/${user.id}`} className="hero-button px-[25px] hover:bg-red-700 flex items-center gap-3 text-center justify-center">
                  <img src={profile} />
                   PROFILE
                 </Link>

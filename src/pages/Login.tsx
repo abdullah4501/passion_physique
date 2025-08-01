@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import bannerImg from '@/assets/gallery/register.png';
 import SectionImg from '@/assets/loginSection.png';
 import { motion, useInView } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 const titleVariants = {
     hidden: { opacity: 0, y: 40, scale: 0.97 },
@@ -14,12 +14,21 @@ const titleVariants = {
 const Login = () => {
     const heroRef = useRef(null);
     const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
-
+    const { id } = useParams();
     const [form, setForm] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const navigate = useNavigate();
+
+      useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+          navigate(`/profile/${user.id}`);
+          return;
+        }
+      }, [id, navigate]);
+
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -105,7 +114,6 @@ const Login = () => {
                                             value={form.email}
                                             onChange={handleChange}
                                             className="w-full bg-[#333] text-white h-[42px] px-4 text-lg font-medium border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
-                                            autoComplete="off"
                                             required
                                         />
                                     </div>

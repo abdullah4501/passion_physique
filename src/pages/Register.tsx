@@ -119,7 +119,6 @@ const Register = () => {
                       value={form.firstName}
                       onChange={handleChange}
                       className="w-full bg-[#333] text-white h-[42px] px-4 text-lg font-medium border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
-                      autoComplete="off"
                       required
                     />
                   </div>
@@ -134,7 +133,6 @@ const Register = () => {
                       value={form.lastName}
                       onChange={handleChange}
                       className="w-full bg-[#333] text-white h-[42px] px-4 text-lg font-medium border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
-                      autoComplete="off"
                       required
                     />
                   </div>
@@ -149,7 +147,6 @@ const Register = () => {
                       value={form.email}
                       onChange={handleChange}
                       className="w-full bg-[#333] text-white h-[42px] px-4 text-lg font-medium border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
-                      autoComplete="off"
                       required
                     />
                   </div>
