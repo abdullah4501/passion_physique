@@ -51,6 +51,7 @@ const Login = () => {
             if (!res.ok) throw new Error(data.msg || 'Login failed');
             setSuccess('Login successful! Redirecting...');
             localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('token', data.token);
             setTimeout(() => navigate('/'), 1200); // Redirect after 1.2s
         } catch (err) {
             setError(err.message || 'Something went wrong');

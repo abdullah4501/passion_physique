@@ -51,7 +51,13 @@ const Profile = () => {
             setInfoLoading(true);
             setInfoError('');
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}`);
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.msg || 'Failed to fetch profile');
                 setInfo({
@@ -76,9 +82,13 @@ const Profile = () => {
         setInfoMsg('');
         setInfoError('');
         try {
+            const token = localStorage.getItem('token');
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(info),
             });
             const data = await res.json();
@@ -107,9 +117,13 @@ const Profile = () => {
             return;
         }
         try {
+            const token = localStorage.getItem('token');
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}/change-password`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(pwForm),
             });
             const data = await res.json();

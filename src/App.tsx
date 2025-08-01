@@ -18,6 +18,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import BecomeMember from "./pages/BecomeMember";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="register" element={<Register />} />
           <Route path="login" element={<Login />} />
           <Route path="profile/:id" element={<Profile />} />
+          <Route path="plans/become-a-member/payment/:planId" element={<BecomeMember />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -3,19 +3,11 @@ import bannerImg from '@/assets/gallery/plan_banner.png';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import bg from "@/assets/bg/Plans.png";
+import { useNavigate } from 'react-router-dom';
 import { motion, useAnimation, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const plans = [
-    { name: "BASIC 12 M", price: "3000", period: "per month", description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.", note: "*Monthly 12 Basic" },
-    { name: "FULL 12 M", price: "4800", period: "per month", description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.", note: "*Monthly 12 Full" },
-    { name: "BASIC 6 M", price: "1600", period: "per month", description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.", note: "*Monthly 6 Basic" },
-    { name: "FULL 6 M", price: "2500", period: "per month", description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.", note: "*Monthly 6 Full" },
-    { name: "BASIC 3 M", price: "850", period: "per month", description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.", note: "*Monthly 3 Basic" },
-    { name: "FULL 3 M", price: "1300", period: "per month", description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.", note: "*Monthly 3 Full" },
-    { name: "BASIC 1 M", price: "300", period: "per month", description: "A personalized training plan with monthly check-ins, basic nutrition guidance, and access to free eBooks and workouts to build consistency and progress.", note: "*Monthly 1 Basic" },
-    { name: "FULL 1 M", price: "450", period: "per month", description: "A comprehensive program with custom training and nutrition, bi-weekly reviews, 1-on-1 consultations, priority support, and full access to premium resources for lasting transformation.", note: "*Monthly 1 Full" },
-];
 
 // For heading
 const tableHeadingVariants = {
@@ -56,6 +48,25 @@ const CoachingPlan = () => {
         if (plansInView) controls.start("visible");
         else controls.start("hidden");
     }, [plansInView, controls]);
+    const navigate = useNavigate();
+
+    const [plans, setPlans] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        setLoading(true);
+        fetch(`${import.meta.env.VITE_API_URL}/api/coachingplans`)
+            .then(res => res.json())
+            .then(data => {
+                setPlans(data.plans || []); // assuming { plans: [...] } in response
+                setLoading(false);
+            })
+            .catch(() => {
+                setError("Could not load plans");
+                setLoading(false);
+            });
+    }, []);
 
     // Heading animation for "Basic VS Full COACHING PLANS"
     const tableSectionRef = useRef(null);
@@ -118,39 +129,48 @@ const CoachingPlan = () => {
                         ref={plansRef}
                         className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch"
                     >
-                        {plans.map((plan, idx) => (
-                            <motion.div
-                                key={plan.name}
-                                className="bg-[#2E2E2E] md:px-[45px] px-[15px] py-[40px] transition-all duration-300 hover:scale-105 md:flex-row flex-col justify-between h-full"
-                                variants={cardVariants}
-                                transition={{ duration: 0.75, ease: "easeInOut" }}
-                                initial="hidden"
-                                animate={plansInView ? "visible" : "hidden"}
-                                custom={idx}
-                                whileHover={{ scale: 1.06, boxShadow: "0 8px 40px 0 rgba(0,0,0,0.25)" }}
-                            >
-                                <div>
-                                    <div className="flex justify-between items-start mb-4 md:flex-row flex-col">
-                                        <div className="flex-1 md:pr-6 pr-0 ">
-                                            <h3 className="text-[26px] font-light text-white mb-3">{plan.name}</h3>
-                                            <p className="text-white text-[14px] font-light leading-relaxed mb-4 md:pr-6 pr-0">
-                                                {plan.description}
-                                            </p>
-                                        </div>
-                                        <div className="text-right pricing-info">
-                                            <div className="text-[36px] font-light text-white">€{plan.price}</div>
-                                            <div className="text-white text-[18px] font-light">{plan.period}</div>
+                        {loading ? (
+                            <div className="text-white text-center col-span-2">Loading plans...</div>
+                        ) : error ? (
+                            <div className="text-red-500 text-center col-span-2">{error}</div>
+                        ) : (
+                            plans.map((plan, idx) => (
+                                <motion.div
+                                    key={plan._id || plan.name}
+                                    className="bg-[#2E2E2E] md:px-[45px] px-[15px] py-[40px] transition-all duration-300 hover:scale-105 md:flex-row flex-col justify-between h-full"
+                                    variants={cardVariants}
+                                    initial="hidden"
+                                    animate={plansInView ? "visible" : "hidden"}
+                                    custom={idx}
+                                    whileHover={{
+                                        scale: 1.06,
+                                        boxShadow: "0 8px 40px 0 rgba(0,0,0,0.25)",
+                                        transition: { duration: 0.15, ease: "easeOut" }  // FAST HOVER!
+                                    }}
+                                >
+                                    <div>
+                                        <div className="flex justify-between items-start mb-4 md:flex-row flex-col">
+                                            <div className="flex-1 md:pr-6 pr-0 ">
+                                                <h3 className="text-[26px] font-light text-white mb-3">{plan.name}</h3>
+                                                <p className="text-white text-[14px] font-light leading-relaxed mb-4 md:pr-6 pr-0">
+                                                    {plan.description}
+                                                </p>
+                                            </div>
+                                            <div className="text-right pricing-info">
+                                                <div className="text-[36px] font-light text-white">€{plan.price}</div>
+                                                <div className="text-white text-[18px] font-light">{plan.period}</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="flex items-center justify-between md:flex-row flex-col">
-                                    <p className="text-primary text-[14px] font-medium">{plan.note}</p>
-                                    <Button className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none md:w-auto w-full md:mt-0 mt-4">
-                                        JOIN NOW
-                                    </Button>
-                                </div>
-                            </motion.div>
-                        ))}
+                                    <div className="flex items-center justify-between md:flex-row flex-col">
+                                        <p className="text-primary text-[14px] font-medium">{plan.note}</p>
+                                        <Button className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none md:w-auto w-full md:mt-0 mt-4">
+                                            <Link to={`/plans/become-a-member/payment/${plan._id}`}>JOIN NOW</Link>
+                                        </Button>
+                                    </div>
+                                </motion.div>
+                            ))
+                        )}
                     </div>
                 </div>
             </section>
