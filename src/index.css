@@ -245,3 +245,18 @@ body{
    }
     
   }
+
+  .stripe-card-input {
+    border: 2px solid transparent;
+    border-radius: 0;
+    background-color: #363636;
+    transition: border-color 0.2s;
+    min-height: 38px; /* matches your inputs */
+    box-sizing: border-box;
+  }
+  
+  .stripe-card-input.StripeElement--focus {
+    border-color: #ff3131; /* your focus color */
+    box-shadow: 0 0 0 2px #ff3131;
+  }
+  

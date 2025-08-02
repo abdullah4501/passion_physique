@@ -4,6 +4,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import bannerImg from '@/assets/bg/profileBg.png';
 import { motion, useInView } from 'framer-motion';
+import { authFetch } from '@/utils/authFetch';
+
 
 const titleVariants = {
     hidden: { opacity: 0, y: 40, scale: 0.97 },
@@ -48,30 +50,26 @@ const Profile = () => {
     // Fetch user info
     useEffect(() => {
         const fetchInfo = async () => {
-            setInfoLoading(true);
-            setInfoError('');
-            try {
-                const token = localStorage.getItem('token');
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.msg || 'Failed to fetch profile');
-                setInfo({
-                    firstName: data.user.firstName,
-                    lastName: data.user.lastName,
-                    email: data.user.email,
-                });
-            } catch (err) {
-                setInfoError(err.message);
+          try {
+            const data = await authFetch(
+              `${import.meta.env.VITE_API_URL}/api/auth/user/${id}`,
+              {},
+              navigate
+            );
+            if (data) {
+              setInfo({
+                firstName: data.user.firstName,
+                lastName: data.user.lastName,
+                email: data.user.email,
+              });
             }
-            setInfoLoading(false);
+          } catch (err) {
+            setInfoError(err.message);
+          }
+          setInfoLoading(false);
         };
         fetchInfo();
-    }, [id]);
+      }, [id]);
 
     // Profile info form
     const handleInfoChange = (e) => {

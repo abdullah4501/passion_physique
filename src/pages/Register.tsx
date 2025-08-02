@@ -5,7 +5,7 @@ import bannerImg from '@/assets/gallery/register.png';
 import SectionImg from '@/assets/registerSection.png';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link , useNavigate} from 'react-router-dom';
 
 const titleVariants = {
   hidden: { opacity: 0, y: 40, scale: 0.97 },
@@ -25,6 +25,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+   const navigate = useNavigate();
 
   // Handle input change
   const handleChange = (e) => {
@@ -58,6 +59,7 @@ const Register = () => {
       if (!res.ok) throw new Error(data.msg || 'Registration failed');
       setSuccess('Registration successful! You can now log in.');
       setForm({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+      setTimeout(() => navigate('/login'), 1200);
     } catch (err) {
       setError(err.message || 'Something went wrong');
     }

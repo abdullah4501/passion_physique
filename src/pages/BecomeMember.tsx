@@ -5,6 +5,11 @@ import Footer from '@/components/Footer';
 import bannerImg from '@/assets/loginSection.png';
 import { motion, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { authFetch } from '@/utils/authFetch';
+import { useStripe, useElements } from '@stripe/react-stripe-js';
+import { CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js';
+import PaymentSuccessModal from "@/components/PaymentSuccessModal"; // adjust the path if needed
+
 
 const paymentOptions = [
     { key: "uae", label: "UAE Bank Transfer (SEPA)" },
@@ -17,6 +22,12 @@ const BecomeMember = () => {
     const navigate = useNavigate();
     const heroRef = useRef(null);
     const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
+    const stripe = useStripe();
+    const elements = useElements();
+    const [processing, setProcessing] = useState(false);
+    const [stripeError, setStripeError] = useState("");
+    const [successModalOpen, setSuccessModalOpen] = useState(false);
+
 
     // Plan state
     const [plan, setPlan] = useState(null);
@@ -37,17 +48,33 @@ const BecomeMember = () => {
     });
 
     useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            // Not logged in, redirect to login
+            navigate("/login", { replace: true });
+            return;
+        }
+    }, [navigate]);
+    
+    useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user) {
-            setForm(prev => ({
-                ...prev,
-                firstName: user.firstName || "",
-                lastName: user.lastName || "",
-                email: user.email || "",
-            }));
+            authFetch(
+                `${import.meta.env.VITE_API_URL}/api/auth/user/${user.id}`,
+                {},
+                navigate // pass navigate so authFetch can redirect on token issues
+            ).then(data => {
+                if (data) {
+                    setForm(prev => ({
+                        ...prev,
+                        firstName: data.user.firstName,
+                        lastName: data.user.lastName,
+                        email: data.user.email
+                    }));
+                }
+            });
         }
-    }, []);
-
+    }, [navigate]);
 
     // Fetch plan info from backend
     useEffect(() => {
@@ -85,15 +112,98 @@ const BecomeMember = () => {
 
 
     // Submit handler
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        const user = JSON.parse(localStorage.getItem('user'));
+        setStripeError("");
         if (!form.agreed) {
             alert("Please agree to the Privacy & Terms.");
             return;
         }
-        // POST payment logic here
-        alert("Submitted! " + JSON.stringify({ ...form, plan: plan?._id }, null, 2));
+
+        if (form.paymentMethod === "stripe") {
+            // Stripe logic
+            if (!stripe || !elements) {
+                setStripeError("Stripe is not loaded");
+                return;
+            }
+            setProcessing(true);
+
+            // 1. Create PaymentIntent on server
+            let clientSecret;
+            try {
+                const token = localStorage.getItem("token");
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-payment-intent`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        amount: Math.round(Number(plan.price) * 100),
+                        currency: "eur",
+                        planId: plan._id,
+                        // any additional info
+                    }),
+                });
+                const data = await res.json();
+                if (!data.clientSecret) throw new Error(data.error || "Could not get payment info.");
+                clientSecret = data.clientSecret;
+            } catch (err) {
+                setStripeError("Failed to start payment: " + err.message);
+                setProcessing(false);
+                return;
+            }
+
+            // 2. Confirm card payment
+            const cardNumberElement = elements.getElement(CardNumberElement);
+            const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: cardNumberElement,
+                    billing_details: {
+                        name: form.firstName + " " + form.lastName,
+                        email: form.email,
+                    },
+                },
+            });
+
+            if (error) {
+                setStripeError(error.message);
+                setProcessing(false);
+                return;
+            }
+            if (paymentIntent.status === "succeeded") {
+                const token = localStorage.getItem("token");
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/members`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        planId: plan._id,
+                        transactionId: paymentIntent.id,
+                        paymentStatus: "paid",
+                        amount: plan.price,
+                        startDate: new Date().toISOString(),
+                        endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
+                    })                    
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setSuccessModalOpen(true); // Show modal only if member saved!
+                } else {
+                    setStripeError(data.error || "Failed to save member. Please contact support.");
+                }
+                setProcessing(false);
+                return;
+            }
+
+        } else {
+            return;
+        }
     };
+
 
     return (
         <>
@@ -217,14 +327,13 @@ const BecomeMember = () => {
                                                 />
                                                 <span
                                                     className={`
-    w-5 h-5 rounded-full border-2
-    flex items-center justify-center
-    transition-all relative
-    ${form.paymentMethod === opt.key
+                                                            w-5 h-5 rounded-full border-2
+                                                            flex items-center justify-center
+                                                            transition-all relative
+                                                            ${form.paymentMethod === opt.key
                                                             ? "border-[#ff3c33]"
                                                             : "border-[#fff]"
-                                                        }
-  `}
+                                                        }`}
                                                 >
                                                     {form.paymentMethod === opt.key && (
                                                         <span className="absolute left-1/2 top-1/2 w-3 h-3 bg-[#ff3c33] rounded-full -translate-x-1/2 -translate-y-1/2"></span>
@@ -243,65 +352,128 @@ const BecomeMember = () => {
                                         ))}
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cardNumber">
-                                        Card Number*
-                                    </label>
-                                    <input
-                                        id="cardNumber"
-                                        name="cardNumber"
-                                        value={form.cardNumber}
-                                        onChange={handleChange}
-                                        className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                        required
-                                    />
-                                </div>
-                                <div className="flex justify-between">
-                                    <div className="w-[48%]">
-                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="expDate">
-                                            Expiration Date*
-                                        </label>
-                                        <input
-                                            id="expDate"
-                                            name="expDate"
-                                            type="text"
-                                            placeholder="MM/YY"
-                                            value={form.expDate}
-                                            maxLength={5}
-                                            onChange={e => {
-                                                let value = e.target.value.replace(/\D/g, ''); // only digits
-                                                if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                                                // validate month
-                                                if (value.length >= 2 && parseInt(value.slice(0, 2)) > 12) {
-                                                    value = '12' + value.slice(2);
-                                                }
-                                                setForm(prev => ({ ...prev, expDate: value }));
-                                            }}
-                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                            required
-                                        />
+                                {form.paymentMethod === "stripe" ? (
+                                    <>
+                                        <div>
+                                            <label className="block text-[#ccc] font-light text-[16px] mb-2">Card Number*</label>
+                                            <div className="w-full bg-[#363636] text-white h-[38px] px-4 flex items-center focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none">
+                                                <CardNumberElement
+                                                    className="flex-1 "
+                                                    options={{
+                                                        style: {
+                                                            base: {
+                                                                fontSize: "16px",
+                                                                color: "#fff",
+                                                                "::placeholder": { color: "#aaa" }
+                                                            },
+                                                            invalid: { color: "#ff3131" }
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between gap-3">
+                                            <div className="w-[48%]">
+                                                <label className="block text-[#ccc] font-light text-[16px] mb-2">Expiration Date*</label>
+                                                <div className="w-full bg-[#363636] text-white h-[38px] px-4 flex items-center rounded-none">
+                                                    <CardExpiryElement
+                                                        className="flex-1 focus:ring-2 focus:ring-primary transition-all duration-200"
+                                                        options={{
+                                                            style: {
+                                                                base: {
+                                                                    fontSize: "16px",
+                                                                    color: "#fff",
+                                                                    "::placeholder": { color: "#aaa" }
+                                                                },
+                                                                invalid: { color: "#ff3131" }
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="w-[48%]">
+                                                <label className="block text-[#ccc] font-light text-[16px] mb-2">CVV*</label>
+                                                <div className="w-full bg-[#363636] text-white h-[38px] px-4 flex items-center rounded-none">
+                                                    <CardCvcElement
+                                                        className="flex-1 focus:ring-2 focus:ring-primary transition-all duration-200"
+                                                        options={{
+                                                            style: {
+                                                                base: {
+                                                                    fontSize: "16px",
+                                                                    color: "#fff",
+                                                                    "::placeholder": { color: "#aaa" }
+                                                                },
+                                                                invalid: { color: "#ff3131" }
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div>
+                                            <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cardNumber">
+                                                Card Number*
+                                            </label>
+                                            <input
+                                                id="cardNumber"
+                                                name="cardNumber"
+                                                value={form.cardNumber}
+                                                onChange={handleChange}
+                                                className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <div className="w-[48%]">
+                                                <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="expDate">
+                                                    Expiration Date*
+                                                </label>
+                                                <input
+                                                    id="expDate"
+                                                    name="expDate"
+                                                    type="text"
+                                                    placeholder="MM/YY"
+                                                    value={form.expDate}
+                                                    maxLength={5}
+                                                    onChange={e => {
+                                                        let value = e.target.value.replace(/\D/g, ''); // only digits
+                                                        if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                                                        // validate month
+                                                        if (value.length >= 2 && parseInt(value.slice(0, 2)) > 12) {
+                                                            value = '12' + value.slice(2);
+                                                        }
+                                                        setForm(prev => ({ ...prev, expDate: value }));
+                                                    }}
+                                                    className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                                    required
+                                                />
 
-                                    </div>
-                                    <div className="w-[48%]">
-                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cvv">
-                                            CVV*
-                                        </label>
-                                        <input
-                                            id="cvv"
-                                            name="cvv"
-                                            type="text"
-                                            value={form.cvv}
-                                            onChange={handleChange}
-                                            maxLength={4}
-                                            pattern="\d*"
-                                            inputMode="numeric"
-                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                            autoComplete="off"
-                                            required
-                                        />
+                                            </div>
+                                            <div className="w-[48%]">
+                                                <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cvv">
+                                                    CVV*
+                                                </label>
+                                                <input
+                                                    id="cvv"
+                                                    name="cvv"
+                                                    type="text"
+                                                    value={form.cvv}
+                                                    onChange={handleChange}
+                                                    maxLength={4}
+                                                    pattern="\d*"
+                                                    inputMode="numeric"
+                                                    className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                                    autoComplete="off"
+                                                    required
+                                                />
 
-                                    </div>
-                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                                 {/* Checkboxes */}
                                 <label className="flex items-center gap-2 mt-2 text-white text-[15px]">
                                     <input
@@ -334,12 +506,38 @@ const BecomeMember = () => {
                                         </a>
                                     </span>
                                 </label>
+                                {stripeError && <div className="text-red-500 mt-2">{stripeError}</div>}
+
                                 <Button
                                     type="submit"
-                                    className="w-full h-[45px] mt-2 bg-[#ff3131] hover:bg-[#e03228] text-white font-[600] text-[16px] transition-all duration-150 rounded-none"
+                                    className="w-full h-[45px] mt-2 bg-[#ff3131] hover:bg-[#e03228] text-white font-[600] text-[16px] transition-all duration-150 rounded-none flex items-center justify-center"
+                                    disabled={processing}
                                 >
-                                    {plan ? `Pay €${plan.price}` : "Pay"}
+                                    {processing ? (
+                                        <span className="flex items-center gap-2">
+                                            <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="4"
+                                                    fill="none"
+                                                />
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8v8z"
+                                                />
+                                            </svg>
+                                            Processing...
+                                        </span>
+                                    ) : (
+                                        plan ? `Pay €${plan.price}` : "Pay"
+                                    )}
                                 </Button>
+
                             </form>
                         </div>
 
@@ -399,6 +597,14 @@ const BecomeMember = () => {
                     </div>
                 </div>
             </section>
+            <PaymentSuccessModal
+                open={successModalOpen}
+                onClose={() => {
+                    setSuccessModalOpen(false);
+                    // Optionally redirect or refresh membership
+                    navigate("/workout-library"); // Or wherever you want to send them
+                }}
+            />
             <Footer />
         </>
     );

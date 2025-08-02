@@ -164,9 +164,9 @@ const CoachingPlan = () => {
                                     </div>
                                     <div className="flex items-center justify-between md:flex-row flex-col">
                                         <p className="text-primary text-[14px] font-medium">{plan.note}</p>
-                                        <Button className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none md:w-auto w-full md:mt-0 mt-4">
-                                            <Link to={`/plans/become-a-member/payment/${plan._id}`}>JOIN NOW</Link>
-                                        </Button>
+                                        <Link to={`/plans/become-a-member/payment/${plan._id}`} className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none md:w-auto w-full md:mt-0 mt-4">
+                                         JOIN NOW
+                                        </Link>
                                     </div>
                                 </motion.div>
                             ))
