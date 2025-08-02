@@ -50,12 +50,11 @@ const BecomeMember = () => {
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
-            // Not logged in, redirect to login
             navigate("/login", { replace: true });
             return;
         }
     }, [navigate]);
-    
+
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user) {
