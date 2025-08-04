@@ -33,6 +33,10 @@ const BecomeMember = () => {
     const [plan, setPlan] = useState(null);
     const [planLoading, setPlanLoading] = useState(true);
     const [planError, setPlanError] = useState("");
+    const [savedCards, setSavedCards] = useState([]);
+    const [useSavedCard, setUseSavedCard] = useState(true); // Show saved card by default if any
+
+
 
     // Form state (You can auto-fill user info here)
     const [form, setForm] = useState({
@@ -46,6 +50,26 @@ const BecomeMember = () => {
         saveInfo: false,
         agreed: false,
     });
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        fetch(`${import.meta.env.VITE_API_URL}/api/payments/saved-cards`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                setSavedCards(data.cards || []);
+                if (data.cards && data.cards.length > 0) {
+                    console.log("Saved cards:", data.cards);
+                } else {
+                    console.log("No saved cards found for this user.");
+                }
+            })
+            .catch(err => {
+                console.log("Error fetching saved cards:", err);
+            });
+    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -142,7 +166,7 @@ const BecomeMember = () => {
                         amount: Math.round(Number(plan.price) * 100),
                         currency: "eur",
                         planId: plan._id,
-                        // any additional info
+                        saveCard: form.saveInfo, // <-- Pass this
                     }),
                 });
                 const data = await res.json();
@@ -186,7 +210,7 @@ const BecomeMember = () => {
                         amount: plan.price,
                         startDate: new Date().toISOString(),
                         endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
-                    })                    
+                    })
                 });
                 const data = await res.json();
                 if (res.ok) {
@@ -308,182 +332,222 @@ const BecomeMember = () => {
                                 </>
 
                                 {/* Payment Info */}
-                                <div className="border-b border-[#acacac] mb-7 pb-3 mt-4">
+                                <div className="border-b border-[#acacac]  pb-3 mt-4">
                                     <h2 className="text-white text-[24px] font-[600]">Payment Info</h2>
                                 </div>
                                 <div>
-                                    <span className="block text-[#ccc] text-[16px] mb-2 font-light">Pay With:</span>
-                                    <div className="flex gap-7">
-                                        {paymentOptions.map((opt) => (
-                                            <label key={opt.key} className="flex items-center gap-2 cursor-pointer select-none">
-                                                <input
-                                                    type="radio"
-                                                    name="paymentMethod"
-                                                    value={opt.key}
-                                                    checked={form.paymentMethod === opt.key}
-                                                    onChange={handleChange}
-                                                    className="sr-only"
-                                                />
-                                                <span
-                                                    className={`
+                                    <span className="block text-[#fff] text-[18px] font-[600]">Pay With:</span>
+
+                                </div>
+
+                                {form.paymentMethod === "stripe" && savedCards.length > 0 && useSavedCard ? (
+                                    // SHOW SAVED CARD
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="text-white text-lg">
+                                            {savedCards[0].brand.charAt(0).toUpperCase() + savedCards[0].brand.slice(1)}
+                                            {" xxxx xxxx xxxx "}
+                                            {savedCards[0].last4}
+                                            {" end at "}
+                                            {String(savedCards[0].exp_month).padStart(2, "0")}/{String(savedCards[0].exp_year).slice(-2)}
+                                        </span>
+                                        <Button
+                                            type="button"
+                                            className="ml-6 bg-[#ff3c33] hover:bg-[#e03228] text-white font-[600] text-[16px] px-8 py-2 rounded-none"
+                                            onClick={() => setUseSavedCard(false)}
+                                        >
+                                            Use Another Payment Way
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    // SHOW CARD FORM FIELDS (stripe or manual)
+                                    <>
+                                        <div className="flex gap-7">
+                                            {paymentOptions.map((opt) => (
+                                                <label key={opt.key} className="flex items-center gap-2 cursor-pointer select-none">
+                                                    <input
+                                                        type="radio"
+                                                        name="paymentMethod"
+                                                        value={opt.key}
+                                                        checked={form.paymentMethod === opt.key}
+                                                        onChange={e => {
+                                                            handleChange(e);
+                                                            // Reset useSavedCard when payment method is changed
+                                                            if (opt.key === "stripe") setUseSavedCard(true);
+                                                        }}
+                                                        className="sr-only"
+                                                    />
+                                                    <span
+                                                        className={`
                                                             w-5 h-5 rounded-full border-2
                                                             flex items-center justify-center
                                                             transition-all relative
                                                             ${form.paymentMethod === opt.key
-                                                            ? "border-[#ff3c33]"
-                                                            : "border-[#fff]"
-                                                        }`}
-                                                >
-                                                    {form.paymentMethod === opt.key && (
-                                                        <span className="absolute left-1/2 top-1/2 w-3 h-3 bg-[#ff3c33] rounded-full -translate-x-1/2 -translate-y-1/2"></span>
-                                                    )}
-                                                </span>
+                                                                ? "border-[#ff3c33]"
+                                                                : "border-[#fff]"
+                                                            }`}
+                                                    >
+                                                        {form.paymentMethod === opt.key && (
+                                                            <span className="absolute left-1/2 top-1/2 w-3 h-3 bg-[#ff3c33] rounded-full -translate-x-1/2 -translate-y-1/2"></span>
+                                                        )}
+                                                    </span>
 
-                                                <span
-                                                    className={`ml-1 text-[17px] font-medium transition-all ${form.paymentMethod === opt.key
-                                                        ? "text-white"
-                                                        : "text-[#cccccc]"
-                                                        }`}
-                                                >
-                                                    {opt.label}
-                                                </span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                                {form.paymentMethod === "stripe" ? (
-                                    <>
-                                        <div>
-                                            <label className="block text-[#ccc] font-light text-[16px] mb-2">Card Number*</label>
-                                            <div className="w-full bg-[#363636] text-white h-[38px] px-4 flex items-center focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none">
-                                                <CardNumberElement
-                                                    className="flex-1 "
-                                                    options={{
-                                                        style: {
-                                                            base: {
-                                                                fontSize: "16px",
-                                                                color: "#fff",
-                                                                "::placeholder": { color: "#aaa" }
-                                                            },
-                                                            invalid: { color: "#ff3131" }
-                                                        }
-                                                    }}
-                                                />
-                                            </div>
+                                                    <span
+                                                        className={`ml-1 text-[17px] font-medium transition-all ${form.paymentMethod === opt.key
+                                                            ? "text-white"
+                                                            : "text-[#cccccc]"
+                                                            }`}
+                                                    >
+                                                        {opt.label}
+                                                    </span>
+                                                </label>
+                                            ))}
                                         </div>
-                                        <div className="flex justify-between gap-3">
-                                            <div className="w-[48%]">
-                                                <label className="block text-[#ccc] font-light text-[16px] mb-2">Expiration Date*</label>
-                                                <div className="w-full bg-[#363636] text-white h-[38px] px-4 flex items-center rounded-none">
-                                                    <CardExpiryElement
-                                                        className="flex-1 focus:ring-2 focus:ring-primary transition-all duration-200"
-                                                        options={{
-                                                            style: {
-                                                                base: {
-                                                                    fontSize: "16px",
-                                                                    color: "#fff",
-                                                                    "::placeholder": { color: "#aaa" }
-                                                                },
-                                                                invalid: { color: "#ff3131" }
-                                                            }
-                                                        }}
+                                        {form.paymentMethod === "stripe" ? (
+                                            <>
+                                                <div>
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2">Card Number*</label>
+                                                    <div className="w-full bg-[#363636] text-white h-[38px] px-4 flex items-center focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none">
+                                                        <CardNumberElement
+                                                            className="flex-1 "
+                                                            options={{
+                                                                style: {
+                                                                    base: {
+                                                                        fontSize: "16px",
+                                                                        color: "#fff",
+                                                                        "::placeholder": { color: "#aaa" }
+                                                                    },
+                                                                    invalid: { color: "#ff3131" }
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-between gap-3">
+                                                    <div className="w-[48%]">
+                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2">Expiration Date*</label>
+                                                        <div className="w-full bg-[#363636] text-white h-[38px] px-4 flex items-center rounded-none">
+                                                            <CardExpiryElement
+                                                                className="flex-1 focus:ring-2 focus:ring-primary transition-all duration-200"
+                                                                options={{
+                                                                    style: {
+                                                                        base: {
+                                                                            fontSize: "16px",
+                                                                            color: "#fff",
+                                                                            "::placeholder": { color: "#aaa" }
+                                                                        },
+                                                                        invalid: { color: "#ff3131" }
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="w-[48%]">
+                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2">CVV*</label>
+                                                        <div className="w-full bg-[#363636] text-white h-[38px] px-4 flex items-center rounded-none">
+                                                            <CardCvcElement
+                                                                className="flex-1 focus:ring-2 focus:ring-primary transition-all duration-200"
+                                                                options={{
+                                                                    style: {
+                                                                        base: {
+                                                                            fontSize: "16px",
+                                                                            color: "#fff",
+                                                                            "::placeholder": { color: "#aaa" }
+                                                                        },
+                                                                        invalid: { color: "#ff3131" }
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {/* "Back to saved card" button if a card exists */}
+                                                {savedCards.length > 0 && (
+                                                    <Button
+                                                        type="button"
+                                                        className="mt-3 bg-[#2E2E2E] hover:bg-[#444] text-white text-xs px-5 py-2 rounded-none"
+                                                        onClick={() => setUseSavedCard(true)}
+                                                    >
+                                                        Back to Saved Card
+                                                    </Button>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div>
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cardNumber">
+                                                        Card Number*
+                                                    </label>
+                                                    <input
+                                                        id="cardNumber"
+                                                        name="cardNumber"
+                                                        value={form.cardNumber}
+                                                        onChange={handleChange}
+                                                        className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                                        required
                                                     />
                                                 </div>
-                                            </div>
-                                            <div className="w-[48%]">
-                                                <label className="block text-[#ccc] font-light text-[16px] mb-2">CVV*</label>
-                                                <div className="w-full bg-[#363636] text-white h-[38px] px-4 flex items-center rounded-none">
-                                                    <CardCvcElement
-                                                        className="flex-1 focus:ring-2 focus:ring-primary transition-all duration-200"
-                                                        options={{
-                                                            style: {
-                                                                base: {
-                                                                    fontSize: "16px",
-                                                                    color: "#fff",
-                                                                    "::placeholder": { color: "#aaa" }
-                                                                },
-                                                                invalid: { color: "#ff3131" }
-                                                            }
-                                                        }}
-                                                    />
+                                                <div className="flex justify-between">
+                                                    <div className="w-[48%]">
+                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="expDate">
+                                                            Expiration Date*
+                                                        </label>
+                                                        <input
+                                                            id="expDate"
+                                                            name="expDate"
+                                                            type="text"
+                                                            placeholder="MM/YY"
+                                                            value={form.expDate}
+                                                            maxLength={5}
+                                                            onChange={e => {
+                                                                let value = e.target.value.replace(/\D/g, ''); // only digits
+                                                                if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                                                                // validate month
+                                                                if (value.length >= 2 && parseInt(value.slice(0, 2)) > 12) {
+                                                                    value = '12' + value.slice(2);
+                                                                }
+                                                                setForm(prev => ({ ...prev, expDate: value }));
+                                                            }}
+                                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div className="w-[48%]">
+                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cvv">
+                                                            CVV*
+                                                        </label>
+                                                        <input
+                                                            id="cvv"
+                                                            name="cvv"
+                                                            type="text"
+                                                            value={form.cvv}
+                                                            onChange={handleChange}
+                                                            maxLength={4}
+                                                            pattern="\d*"
+                                                            inputMode="numeric"
+                                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                                            autoComplete="off"
+                                                            required
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div>
-                                            <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cardNumber">
-                                                Card Number*
-                                            </label>
-                                            <input
-                                                id="cardNumber"
-                                                name="cardNumber"
-                                                value={form.cardNumber}
-                                                onChange={handleChange}
-                                                className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <div className="w-[48%]">
-                                                <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="expDate">
-                                                    Expiration Date*
-                                                </label>
+                                            </>
+                                        )}
+                                        {/* Save card info checkbox only for new card entry with Stripe */}
+                                        {form.paymentMethod === "stripe" && (!savedCards.length || !useSavedCard) && (
+                                            <label className="flex items-center gap-2 mt-2 text-white text-[15px]">
                                                 <input
-                                                    id="expDate"
-                                                    name="expDate"
-                                                    type="text"
-                                                    placeholder="MM/YY"
-                                                    value={form.expDate}
-                                                    maxLength={5}
-                                                    onChange={e => {
-                                                        let value = e.target.value.replace(/\D/g, ''); // only digits
-                                                        if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                                                        // validate month
-                                                        if (value.length >= 2 && parseInt(value.slice(0, 2)) > 12) {
-                                                            value = '12' + value.slice(2);
-                                                        }
-                                                        setForm(prev => ({ ...prev, expDate: value }));
-                                                    }}
-                                                    className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                    required
-                                                />
-
-                                            </div>
-                                            <div className="w-[48%]">
-                                                <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cvv">
-                                                    CVV*
-                                                </label>
-                                                <input
-                                                    id="cvv"
-                                                    name="cvv"
-                                                    type="text"
-                                                    value={form.cvv}
+                                                    type="checkbox"
+                                                    name="saveInfo"
+                                                    checked={form.saveInfo}
                                                     onChange={handleChange}
-                                                    maxLength={4}
-                                                    pattern="\d*"
-                                                    inputMode="numeric"
-                                                    className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                    autoComplete="off"
-                                                    required
+                                                    className="w-4 h-4 accent-[#ff3131]"
                                                 />
-
-                                            </div>
-                                        </div>
+                                                <span className="text-white">Save this information for faster check-out next time</span>
+                                            </label>
+                                        )}
                                     </>
                                 )}
-                                {/* Checkboxes */}
-                                <label className="flex items-center gap-2 mt-2 text-white text-[15px]">
-                                    <input
-                                        type="checkbox"
-                                        name="saveInfo"
-                                        checked={form.saveInfo}
-                                        onChange={handleChange}
-                                        className="w-4 h-4 accent-[#ff3131]"
-                                    />
-                                    <span className="text-white">Save this information for faster check-out next time</span>
-                                </label>
+                                {/* Agreement and error */}
                                 <label className="flex items-center gap-2 mt-2 text-white text-[15px]">
                                     <input
                                         type="checkbox"
