@@ -100,19 +100,25 @@ const BecomeMember = () => {
     }, [navigate]);
 
     // Fetch plan info from backend
-    useEffect(() => {
-        setPlanLoading(true);
-        fetch(`${import.meta.env.VITE_API_URL}/api/coachingplans/${planId}`)
-            .then(res => res.json())
-            .then(data => {
-                setPlan(data.plan);
-                setPlanLoading(false);
-            })
-            .catch(() => {
-                setPlanError("Could not load plan details");
-                setPlanLoading(false);
-            });
-    }, [planId]);
+useEffect(() => {
+    setPlanLoading(true);
+    fetch(`${import.meta.env.VITE_API_URL}/api/coachingplans/stripe`)
+        .then(res => res.json())
+        .then(data => {
+            const found = (data.plans || []).find(p => p.priceId === planId);
+            if (found) {
+                setPlan(found);
+            } else {
+                setPlanError("Plan not found.");
+            }
+            setPlanLoading(false);
+        })
+        .catch(() => {
+            setPlanError("Could not load plan details");
+            setPlanLoading(false);
+        });
+}, [planId]);
+
 
     // Handle input changes
     const handleChange = (e) => {
@@ -165,7 +171,7 @@ const BecomeMember = () => {
                     body: JSON.stringify({
                         amount: Math.round(Number(plan.price) * 100),
                         currency: "eur",
-                        planId: plan._id,
+                        planId: plan.priceId,
                         saveCard: form.saveInfo, // <-- Pass this
                     }),
                 });
@@ -204,10 +210,10 @@ const BecomeMember = () => {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        planId: plan._id,
+                        planId: plan.priceId,
                         transactionId: paymentIntent.id,
                         paymentStatus: "paid",
-                        amount: plan.price,
+                        amount: plan.amount,
                         startDate: new Date().toISOString(),
                         endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
                     })
@@ -625,7 +631,7 @@ const BecomeMember = () => {
                                                         </p>
                                                     </div>
                                                     <div className="text-right pricing-info">
-                                                        <div className="text-[36px] font-light text-white">€{plan.price}</div>
+                                                        <div className="text-[36px] font-light text-white">€{plan.amount}</div>
                                                         <div className="text-white text-[18px] font-light">{plan.period}</div>
                                                     </div>
                                                 </div>
@@ -637,7 +643,7 @@ const BecomeMember = () => {
                                         <div className="flex flex-col gap-3 border-t border-[#acacac] pt-5">
                                             <div className="flex items-center justify-between text-[15px] font-normal">
                                                 <span className="text-[#fff] text-[16px] font-[500] ">Subtotal</span>
-                                                <span className="text-[#fff] text-[16px] font-[500] ">€{plan.price}</span>
+                                                <span className="text-[#fff] text-[16px] font-[500] ">€{plan.amount}</span>
                                             </div>
                                             <div className="flex items-center justify-between text-[15px] font-normal">
                                                 <span className="text-[#fff] text-[16px] font-[500] ">Additional processing fee</span>
@@ -650,7 +656,7 @@ const BecomeMember = () => {
                                                         Including €0 in taxes
                                                     </span>
                                                 </div>
-                                                <span className="text-white text-[36px] font-[500]">€{plan.price}</span>
+                                                <span className="text-white text-[36px] font-[500]">€{plan.amount}</span>
                                             </div>
                                         </div>
                                     </>
