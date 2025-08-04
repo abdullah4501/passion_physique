@@ -5,7 +5,7 @@ import bannerImg from '@/assets/gallery/register.png';
 import SectionImg from '@/assets/registerSection.png';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Link , useNavigate} from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const titleVariants = {
   hidden: { opacity: 0, y: 40, scale: 0.97 },
@@ -25,46 +25,117 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-   const navigate = useNavigate();
+  const [otp, setOtp] = useState('');
+  const [email, setEmail] = useState('');
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const navigate = useNavigate();
 
   // Handle input change
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Handle form submit
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
-    if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
     setLoading(true);
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          firstName: form.firstName,
-          lastName: form.lastName,
-          email: form.email,
-          password: form.password,
-          confirmPassword: form.confirmPassword,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.msg || 'Registration failed');
-      setSuccess('Registration successful! You can now log in.');
-      setForm({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
-      setTimeout(() => navigate('/login'), 1200);
-    } catch (err) {
-      setError(err.message || 'Something went wrong');
-    }
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/pre-register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    });
+    const data = await res.json();
     setLoading(false);
+    if (res.ok) {
+      setEmail(form.email);
+      setShowOtpModal(true); // Show modal!
+    } else {
+      setError(data.msg || 'Something went wrong');
+    }
   };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    setError('');
+    setVerifyingOtp(true);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp })
+    });
+    const data = await res.json();
+    setVerifyingOtp(false);
+    if (res.ok) {
+      setShowOtpModal(false);
+      setSuccess('Registration successful! You can now log in.');
+      setTimeout(() => navigate('/login'), 1200);
+    } else {
+      setError(data.msg || "Invalid OTP");
+    }
+  };
+
+  const OtpModal = ({ open, otp, setOtp, loading, error, onSubmit, onClose }) => {
+    if (!open) return null;
+    return (
+      <div className="fixed z-50 inset-0 flex items-center justify-center bg-black/70">
+        <div className="bg-[#1a1a1a] rounded-xl shadow-2xl px-7 py-9 min-w-[340px] max-w-[95vw] relative">
+          <button
+            className="absolute top-3 right-3 text-[#ff3c33] text-2xl font-bold"
+            onClick={onClose}
+            aria-label="Close"
+            type="button"
+          >
+            ×
+          </button>
+          <h3 className="text-white text-2xl mb-5 font-bold text-center">Verify Email</h3>
+          <form onSubmit={onSubmit} className="flex flex-col gap-4">
+            <label className="block text-white text-sm mb-1" htmlFor="otp">Enter the OTP sent to your email</label>
+            <input
+              id="otp"
+              type="text"
+              value={otp}
+              onChange={e => setOtp(e.target.value)}
+              className="w-full bg-[#333] text-white h-[42px] px-4 text-lg font-medium border-none outline-none focus:ring-2 focus:ring-primary rounded-md transition-all duration-200 tracking-widest text-center text-xl"
+              maxLength={6}
+              required
+              autoFocus
+              inputMode="numeric"
+              pattern="\d*"
+              placeholder="6-digit code"
+            />
+            {error && <div className="text-red-500 mt-1 text-center">{error}</div>}
+            <button
+              type="submit"
+              className="w-full bg-[#ff3c33] hover:bg-[#e03228] text-white font-[700] text-[16px] h-[48px] rounded-md transition-all duration-200 mt-2 flex items-center justify-center"
+              disabled={loading}
+            >
+              {loading && (
+                <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8z"
+                  />
+                </svg>
+              )}
+              {loading ? 'Verifying...' : 'Verify'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
 
   return (
     <>
@@ -108,7 +179,7 @@ const Register = () => {
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[120px]">
             <div className="flex flex-col justify-center col-span-1">
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleRegister}>
                 <div className="flex flex-col gap-6 w-full">
                   <div>
                     <label className="block text-white font-[400] text-[16px] mb-2" htmlFor="firstName">
@@ -199,6 +270,7 @@ const Register = () => {
                   </p>
                 </div>
               </form>
+
             </div>
             <div className="md:flex flex-col items-center justify-center col-span-1 hidden">
               <img src={SectionImg} alt="Register Section" className="w-full h-auto" />
@@ -206,6 +278,15 @@ const Register = () => {
           </div>
         </div>
       </section>
+      <OtpModal
+        open={showOtpModal}
+        otp={otp}
+        setOtp={setOtp}
+        loading={verifyingOtp}
+        error={error}
+        onSubmit={handleVerify}
+        onClose={() => setShowOtpModal(false)}
+      />
       <Footer />
     </>
   );

@@ -56,7 +56,7 @@ const CoachingPlan = () => {
 
     useEffect(() => {
         setLoading(true);
-        fetch(`${import.meta.env.VITE_API_URL}/api/coachingplans`)
+        fetch(`${import.meta.env.VITE_API_URL}/api/coachingplans/stripe`)
             .then(res => res.json())
             .then(data => {
                 setPlans(data.plans || []); // assuming { plans: [...] } in response
@@ -157,14 +157,14 @@ const CoachingPlan = () => {
                                                 </p>
                                             </div>
                                             <div className="text-right pricing-info">
-                                                <div className="text-[36px] font-light text-white">€{plan.price}</div>
+                                                <div className="text-[36px] font-light text-white">€{plan.amount}</div>
                                                 <div className="text-white text-[18px] font-light">{plan.period}</div>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between md:flex-row flex-col">
                                         <p className="text-primary text-[14px] font-medium">{plan.note}</p>
-                                        <Link to={`/plans/become-a-member/payment/${plan._id}`} className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none md:w-auto w-full md:mt-0 mt-4">
+                                        <Link to={`/plans/become-a-member/payment/${plan.priceId}`} className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none md:w-auto w-full md:mt-0 mt-4">
                                          JOIN NOW
                                         </Link>
                                     </div>
