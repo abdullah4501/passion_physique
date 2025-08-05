@@ -34,6 +34,7 @@ const BecomeMember = () => {
     const [planLoading, setPlanLoading] = useState(true);
     const [planError, setPlanError] = useState("");
     const [savedCards, setSavedCards] = useState([]);
+    const [defaultCardId, setDefaultCardId] = useState('');
     const [useSavedCard, setUseSavedCard] = useState(true); // Show saved card by default if any
 
 
@@ -100,24 +101,24 @@ const BecomeMember = () => {
     }, [navigate]);
 
     // Fetch plan info from backend
-useEffect(() => {
-    setPlanLoading(true);
-    fetch(`${import.meta.env.VITE_API_URL}/api/coachingplans/stripe`)
-        .then(res => res.json())
-        .then(data => {
-            const found = (data.plans || []).find(p => p.priceId === planId);
-            if (found) {
-                setPlan(found);
-            } else {
-                setPlanError("Plan not found.");
-            }
-            setPlanLoading(false);
-        })
-        .catch(() => {
-            setPlanError("Could not load plan details");
-            setPlanLoading(false);
-        });
-}, [planId]);
+    useEffect(() => {
+        setPlanLoading(true);
+        fetch(`${import.meta.env.VITE_API_URL}/api/coachingplans/stripe`)
+            .then(res => res.json())
+            .then(data => {
+                const found = (data.plans || []).find(p => p.priceId === planId);
+                if (found) {
+                    setPlan(found);
+                } else {
+                    setPlanError("Plan not found.");
+                }
+                setPlanLoading(false);
+            })
+            .catch(() => {
+                setPlanError("Could not load plan details");
+                setPlanLoading(false);
+            });
+    }, [planId]);
 
 
     // Handle input changes
@@ -139,8 +140,6 @@ useEffect(() => {
         }));
     };
 
-
-    // Submit handler
     const handleSubmit = async (e) => {
         e.preventDefault();
         const user = JSON.parse(localStorage.getItem('user'));
@@ -151,88 +150,111 @@ useEffect(() => {
         }
 
         if (form.paymentMethod === "stripe") {
-            // Stripe logic
             if (!stripe || !elements) {
                 setStripeError("Stripe is not loaded");
                 return;
             }
             setProcessing(true);
 
-            // 1. Create PaymentIntent on server
-            let clientSecret;
             try {
-                const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-payment-intent`, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        amount: Math.round(Number(plan.amount) * 100),
-                        currency: "eur",
-                        planId: plan.priceId,
-                        saveCard: form.saveInfo, // <-- Pass this
-                    }),
-                });
-                const data = await res.json();
-                if (!data.clientSecret) throw new Error(data.error || "Could not get payment info.");
-                clientSecret = data.clientSecret;
-            } catch (err) {
-                setStripeError("Failed to start payment: " + err.message);
-                setProcessing(false);
-                return;
-            }
-
-            // 2. Confirm card payment
-            const cardNumberElement = elements.getElement(CardNumberElement);
-            const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: {
-                    card: cardNumberElement,
+                // 1. Create Payment Method
+                const cardElement = elements.getElement(CardNumberElement);
+                const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
+                    type: "card",
+                    card: cardElement,
                     billing_details: {
-                        name: form.firstName + " " + form.lastName,
+                        name: `${form.firstName} ${form.lastName}`,
                         email: form.email,
                     },
-                },
-            });
+                });
+                if (pmError) throw pmError;
 
-            if (error) {
-                setStripeError(error.message);
-                setProcessing(false);
-                return;
-            }
-            if (paymentIntent.status === "succeeded") {
+                // 2. Create subscription in backend
                 const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/members`, {
+                const subRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-subscription`, {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        planId: plan.priceId,
-                        transactionId: paymentIntent.id,
-                        paymentStatus: "paid",
-                        amount: plan.amount,
-                        startDate: new Date().toISOString(),
-                        endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
-                    })
+                        priceId: plan.priceId,
+                        paymentMethodId: paymentMethod.id,
+                    }),
                 });
-                const data = await res.json();
-                if (res.ok) {
-                    setSuccessModalOpen(true); // Show modal only if member saved!
-                } else {
-                    setStripeError(data.error || "Failed to save member. Please contact support.");
+                const data = await subRes.json();
+                console.log("Create subscription response:", data);
+
+                if (!subRes.ok) {
+                    throw new Error(data.error || "Could not start subscription");
                 }
-                setProcessing(false);
-                return;
+
+                // Defensive: Check for latest_invoice and payment_intent
+                const invoice = data.subscription.latest_invoice;
+                const paymentIntent = invoice ? invoice.payment_intent : null;
+                const clientSecret = paymentIntent ? paymentIntent.client_secret : null;
+
+                if (clientSecret) {
+                    // Payment required, confirm payment
+                    const { paymentIntent: confirmedPI, error } = await stripe.confirmCardPayment(clientSecret);
+
+                    if (error) {
+                        setStripeError(error.message);
+                        setProcessing(false);
+                        console.error("Stripe payment error:", error);
+                        return;
+                    }
+
+                    if (confirmedPI.status === "succeeded") {
+                        // Payment succeeded, create member
+                        await saveMember(plan, confirmedPI.id, "paid"); // <--- "paid" is valid!
+                        setSuccessModalOpen(true);
+                    } else {
+                        setStripeError("Payment not completed.");
+                        console.error("Payment not completed. Status:", confirmedPI.status);
+                    }
+                } else {
+                    // No payment required (could be free trial, etc.), still use "paid" for now!
+                    await saveMember(plan, data.subscription.id, "paid"); // <--- "paid" (not "active")
+                    setSuccessModalOpen(true);
+                }
+            } catch (err) {
+                setStripeError(err.message || "Failed to start subscription");
+                console.error("Subscription/payment error:", err);
             }
 
+            setProcessing(false);
         } else {
+            // Other payment methods here (if you add more)
             return;
         }
-    };
 
+        // Helper function for creating member in DB
+        async function saveMember(plan, transactionId, paymentStatus) {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/members`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    planId: plan.priceId,
+                    transactionId,
+                    paymentStatus,
+                    amount: plan.amount,
+                    startDate: new Date().toISOString(),
+                    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
+                })
+            });
+            const data = await res.json();
+            console.log("Save member response:", data);
+            if (!res.ok) {
+                setStripeError(data.error || "Failed to save member. Please contact support.");
+                throw new Error(data.error || "Failed to save member");
+            }
+        }
+    };
 
     return (
         <>

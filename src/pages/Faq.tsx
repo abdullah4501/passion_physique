@@ -80,6 +80,11 @@ const faqData = [
         id: "item-10",
         question: "10. Are eBooks included?",
         answer: "eBook information and inclusions will be provided here."
+    },
+    {
+        id: "item-11",
+        question: "11. What if I can’t perform an exercise from the workout library?",
+        answer: "eBook information and inclusions will be provided here."
     }
 ];
 

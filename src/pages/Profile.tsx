@@ -6,6 +6,8 @@ import bannerImg from '@/assets/bg/profileBg.png';
 import { motion, useInView } from 'framer-motion';
 import { authFetch } from '@/utils/authFetch';
 import PaymentInfo from '@/components/PaymentInfo';
+import ActivePlan from '@/components/ActivePlan';
+
 
 const titleVariants = {
     hidden: { opacity: 0, y: 40, scale: 0.97 },
@@ -17,6 +19,7 @@ const tabList = [
     { key: 'payment', label: 'Payment Info' },
     { key: 'library', label: 'Your Library' },
     { key: 'ebook', label: 'Your E-Book' },
+    { key: 'activePlan', label: 'Active Plan' },
 ];
 
 const Profile = () => {
@@ -321,8 +324,9 @@ const Profile = () => {
                         )}
 
                         {activeTab === 'payment' && <PaymentInfo />}
+                        {activeTab === 'activePlan' && <ActivePlan />}
 
-                        {activeTab !== 'info' && activeTab !== 'password' && activeTab !== 'payment' && (
+                        {activeTab !== 'info' && activeTab !== 'password' && activeTab !== 'payment' && activeTab !=='activePlan' && (
                             <div className="text-[#ccc] text-lg pt-8">
                                 This section will be available soon.
                             </div>
