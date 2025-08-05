@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import bannerImg from '@/assets/bg/profileBg.png';
 import { motion, useInView } from 'framer-motion';
 import { authFetch } from '@/utils/authFetch';
-
+import PaymentInfo from '@/components/PaymentInfo';
 
 const titleVariants = {
     hidden: { opacity: 0, y: 40, scale: 0.97 },
@@ -50,26 +50,26 @@ const Profile = () => {
     // Fetch user info
     useEffect(() => {
         const fetchInfo = async () => {
-          try {
-            const data = await authFetch(
-              `${import.meta.env.VITE_API_URL}/api/auth/user/${id}`,
-              {},
-              navigate
-            );
-            if (data) {
-              setInfo({
-                firstName: data.user.firstName,
-                lastName: data.user.lastName,
-                email: data.user.email,
-              });
+            try {
+                const data = await authFetch(
+                    `${import.meta.env.VITE_API_URL}/api/auth/user/${id}`,
+                    {},
+                    navigate
+                );
+                if (data) {
+                    setInfo({
+                        firstName: data.user.firstName,
+                        lastName: data.user.lastName,
+                        email: data.user.email,
+                    });
+                }
+            } catch (err) {
+                setInfoError(err.message);
             }
-          } catch (err) {
-            setInfoError(err.message);
-          }
-          setInfoLoading(false);
+            setInfoLoading(false);
         };
         fetchInfo();
-      }, [id]);
+    }, [id]);
 
     // Profile info form
     const handleInfoChange = (e) => {
@@ -320,11 +320,14 @@ const Profile = () => {
                             </>
                         )}
 
-                        {activeTab !== 'info' && activeTab !== 'password' && (
+                        {activeTab === 'payment' && <PaymentInfo />}
+
+                        {activeTab !== 'info' && activeTab !== 'password' && activeTab !== 'payment' && (
                             <div className="text-[#ccc] text-lg pt-8">
                                 This section will be available soon.
                             </div>
                         )}
+
                     </div>
                 </div>
             </section>

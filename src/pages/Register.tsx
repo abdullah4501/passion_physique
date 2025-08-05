@@ -35,11 +35,26 @@ const Register = () => {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-
+  const passwordIsValid = (password) => {
+    return /^(?=.*\d)(?=.*[-_.+=!@#$%^&*()\/?><.,'])[A-Za-z\d\-_.+=!@#$%^&*()\/?><.,']{8,}$/.test(password);
+  };
+  
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+      // --- Password validation here ---
+  if (!passwordIsValid(form.password)) {
+    setError("Password must be at least 8 characters long, contain at least one number and one special character.");
+    setLoading(false);
+    return;
+  }
+  if (form.password !== form.confirmPassword) {
+    setError("Passwords do not match.");
+    setLoading(false);
+    return;
+  }
+  
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/pre-register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

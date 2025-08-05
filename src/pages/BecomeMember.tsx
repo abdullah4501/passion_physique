@@ -12,8 +12,8 @@ import PaymentSuccessModal from "@/components/PaymentSuccessModal"; // adjust th
 
 
 const paymentOptions = [
-    { key: "uae", label: "UAE Bank Transfer (SEPA)" },
-    { key: "payoneer", label: "Payoneer" },
+    // { key: "uae", label: "UAE Bank Transfer (SEPA)" },
+    // { key: "payoneer", label: "Payoneer" },
     { key: "stripe", label: "Stripe" },
 ];
 
@@ -46,7 +46,7 @@ const BecomeMember = () => {
         cardNumber: "",
         expDate: "",
         cvv: "",
-        paymentMethod: "uae",
+        paymentMethod: "stripe",
         saveInfo: false,
         agreed: false,
     });
@@ -169,7 +169,7 @@ useEffect(() => {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        amount: Math.round(Number(plan.price) * 100),
+                        amount: Math.round(Number(plan.amount) * 100),
                         currency: "eur",
                         planId: plan.priceId,
                         saveCard: form.saveInfo, // <-- Pass this
@@ -603,7 +603,7 @@ useEffect(() => {
                                             Processing...
                                         </span>
                                     ) : (
-                                        plan ? `Pay €${plan.price}` : "Pay"
+                                        plan ? `Pay €${plan.amount}` : "Pay"
                                     )}
                                 </Button>
 
