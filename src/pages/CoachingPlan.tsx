@@ -51,6 +51,7 @@ const CoachingPlan = () => {
     const navigate = useNavigate();
 
     const [plans, setPlans] = useState([]);
+    const [activePlan, setActivePlan] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -83,6 +84,23 @@ const CoachingPlan = () => {
             tbodyControls.start("hidden");
         }
     }, [tableInView, headingControls, tbodyControls]);
+
+    useEffect(() => {
+        // Only run if user is logged in!
+        const fetchActivePlan = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) return; // skip if not logged in
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/active`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await res.json();
+            // You may need to adapt the property name below:
+            setActivePlan(data.plan); // or setActivePlan(data.activePlan)
+        };
+        fetchActivePlan();
+
+    }, []);
+
 
     return (
         <>
@@ -164,10 +182,17 @@ const CoachingPlan = () => {
                                     </div>
                                     <div className="flex items-center justify-between md:flex-row flex-col">
                                         <p className="text-primary text-[14px] font-medium">{plan.note}</p>
-                                        <Link to={`/plans/become-a-member/payment/${plan.priceId}`} className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none md:w-auto w-full md:mt-0 mt-4">
-                                         JOIN NOW
-                                        </Link>
+                                        {
+                                            plan.priceId === (activePlan?.priceId || activePlan?.plan)
+                                                ? <span className="text-green-500 font-bold">ACTIVE</span>
+                                                : <Link
+                                                    to={`/plans/become-a-member/payment/${plan.priceId}`}
+                                                    className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none md:w-auto w-full md:mt-0 mt-4"
+                                                >{activePlan ? "UPGRADE" : "JOIN NOW"}</Link>
+                                        }
+
                                     </div>
+
                                 </motion.div>
                             ))
                         )}

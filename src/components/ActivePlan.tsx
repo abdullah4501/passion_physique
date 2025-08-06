@@ -40,6 +40,23 @@ const ActivePlan = () => {
     // Format the dates
     const startDate = new Date(plan.startDate).toLocaleDateString();
     const endDate = new Date(plan.endDate).toLocaleDateString();
+    // If renewalDate is not valid, calculate it from startDate + interval
+    const getRenewalDate = (plan) => {
+        if (plan.renewalDate) return new Date(plan.renewalDate).toLocaleDateString();
+        if (plan.startDate && plan.interval) {
+            const d = new Date(plan.startDate);
+            if (plan.interval === "month") d.setMonth(d.getMonth() + 1);
+            if (plan.interval === "year") d.setFullYear(d.getFullYear() + 1);
+            // Add other intervals if needed
+            return d.toLocaleDateString();
+        }
+        return "N/A";
+    };
+
+    const renewalDate = getRenewalDate(plan);
+    const period = plan.interval ? (plan.interval.charAt(0).toUpperCase() + plan.interval.slice(1)) : "N/A";
+
+
 
     return (
         <div className="bg-[#2E2E2E] px-7 py-9 rounded-[2px]">
@@ -57,12 +74,13 @@ const ActivePlan = () => {
                 </div>
                 <div className="flex justify-between">
                     <span className="text-[#ccc]">Renewal Date:</span>
-                    <span className="text-white">{endDate}</span>
+                    <span className="text-white">{renewalDate}</span>
                 </div>
                 <div className="flex justify-between">
                     <span className="text-[#ccc]">Period:</span>
-                    <span className="text-white">{plan.period}</span>
+                    <span className="text-white">Per {period}</span>
                 </div>
+
                 {plan.note && (
                     <div className="flex justify-between">
                         <span className="text-[#ccc]">Note:</span>
@@ -76,7 +94,7 @@ const ActivePlan = () => {
             </div>
             <button
                 className="mt-10 w-full h-[45px] bg-[#ff3c33] hover:bg-[#e03228] text-white font-[600] text-[16px] transition-all duration-150 rounded-none"
-                onClick={() => navigate("/coaching-plans")}
+                onClick={() => navigate("/plans")}
             >
                 Upgrade Plan
             </button>

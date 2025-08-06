@@ -2,7 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import bannerImg from '@/assets/bg/workoutBg.png';
 import playicon from '@/assets/workout/play-circle.png';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
@@ -70,7 +70,7 @@ const WorkoutLibrary = () => {
       setUserLoading(false);
       return;
     }
-  
+
     fetch(`${import.meta.env.VITE_API_URL}/api/members/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -219,9 +219,18 @@ const WorkoutLibrary = () => {
                         {video.forMembersOnly ? 'FOR MEMBERS ONLY' : 'PUBLIC'}
                       </span>
                     </div>
-                    <h3 className="text-white text-[20px] font-normal leading-[30px] mb-3">
+                    <h3 className="text-white text-[20px] font-normal leading-[30px] mb-3 flex items-center gap-2">
                       {video.title}
+                      {video.category?.name && (
+                        <Badge
+                          className="ml-2"
+                          variant="default" // or "destructive" if you want red (see below)
+                        >
+                          {video.category.name}
+                        </Badge>
+                      )}
                     </h3>
+
                     <p className="text-white text-[15px] leading-[25px] font-normal">
                       {video.description}
                     </p>
@@ -229,11 +238,11 @@ const WorkoutLibrary = () => {
                 );
               })}
           </div>
-          {!isMember &&(
+          {!isMember && (
             <div className="text-left">
-                <Link to={'/plans'} className="hero-button px-[45px] uppercase">
+              <Link to={'/plans'} className="hero-button px-[45px] uppercase">
                 Check our Plans
-                </Link>
+              </Link>
             </div>
           )}
         </div>
