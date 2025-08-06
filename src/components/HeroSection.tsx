@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, EffectFade, Pagination } from 'swiper/modules';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
 import 'swiper/css/pagination';
@@ -9,6 +10,7 @@ import 'swiper/css/pagination';
 import heroImage2 from '@/assets/hero-bg2.png';
 import heroImage from '@/assets/hero-bg.png';
 import heroImage3 from '@/assets/hero-bg.png';
+import { Link } from 'react-router-dom';
 
 const slides = [
   {
@@ -65,6 +67,7 @@ import React, { useState } from 'react';
 
 const HeroSection = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const navigate = useNavigate();
 
   return (
     <section className="relative min-h-screen overflow-hidden">
@@ -120,7 +123,7 @@ const HeroSection = () => {
                         animate={{ opacity: 1, scale: 1, transition: { delay: 0.32, duration: 0.45, ease: [0.42, 0, 0.2, 1] } }}
                         exit={{ opacity: 0, scale: 0.92 }}
                       >
-                        <Button className="hero-button hover:animate-glow px-[25px] transition-all duration-300 hover:scale-105">
+                        <Button className="hero-button hover:animate-glow px-[25px] transition-all duration-300 hover:scale-105" onClick={() => navigate('/plans')}>
                           {slide.buttonText}
                         </Button>
                       </motion.div>

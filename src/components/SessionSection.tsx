@@ -4,7 +4,7 @@ import image2 from "@/assets/session/image2.png";
 import symbol from "@/assets/icons/symbol.png";
 import { motion, useAnimation, useInView } from 'framer-motion';
 import { useRef, useEffect } from 'react';
-
+import { Link } from 'react-router-dom';
 const sessionFeatures = [
   "Nutrition",
   "Program analysis",
@@ -103,9 +103,9 @@ export default function SessionSection() {
               ))}
             </div>
             <div className='flex'>
-              <Button className="hero-button px-[45px]">
+              <Link to={'/session'} className="hero-button px-[45px]">
                 READ MORE
-              </Button>
+              </Link>
             </div>
           </motion.div>
           {/* Image Block */}
@@ -180,9 +180,9 @@ export default function SessionSection() {
               ))}
             </div>
             <div className='flex'>
-              <Button className="hero-button px-[45px]">
+              <Link to={'/supplement-guidance'} className="hero-button px-[45px]">
                 READ MORE
-              </Button>
+              </Link>
             </div>
           </motion.div>
         </div>

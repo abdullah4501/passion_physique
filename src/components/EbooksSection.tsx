@@ -6,6 +6,7 @@ import ebookCover3 from '@/assets/ebooks/ebook-1.png';
 import ebookCover4 from '@/assets/ebooks/ebook-1.png';
 import { motion, useAnimation, useInView } from 'framer-motion';
 import { useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const ebooks = [
   {
@@ -127,9 +128,9 @@ export default function EbooksSection() {
         </motion.div>
         {/* Read More Button */}
         <div className="text-center mt-[55px]">
-          <Button className="hero-button">
-            READ MORE
-          </Button>
+            <Link to={'/e-books'} className="hero-button px-[45px]">
+              READ MORE
+            </Link>
         </div>
       </div>
     </motion.section>

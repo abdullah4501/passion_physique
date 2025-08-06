@@ -10,7 +10,7 @@ const navItems = [
   { label: 'About Us', href: '/about-us' },
   { label: 'Plans', href: '/plans' },
   { label: 'Books', href: '/e-books' },
-  { label: '1-on-1 Session', href: '/sessions' },
+  { label: '1-on-1 Session', href: '/session' },
   { label: 'Supplement Guidance', href: '/supplement-guidance' },
   { label: 'Library', href: '/workout-library' },
   { label: 'FAQs', href: '/faqs' },
