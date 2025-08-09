@@ -36,7 +36,7 @@ const BecomeMember = () => {
     const [savedCards, setSavedCards] = useState([]);
     const [defaultCardId, setDefaultCardId] = useState('');
     const [useSavedCard, setUseSavedCard] = useState(true); // Show saved card by default if any
-
+    const defaultCard = savedCards.find(card => card.id === defaultCardId) || savedCards[0];
 
 
     // Form state (You can auto-fill user info here)
@@ -55,22 +55,27 @@ const BecomeMember = () => {
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) return;
+
+        // Fetch saved cards
         fetch(`${import.meta.env.VITE_API_URL}/api/payments/saved-cards`, {
             headers: { "Authorization": `Bearer ${token}` }
         })
             .then(res => res.json())
             .then(data => {
                 setSavedCards(data.cards || []);
-                if (data.cards && data.cards.length > 0) {
-                    console.log("Saved cards:", data.cards);
-                } else {
-                    console.log("No saved cards found for this user.");
-                }
-            })
-            .catch(err => {
-                console.log("Error fetching saved cards:", err);
+            });
+
+        // Fetch default card
+        fetch(`${import.meta.env.VITE_API_URL}/api/payments/default-card`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                setDefaultCardId(data.defaultCardId || "");
             });
     }, []);
+
+
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -142,23 +147,49 @@ const BecomeMember = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const user = JSON.parse(localStorage.getItem('user'));
         setStripeError("");
+        setProcessing(true);
+
+        // Agreement check
         if (!form.agreed) {
             alert("Please agree to the Privacy & Terms.");
+            setProcessing(false);
             return;
         }
 
-        if (form.paymentMethod === "stripe") {
-            if (!stripe || !elements) {
-                setStripeError("Stripe is not loaded");
-                return;
-            }
-            setProcessing(true);
+        // Stripe.js loaded check
+        if (!stripe || !elements) {
+            setStripeError("Stripe is not loaded");
+            setProcessing(false);
+            return;
+        }
 
-            try {
-                // 1. Create Payment Method
+        // Auth/user checks
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('token');
+        if (!user || !token) {
+            setStripeError("Please login again.");
+            setProcessing(false);
+            return;
+        }
+
+        let paymentMethodId = null; // What we will send to the backend
+
+        try {
+            // ---- 1. Get the payment method ----
+
+            if (form.paymentMethod === "stripe" && savedCards.length > 0 && useSavedCard) {
+                // Use saved card's paymentMethodId from backend (NO need to createPaymentMethod or use CardNumberElement)
+                const defaultCard = savedCards.find(card => card.id === defaultCardId) || savedCards[0];
+                paymentMethodId = defaultCard.id;
+            } else {
+                // Create payment method from card input
                 const cardElement = elements.getElement(CardNumberElement);
+                if (!cardElement) {
+                    setStripeError("Card input not found");
+                    setProcessing(false);
+                    return;
+                }
                 const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
                     type: "card",
                     card: cardElement,
@@ -168,70 +199,83 @@ const BecomeMember = () => {
                     },
                 });
                 if (pmError) throw pmError;
-
-                // 2. Create subscription in backend
-                const token = localStorage.getItem("token");
-                const subRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-subscription`, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        priceId: plan.priceId,
-                        paymentMethodId: paymentMethod.id,
-                    }),
-                });
-                const data = await subRes.json();
-                console.log("Create subscription response:", data);
-
-                if (!subRes.ok) {
-                    throw new Error(data.error || "Could not start subscription");
-                }
-
-                // Defensive: Check for latest_invoice and payment_intent
-                const invoice = data.subscription.latest_invoice;
-                const paymentIntent = invoice ? invoice.payment_intent : null;
-                const clientSecret = paymentIntent ? paymentIntent.client_secret : null;
-
-                if (clientSecret) {
-                    // Payment required, confirm payment
-                    const { paymentIntent: confirmedPI, error } = await stripe.confirmCardPayment(clientSecret);
-
-                    if (error) {
-                        setStripeError(error.message);
-                        setProcessing(false);
-                        console.error("Stripe payment error:", error);
-                        return;
-                    }
-
-                    if (confirmedPI.status === "succeeded") {
-                        // Payment succeeded, create member
-                        await saveMember(plan, confirmedPI.id, "paid"); // <--- "paid" is valid!
-                        setSuccessModalOpen(true);
-                    } else {
-                        setStripeError("Payment not completed.");
-                        console.error("Payment not completed. Status:", confirmedPI.status);
-                    }
-                } else {
-                    // No payment required (could be free trial, etc.), still use "paid" for now!
-                    await saveMember(plan, data.subscription.id, "paid"); // <--- "paid" (not "active")
-                    setSuccessModalOpen(true);
-                }
-            } catch (err) {
-                setStripeError(err.message || "Failed to start subscription");
-                console.error("Subscription/payment error:", err);
+                paymentMethodId = paymentMethod.id;
             }
 
-            setProcessing(false);
-        } else {
-            // Other payment methods here (if you add more)
-            return;
+            // ---- 2. Call backend to create Stripe Subscription ----
+
+            const subRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-subscription`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    priceId: plan.priceId,
+                    paymentMethodId, // pass paymentMethodId (from new or saved card)
+                    saveCard: form.saveInfo,
+                }),
+            });
+            const data = await subRes.json();
+            if (!subRes.ok) throw new Error(data.error || "Could not start subscription");
+
+            // Defensive: Check for latest_invoice and payment_intent
+            const invoice = data.subscription?.latest_invoice;
+            const paymentIntent = invoice?.payment_intent;
+            const clientSecret = paymentIntent?.client_secret;
+            let transactionId = data.subscription.id;
+
+            // ---- 3. Confirm payment if needed ----
+            if (clientSecret) {
+                let confirmResult;
+                if (form.paymentMethod === "stripe" && savedCards.length > 0 && useSavedCard) {
+                    // Using a saved card → only pass payment_method
+                    confirmResult = await stripe.confirmCardPayment(clientSecret, {
+                        payment_method: paymentMethodId
+                    });
+                } else {
+                    // New card → pass card element and billing details
+                    const cardElement = elements.getElement(CardNumberElement);
+                    confirmResult = await stripe.confirmCardPayment(clientSecret, {
+                        payment_method: {
+                            card: cardElement,
+                            billing_details: {
+                                name: `${form.firstName} ${form.lastName}`,
+                                email: form.email,
+                            }
+                        }
+                    });
+                }
+
+                const { paymentIntent: confirmedPI, error } = confirmResult;
+                if (error) {
+                    setStripeError(error.message);
+                    setProcessing(false);
+                    return;
+                }
+
+                if (confirmedPI.status === "succeeded") {
+                    // Success, create member in DB
+                    await saveMember(plan, confirmedPI.id, "paid");
+                    setSuccessModalOpen(true);
+                } else {
+                    setStripeError("Payment not completed.");
+                }
+            } else {
+                // No payment required (e.g. trial) — create member right away
+                await saveMember(plan, data.subscription.id, "paid");
+                setSuccessModalOpen(true);
+            }
+
+        } catch (err) {
+            setStripeError(err.message || "Failed to start subscription");
+            console.error("Stripe error:", err);
         }
 
-        // Helper function for creating member in DB
+        setProcessing(false);
+
+        // --- Helper: Save member in backend ---
         async function saveMember(plan, transactionId, paymentStatus) {
-            const token = localStorage.getItem("token");
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/members`, {
                 method: "POST",
                 headers: {
@@ -248,13 +292,33 @@ const BecomeMember = () => {
                 })
             });
             const data = await res.json();
-            console.log("Save member response:", data);
             if (!res.ok) {
                 setStripeError(data.error || "Failed to save member. Please contact support.");
                 throw new Error(data.error || "Failed to save member");
             }
+            // Save to purchases endpoint
+            const purchaseRes = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    user: user.id,
+                    itemType: "coaching plan",
+                    itemName: plan.name,
+                    amount: plan.amount,
+                    stripePaymentId: transactionId,
+                })
+            });
+            const purchaseData = await purchaseRes.json();
+            if (!purchaseRes.ok) {
+                setStripeError(purchaseData.error || "Failed to save purchase. Please contact support.");
+                throw new Error(purchaseData.error || "Failed to save purchase");
+            }
         }
     };
+
 
     return (
         <>
@@ -372,11 +436,11 @@ const BecomeMember = () => {
                                     // SHOW SAVED CARD
                                     <div className="flex items-center justify-between mb-4">
                                         <span className="text-white text-lg">
-                                            {savedCards[0].brand.charAt(0).toUpperCase() + savedCards[0].brand.slice(1)}
+                                            {defaultCard?.brand?.charAt(0).toUpperCase() + defaultCard?.brand?.slice(1)}
                                             {" xxxx xxxx xxxx "}
-                                            {savedCards[0].last4}
+                                            {defaultCard?.last4}
                                             {" end at "}
-                                            {String(savedCards[0].exp_month).padStart(2, "0")}/{String(savedCards[0].exp_year).slice(-2)}
+                                            {String(defaultCard?.exp_month).padStart(2, "0")}/{String(defaultCard?.exp_year).slice(-2)}
                                         </span>
                                         <Button
                                             type="button"

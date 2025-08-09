@@ -5,7 +5,8 @@ import symbol from "@/assets/icons/symbol.png";
 import Footer from '@/components/Footer';
 import bg from "@/assets/bg/Plans.png";
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const sessionFeatures = [
     "Training strategy & program analysis",
@@ -37,6 +38,20 @@ const featureItemVariants = {
 };
 
 const Sessions = () => {
+    const [session, setSession] = useState(null);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        fetch(`${import.meta.env.VITE_API_URL}/api/sessions`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.sessions && data.sessions.length > 0) {
+                  setSession(data.sessions[0]);
+                }
+                setLoading(false);
+              })
+              
+            .catch(() => setLoading(false));
+    }, []);
     // Animation refs
     const heroRef = useRef(null);
     const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
@@ -105,55 +120,62 @@ const Sessions = () => {
                     Whether you continue with a coaching plan or not, this session will always leave you more informed, more structured, and more focused. <b>(through WhatsApp)</b>
                 </motion.p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
-                    {/* Duration */}
-                    <motion.div
-                        className="bg-[#2e2e2e] flex flex-col items-center justify-center min-h-[250px] px-6 py-12"
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate={cardsInView ? "visible" : "hidden"}
-                        transition={{ duration: 0.55, delay: 0 * 0.12, ease: [0.42, 0, 0.2, 1] }}
-                    >
-                        <span className="text-primary text-[14px] font-[700] tracking-[1px] leading-[25px] uppercase mb-1">Duration</span>
-                        <span className="text-white text-[20px] leading-[30px] font-[400] mt-1">60 minutes</span>
-                    </motion.div>
-                    {/* Book Now */}
-                    <motion.div
-                        className="bg-[#ff3131] flex flex-col items-center justify-center min-h-[250px] px-6 py-12"
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate={cardsInView ? "visible" : "hidden"}
-                        transition={{ duration: 0.6, delay: 1 * 0.12, ease: [0.42, 0, 0.2, 1] }}
-                        whileHover={{ scale: 1.03, boxShadow: "0 4px 24px 0 rgba(237,49,49,0.18)" }}
-                    >
-                        <span className="text-white text-[14px] font-[700] tracking-[1px] leading-[25px] uppercase mb-1">Book Now</span>
-                        <button
-                            className="
-                                border border-white 
-                                text-white mt-3
-                                text-[12px] font-[700] leading-[12px] uppercase 
-                                px-[35px] py-[15px]
-                                transition-all duration-200
-                                hover:bg-white hover:text-[#FF3535]
-                            "
-                            style={{
-                                letterSpacing: '1px',
-                                outline: 'none'
-                            }}
-                        >
-                            BOOK NOW
-                        </button>
-                    </motion.div>
-                    {/* Price */}
-                    <motion.div
-                        className="bg-[#2e2e2e] flex flex-col items-center justify-center min-h-[250px] px-6 py-12"
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate={cardsInView ? "visible" : "hidden"}
-                        transition={{ duration: 0.55, delay: 2 * 0.12, ease: [0.42, 0, 0.2, 1] }}
-                    >
-                        <span className="text-primary text-[14px] font-[700] tracking-[1px] leading-[25px] uppercase mb-1">Price</span>
-                        <span className="text-white text-[20px] leading-[30px] font-[400] mt-1">€300</span>
-                    </motion.div>
+                    {loading ? (
+                        <div className="text-white col-span-3 text-center">Loading session info...</div>
+                    ) : session && (
+                        <>
+                            {/* Duration */}
+                            <motion.div
+                                className="bg-[#2e2e2e] flex flex-col items-center justify-center min-h-[250px] px-6 py-12"
+                                variants={cardVariants}
+                                initial="hidden"
+                                animate={cardsInView ? "visible" : "hidden"}
+                                transition={{ duration: 0.55, delay: 0 * 0.12, ease: [0.42, 0, 0.2, 1] }}
+                            >
+                                <span className="text-primary text-[14px] font-[700] tracking-[1px] leading-[25px] uppercase mb-1">Duration</span>
+                                <span className="text-white text-[20px] leading-[30px] font-[400] mt-1">{session.duration} minutes</span>
+                            </motion.div>
+                            {/* Book Now */}
+                            <motion.div
+                                className="bg-[#ff3131] flex flex-col items-center justify-center min-h-[250px] px-6 py-12"
+                                variants={cardVariants}
+                                initial="hidden"
+                                animate={cardsInView ? "visible" : "hidden"}
+                                transition={{ duration: 0.6, delay: 1 * 0.12, ease: [0.42, 0, 0.2, 1] }}
+                                whileHover={{ scale: 1.03, boxShadow: "0 4px 24px 0 rgba(237,49,49,0.18)" }}
+                            >
+                                <span className="text-white text-[14px] font-[700] tracking-[1px] leading-[25px] uppercase mb-1">Book Now</span>
+                                <Link to={`/session/payment/${session._id}`}
+                                    className="
+                                        border border-white 
+                                        text-white mt-3
+                                        text-[12px] font-[700] leading-[12px] uppercase 
+                                        px-[35px] py-[15px]
+                                        transition-all duration-200
+                                        hover:bg-white hover:text-[#FF3535]
+                                        "
+                                    style={{
+                                        letterSpacing: '1px',
+                                        outline: 'none'
+                                    }}
+                                >
+                                    BOOK NOW
+                                </Link>
+                            </motion.div>
+                            {/* Price */}
+                            <motion.div
+                                className="bg-[#2e2e2e] flex flex-col items-center justify-center min-h-[250px] px-6 py-12"
+                                variants={cardVariants}
+                                initial="hidden"
+                                animate={cardsInView ? "visible" : "hidden"}
+                                transition={{ duration: 0.55, delay: 2 * 0.12, ease: [0.42, 0, 0.2, 1] }}
+                            >
+                                <span className="text-primary text-[14px] font-[700] tracking-[1px] leading-[25px] uppercase mb-1">Price</span>
+                                <span className="text-white text-[20px] leading-[30px] font-[400] mt-1">€{session.amount}</span>
+                            </motion.div>
+                        </>
+                    )}
+
                 </div>
             </motion.div>
         </section>

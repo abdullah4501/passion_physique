@@ -121,79 +121,85 @@ const WorkoutLibrarySection = () => {
           </div>
         </SectionWrapper>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" ref={cardsRef}>
-            {!loading &&
-              workoutVideos.map((video, index) => {
-                const isLocked = video.forMembersOnly && !isMember;
-                return (
-                  <motion.div
-                    key={video._id}
-                    className={`group mb-20 cursor-pointer relative`}
-                    variants={cardVariants}
-                    initial="hidden"
-                    animate={cardsInView ? 'visible' : 'hidden'}
-                    transition={{
-                      duration: 0.65,
-                      ease: [0.42, 0, 0.2, 1],
-                      delay: index * 0.13,
-                    }}
-                    whileHover={
-                      !isLocked
-                        ? { scale: 1.04, boxShadow: '0 8px 38px 0 rgba(237,35,42,0.13)' }
-                        : {}
-                    }
-                    onClick={() => !isLocked && handlePlay(video)}
-                    style={{ pointerEvents: isLocked ? 'none' : 'auto' }}
-                  >
-                    <div className="relative mb-6">
-                      <div className="relative group">
-                        <video
-                          src={`${import.meta.env.VITE_API_URL}${video.videoUrl}`}
-                          className={`object-cover w-full max-h-[270px] ${isLocked ? 'blur-[8px]' : ''}`}
-                          poster=""
-                          style={{ pointerEvents: 'none' }}
-                        />
-                        {isLocked && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <img src={playicon} className="w-[60px] h-[60px] opacity-60 mb-3" />
-                          </div>
-                        )}
-                        {!isLocked && (
-                          <div className="absolute inset-0 flex items-center justify-center transition-colors">
-                            <img src={playicon} className="w-[60px] h-[60px]" />
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 left-0">
-                          <span className="bg-primary px-[45px] py-1 text-[12px] tracking-[1.2px] font-medium text-white">
-                            LEVEL {video.level}
-                          </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" ref={cardsRef}>
+          {!loading &&
+            workoutVideos.map((video, index) => {
+              const isLocked = video.forMembersOnly && !isMember;
+              return (
+                <motion.div
+                  key={video._id}
+                  className={`group mb-20 cursor-pointer relative`}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate={cardsInView ? 'visible' : 'hidden'}
+                  transition={{
+                    duration: 0.65,
+                    ease: [0.42, 0, 0.2, 1],
+                    delay: index * 0.13,
+                  }}
+                  whileHover={
+                    !isLocked
+                      ? { scale: 1.04, boxShadow: '0 8px 38px 0 rgba(237,35,42,0.13)' }
+                      : {}
+                  }
+                  onClick={() => !isLocked && handlePlay(video)}
+                  style={{ pointerEvents: isLocked ? 'none' : 'auto' }}
+                >
+                  <div className="relative mb-6">
+                    <div className="relative group">
+                      <video
+                        src={`${import.meta.env.VITE_API_URL}${video.videoUrl}`}
+                        className={`object-cover w-full max-h-[270px] ${isLocked ? 'blur-[8px]' : ''}`}
+                        poster=""
+                        style={{ pointerEvents: 'none' }}
+                      />
+                      {isLocked && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <img src={playicon} className="w-[60px] h-[60px] opacity-60 mb-3" />
                         </div>
+                      )}
+                      {!isLocked && (
+                        <div className="absolute inset-0 flex items-center justify-center transition-colors">
+                          <img src={playicon} className="w-[60px] h-[60px]" />
+                        </div>
+                      )}
+                      <div className="absolute bottom-0 left-0">
+                        <span className="bg-primary px-[45px] py-1 text-[12px] tracking-[1.2px] font-medium text-white">
+                          LEVEL {video.level}
+                        </span>
                       </div>
                     </div>
-                    <div className="mb-2">
-                      <span className="text-primary text-[14px] font-semibold">
-                        {video.forMembersOnly ? 'FOR MEMBERS ONLY' : 'PUBLIC'}
-                      </span>
-                    </div>
-                    <h3 className="text-white text-[20px] font-normal leading-[30px] mb-3 flex items-center gap-2">
-                      {video.title}
-                      {video.category?.name && (
-                        <Badge
-                          className="ml-2"
-                          variant="default" // or "destructive" if you want red (see below)
-                        >
-                          {video.category.name}
-                        </Badge>
-                      )}
-                    </h3>
+                  </div>
+                  <div className="mb-2">
+                    <span className="text-primary text-[14px] font-semibold">
+                      {video.forMembersOnly ? 'FOR MEMBERS ONLY' : 'PUBLIC'}
+                    </span>
+                  </div>
+                  <h3 className="text-white text-[20px] font-normal leading-[30px] mb-3 flex items-center gap-2">
+                    {video.title}
+                    {video.category?.name && (
+                      <Badge
+                        className="ml-2"
+                        variant="default" // or "destructive" if you want red (see below)
+                      >
+                        {video.category.name}
+                      </Badge>
+                    )}
+                  </h3>
 
-                    <p className="text-white text-[15px] leading-[25px] font-normal">
-                      {video.description}
-                    </p>
-                  </motion.div>
-                );
-              })}
-          </div>
+                  <p className="text-white text-[15px] leading-[25px] font-normal">
+                    {video.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+        </div>
+        <VideoModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          videoUrl={activeVideo ? `${import.meta.env.VITE_API_URL}${activeVideo.videoUrl}` : ''}
+          title={activeVideo?.title || ''}
+        />
 
         <SectionWrapper>
           <div className="text-center">

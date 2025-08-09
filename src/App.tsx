@@ -64,7 +64,8 @@ const App = () => (
             <Route path="login" element={<Login />} />
             <Route path="profile/:id" element={<Profile />} />
             <Route path="plans/become-a-member/payment/:planId" element={<BecomeMember />} />
-            <Route path="session/payment" element={<CheckoutSession />} />
+            <Route path="session/payment/:productId" element={<CheckoutSession />} />
+            <Route path="supplement-guidance/payment/:producttId" element={<CheckoutSession />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
