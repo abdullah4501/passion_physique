@@ -7,8 +7,84 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 
-const VideoModal = ({ open, onClose, videoUrl, title }) => {
-  if (!open) return null;
+const VideoModal = ({ open, onClose, videoId, title }) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoSrc, setVideoSrc] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch signed URL
+  useEffect(() => {
+    if (!open || !videoId) {
+      setVideoSrc('');
+      setError(null);
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Please log in to view this video');
+      return;
+    }
+    fetch(`${import.meta.env.VITE_API_URL}/api/workout-library/signed-url/${videoId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setVideoSrc(data.signedUrl);
+        setError(null);
+      })
+      .catch((error) => {
+        console.error('Error fetching signed URL:', error.message);
+        setError('Failed to load video. Please try again.');
+      });
+  }, [open, videoId]);
+
+  // Video event listeners
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) {
+      return;
+    }
+
+    const handleLoadStart = () => console.log('Video load started:', videoSrc);
+    const handleLoadedData = () => console.log('Video data loaded successfully');
+    const handleError = (e: Event) => {
+      const error = (e.target as HTMLVideoElement).error;
+      console.error('Video error:', error?.message || 'Unknown error', 'Code:', error?.code);
+      setError('Failed to play video. Please try again.');
+    };
+    const handleCanPlay = () => console.log('Video can play');
+    const handleStalled = () => console.log('Video stalled');
+    const handleAbort = () => console.log('Video load aborted');
+
+    video.addEventListener('loadstart', handleLoadStart);
+    video.addEventListener('loadeddata', handleLoadedData);
+    video.addEventListener('error', handleError);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('stalled', handleStalled);
+    video.addEventListener('abort', handleAbort);
+
+    return () => {
+      console.log('Cleaning up video event listeners');
+      video.removeEventListener('loadstart', handleLoadStart);
+      video.removeEventListener('loadeddata', handleLoadedData);
+      video.removeEventListener('error', handleError);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('stalled', handleStalled);
+      video.removeEventListener('abort', handleAbort);
+    };
+  }, [videoSrc]);
+
+  if (!open) {
+    console.log('VideoModal not rendered: open=false');
+    return null;
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
       <div className="bg-[#181818] rounded-lg p-5 shadow-xl max-w-2xl w-full relative">
@@ -19,8 +95,12 @@ const VideoModal = ({ open, onClose, videoUrl, title }) => {
           ×
         </button>
         <h3 className="text-white text-lg mb-3">{title}</h3>
+        {error && (
+          <div className="text-red-500 mb-3">{error}</div>
+        )}
         <video
-          src={videoUrl}
+          ref={videoRef}
+          src={videoSrc}
           controls
           autoPlay
           className="w-full"
@@ -71,17 +151,19 @@ const WorkoutLibrary = () => {
       return;
     }
 
+    console.log('Fetching membership status');
     fetch(`${import.meta.env.VITE_API_URL}/api/members/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
+        console.log('Membership response status:', res.status);
         if (!res.ok) {
           throw new Error(`HTTP error! Status: ${res.status}`);
         }
         return res.json();
       })
       .then((data) => {
-        console.log('Membership status:', data.isMember); // Log true/false
+        console.log('Membership status:', data.isMember);
         setIsMember(data.isMember);
         setUserLoading(false);
       })
@@ -94,9 +176,17 @@ const WorkoutLibrary = () => {
 
   // Fetch workout videos
   useEffect(() => {
+    console.log('Fetching workout videos');
     fetch(`${import.meta.env.VITE_API_URL}/api/workout-library`)
-      .then((res) => res.json())
+      .then((res) => {
+        console.log('Workout videos response status:', res.status);
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
+        console.log('Workout videos fetched:', data.videos.length);
         setWorkoutVideos(data.videos);
         setLoading(false);
       })
@@ -106,7 +196,8 @@ const WorkoutLibrary = () => {
       });
   }, []);
 
-  const handlePlay = (video) => {
+  const handlePlay = (video: any) => {
+    console.log('Attempting to play video:', video.title, 'ID:', video._id);
     setActiveVideo(video);
     setModalOpen(true);
   };
@@ -151,7 +242,7 @@ const WorkoutLibrary = () => {
         <div className="mx-auto">
           <p className="uppercase text-white text-center text-[16px] font-bold">
             The WORKOUT LIBRARY IS AVAILABLE ONLY FOR MEMBERS OF The Passion
-            Physique, Please JOIN OR LOGIN to access all books
+            Physique, Please JOIN OR LOGIN to access all videos
           </p>
         </div>
       </section>
@@ -167,7 +258,7 @@ const WorkoutLibrary = () => {
           {loading && <div className="text-white">Loading videos...</div>}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" ref={cardsRef}>
             {!loading &&
-              workoutVideos.map((video, index) => {
+              workoutVideos.map((video: any, index: number) => {
                 const isLocked = video.forMembersOnly && !isMember;
                 return (
                   <motion.div
@@ -191,10 +282,14 @@ const WorkoutLibrary = () => {
                   >
                     <div className="relative mb-6">
                       <div className="relative group">
-                        <video
-                          src={`${import.meta.env.VITE_API_URL}${video.videoUrl}`}
+                        <img
+                          src={
+                            video.thumbnailUrl
+                              ? `${import.meta.env.VITE_API_URL}${video.thumbnailUrl}`
+                              : ''
+                          }
+                          alt={video.title}
                           className={`object-cover w-full max-h-[270px] ${isLocked ? 'blur-[8px]' : ''}`}
-                          poster=""
                           style={{ pointerEvents: 'none' }}
                         />
                         {isLocked && (
@@ -222,15 +317,11 @@ const WorkoutLibrary = () => {
                     <h3 className="text-white text-[20px] font-normal leading-[30px] mb-3 flex items-center gap-2">
                       {video.title}
                       {video.category?.name && (
-                        <Badge
-                          className="ml-2"
-                          variant="default" // or "destructive" if you want red (see below)
-                        >
+                        <Badge className="ml-2" variant="default">
                           {video.category.name}
                         </Badge>
                       )}
                     </h3>
-
                     <p className="text-white text-[15px] leading-[25px] font-normal">
                       {video.description}
                     </p>
@@ -250,7 +341,7 @@ const WorkoutLibrary = () => {
       <VideoModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        videoUrl={activeVideo ? `${import.meta.env.VITE_API_URL}${activeVideo.videoUrl}` : ''}
+        videoId={activeVideo?._id || ''}
         title={activeVideo?.title || ''}
       />
       <Footer />
