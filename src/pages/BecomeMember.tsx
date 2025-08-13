@@ -9,10 +9,10 @@ import { authFetch } from '@/utils/authFetch';
 import { useStripe, useElements } from '@stripe/react-stripe-js';
 import { CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js';
 import PaymentSuccessModal from "@/components/PaymentSuccessModal"; // adjust the path if needed
-
+import AppModal from '@/components/AppModal';
 
 const paymentOptions = [
-    // { key: "uae", label: "UAE Bank Transfer (SEPA)" },
+    { key: "uae", label: "UAE Bank Transfer (SEPA)" },
     // { key: "payoneer", label: "Payoneer" },
     { key: "stripe", label: "Stripe" },
 ];
@@ -27,6 +27,8 @@ const BecomeMember = () => {
     const [processing, setProcessing] = useState(false);
     const [stripeError, setStripeError] = useState("");
     const [successModalOpen, setSuccessModalOpen] = useState(false);
+    const [receiptModalOpen, setReceiptModalOpen] = useState(false);
+    const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
 
     // Plan state
@@ -37,6 +39,29 @@ const BecomeMember = () => {
     const [defaultCardId, setDefaultCardId] = useState('');
     const [useSavedCard, setUseSavedCard] = useState(true); // Show saved card by default if any
     const defaultCard = savedCards.find(card => card.id === defaultCardId) || savedCards[0];
+    const [activePlan, setActivePlan] = useState<null | {
+        priceId: string;
+        subscriptionId?: string;
+    }>(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        fetch(`${import.meta.env.VITE_API_URL}/api/payments/active`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data?.plan) {
+                    setActivePlan({
+                        priceId: data.plan.priceId || data.plan.plan, // your /active returns .priceId
+                        subscriptionId: data.plan.subscriptionId,     // add this in /active if you want
+                    });
+                }
+            })
+            .catch(() => { });
+    }, []);
 
 
     // Form state (You can auto-fill user info here)
@@ -150,44 +175,67 @@ const BecomeMember = () => {
         setStripeError("");
         setProcessing(true);
 
-        // Agreement check
-        if (!form.agreed) {
-            alert("Please agree to the Privacy & Terms.");
-            setProcessing(false);
-            return;
-        }
-
-        // Stripe.js loaded check
-        if (!stripe || !elements) {
-            setStripeError("Stripe is not loaded");
-            setProcessing(false);
-            return;
-        }
-
-        // Auth/user checks
-        const user = JSON.parse(localStorage.getItem('user'));
-        const token = localStorage.getItem('token');
-        if (!user || !token) {
-            setStripeError("Please login again.");
-            setProcessing(false);
-            return;
-        }
-
-        let paymentMethodId = null; // What we will send to the backend
-
         try {
-            // ---- 1. Get the payment method ----
+            if (!form.agreed) {
+                alert("Please agree to the Privacy & Terms.");
+                return;
+            }
 
+            const user = JSON.parse(localStorage.getItem("user"));
+            const token = localStorage.getItem("token");
+            if (!user || !token) {
+                setStripeError("Please login again.");
+                return;
+            }
+
+            // ── SEPA (UAE Bank Transfer) flow ───────────────────────────────────────────
+            if (form.paymentMethod === "uae") {
+                if (!receiptFile) {
+                    setStripeError("Please upload your payment receipt.");
+                    return;
+                }
+                if (!plan?.priceId) {
+                    setStripeError("Plan not found.");
+                    return;
+                }
+
+                const fd = new FormData();
+                fd.append("priceId", plan.priceId);
+                fd.append("receipt", receiptFile);
+
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/receipts`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${token}` },
+                    body: fd,
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data?.error || "Failed to submit receipt");
+                setReceiptModalOpen(true);
+                setReceiptFile(null);
+
+                setProcessing(false);
+                return;
+            }
+            // ────────────────────────────────────────────────────────────────────────────
+
+            // Stripe branch (unchanged)
+            if (!stripe || !elements) {
+                setStripeError("Stripe is not loaded");
+                return;
+            }
+
+            let paymentMethodId: string | null = null;
             if (form.paymentMethod === "stripe" && savedCards.length > 0 && useSavedCard) {
-                // Use saved card's paymentMethodId from backend (NO need to createPaymentMethod or use CardNumberElement)
-                const defaultCard = savedCards.find(card => card.id === defaultCardId) || savedCards[0];
-                paymentMethodId = defaultCard.id;
+                const chosen = savedCards.find(c => c.id === defaultCardId) || savedCards[0];
+                paymentMethodId = chosen?.id;
+                if (!paymentMethodId) {
+                    setStripeError("No saved card found.");
+                    return;
+                }
             } else {
-                // Create payment method from card input
                 const cardElement = elements.getElement(CardNumberElement);
                 if (!cardElement) {
                     setStripeError("Card input not found");
-                    setProcessing(false);
                     return;
                 }
                 const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
@@ -198,127 +246,99 @@ const BecomeMember = () => {
                         email: form.email,
                     },
                 });
-                if (pmError) throw pmError;
+                if (pmError) {
+                    setStripeError(pmError.message || "Could not create payment method");
+                    return;
+                }
                 paymentMethodId = paymentMethod.id;
             }
 
-            // ---- 2. Call backend to create Stripe Subscription ----
+            let activePlanPriceId: string | null = null;
+            try {
+                const activeRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/active`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const activeData = await activeRes.json();
+                if (activeRes.ok && activeData?.plan) {
+                    activePlanPriceId = activeData.plan.priceId || activeData.plan.plan;
+                }
+            } catch { }
 
-            const subRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-subscription`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    priceId: plan.priceId,
-                    paymentMethodId, // pass paymentMethodId (from new or saved card)
-                    saveCard: form.saveInfo,
-                }),
-            });
+            if (activePlanPriceId && activePlanPriceId === plan.priceId) {
+                setStripeError("You're already on this plan.");
+                return;
+            }
+
+            let subRes: Response;
+            if (activePlanPriceId) {
+                subRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/upgrade-subscription`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        priceId: plan.priceId,
+                        paymentMethodId,
+                    }),
+                });
+            } else {
+                subRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-subscription`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        priceId: plan.priceId,
+                        paymentMethodId,
+                        saveCard: form.saveInfo,
+                    }),
+                });
+            }
+
             const data = await subRes.json();
-            if (!subRes.ok) throw new Error(data.error || "Could not start subscription");
+            if (!subRes.ok) throw new Error(data?.error || "Could not start/upgrade subscription");
 
-            // Defensive: Check for latest_invoice and payment_intent
-            const invoice = data.subscription?.latest_invoice;
-            const paymentIntent = invoice?.payment_intent;
-            const clientSecret = paymentIntent?.client_secret;
-            let transactionId = data.subscription.id;
+            const clientSecret =
+                data?.subscription?.latest_invoice?.payment_intent?.client_secret ||
+                data?.clientSecret ||
+                null;
 
-            // ---- 3. Confirm payment if needed ----
             if (clientSecret) {
                 let confirmResult;
                 if (form.paymentMethod === "stripe" && savedCards.length > 0 && useSavedCard) {
-                    // Using a saved card → only pass payment_method
-                    confirmResult = await stripe.confirmCardPayment(clientSecret, {
-                        payment_method: paymentMethodId
-                    });
+                    confirmResult = await stripe.confirmCardPayment(clientSecret, { payment_method: paymentMethodId! });
                 } else {
-                    // New card → pass card element and billing details
                     const cardElement = elements.getElement(CardNumberElement);
                     confirmResult = await stripe.confirmCardPayment(clientSecret, {
                         payment_method: {
-                            card: cardElement,
-                            billing_details: {
-                                name: `${form.firstName} ${form.lastName}`,
-                                email: form.email,
-                            }
-                        }
+                            card: cardElement!,
+                            billing_details: { name: `${form.firstName} ${form.lastName}`, email: form.email },
+                        },
                     });
                 }
 
                 const { paymentIntent: confirmedPI, error } = confirmResult;
                 if (error) {
-                    setStripeError(error.message);
-                    setProcessing(false);
+                    setStripeError(error.message || "Payment confirmation failed");
                     return;
                 }
-
-                if (confirmedPI.status === "succeeded") {
-                    // Success, create member in DB
-                    await saveMember(plan, confirmedPI.id, "paid");
-                    setSuccessModalOpen(true);
-                } else {
+                if (confirmedPI?.status !== "succeeded") {
                     setStripeError("Payment not completed.");
+                    return;
                 }
+                setSuccessModalOpen(true);
             } else {
-                // No payment required (e.g. trial) — create member right away
-                await saveMember(plan, data.subscription.id, "paid");
                 setSuccessModalOpen(true);
             }
-
         } catch (err) {
-            setStripeError(err.message || "Failed to start subscription");
-            console.error("Stripe error:", err);
-        }
-
-        setProcessing(false);
-
-        // --- Helper: Save member in backend ---
-        async function saveMember(plan, transactionId, paymentStatus) {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/members`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    planId: plan.priceId,
-                    transactionId,
-                    paymentStatus,
-                    amount: plan.amount,
-                    startDate: new Date().toISOString(),
-                    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setStripeError(data.error || "Failed to save member. Please contact support.");
-                throw new Error(data.error || "Failed to save member");
-            }
-            // Save to purchases endpoint
-            const purchaseRes = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    user: user.id,
-                    itemType: "coaching plan",
-                    itemName: plan.name,
-                    amount: plan.amount,
-                    stripePaymentId: transactionId,
-                })
-            });
-            const purchaseData = await purchaseRes.json();
-            if (!purchaseRes.ok) {
-                setStripeError(purchaseData.error || "Failed to save purchase. Please contact support.");
-                throw new Error(purchaseData.error || "Failed to save purchase");
-            }
+            console.error("Stripe/SEPA flow error:", err);
+            setStripeError(err?.message || "Payment failed");
+        } finally {
+            setProcessing(false);
         }
     };
-
 
     return (
         <>
@@ -565,62 +585,68 @@ const BecomeMember = () => {
                                             </>
                                         ) : (
                                             <>
+                                                <p className="text-white text-[16px] mb-4">
+                                                    Transfer via bank and upload your payment receipt. Your membership activates after verification.
+                                                </p>
                                                 <div>
-                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cardNumber">
-                                                        Card Number*
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                        Account Holder
                                                     </label>
-                                                    <input
-                                                        id="cardNumber"
-                                                        name="cardNumber"
-                                                        value={form.cardNumber}
-                                                        onChange={handleChange}
-                                                        className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                        required
-                                                    />
+                                                    <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none flex items-center">
+                                                        The Passion Physique LLC
+                                                    </p>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <div className="w-[48%]">
-                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="expDate">
-                                                            Expiration Date*
+                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2">
+                                                            Account number
                                                         </label>
-                                                        <input
-                                                            id="expDate"
-                                                            name="expDate"
-                                                            type="text"
-                                                            placeholder="MM/YY"
-                                                            value={form.expDate}
-                                                            maxLength={5}
-                                                            onChange={e => {
-                                                                let value = e.target.value.replace(/\D/g, ''); // only digits
-                                                                if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                                                                // validate month
-                                                                if (value.length >= 2 && parseInt(value.slice(0, 2)) > 12) {
-                                                                    value = '12' + value.slice(2);
-                                                                }
-                                                                setForm(prev => ({ ...prev, expDate: value }));
-                                                            }}
-                                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                            required
-                                                        />
+                                                        <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none flex items-center">
+                                                            9012850782
+                                                        </p>
                                                     </div>
                                                     <div className="w-[48%]">
-                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cvv">
-                                                            CVV*
+                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                            IBAN
                                                         </label>
-                                                        <input
-                                                            id="cvv"
-                                                            name="cvv"
-                                                            type="text"
-                                                            value={form.cvv}
-                                                            onChange={handleChange}
-                                                            maxLength={4}
-                                                            pattern="\d*"
-                                                            inputMode="numeric"
-                                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                            autoComplete="off"
-                                                            required
-                                                        />
+                                                        <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none flex items-center">AE500860000009012850782</p>
                                                     </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                        BIC
+                                                    </label>
+                                                    <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none flex items-center">
+                                                        WIOBAEADXXX
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                        Bank Address
+                                                    </label>
+                                                    <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none flex items-center">
+                                                        Etihad Airways Centre 5th Floor, Abu Dhabi, UAE
+                                                    </p>
+                                                </div>
+                                                <div className="mb-4">
+                                                    <input
+                                                        id="receipt"
+                                                        type="file"
+                                                        accept="image/png,image/jpeg"
+                                                        className="hidden"
+                                                        onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                                                    />
+                                                    <label
+                                                        htmlFor="receipt"
+                                                        className="inline-flex items-center justify-center bg-[#ff3c33] hover:bg-[#e03228] text-white font-[600] text-[16px] px-6 h-[42px] rounded-none cursor-pointer transition-all"
+                                                    >
+                                                        Upload Payment Receipt
+                                                    </label>
+                                                    {receiptFile && (
+                                                        <div className="mt-2 text-[#ccc] text-sm">
+                                                            Selected: <span className="text-white">{receiptFile.name}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </>
                                         )}
@@ -671,26 +697,17 @@ const BecomeMember = () => {
                                     {processing ? (
                                         <span className="flex items-center gap-2">
                                             <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                                                <circle
-                                                    className="opacity-25"
-                                                    cx="12"
-                                                    cy="12"
-                                                    r="10"
-                                                    stroke="currentColor"
-                                                    strokeWidth="4"
-                                                    fill="none"
-                                                />
-                                                <path
-                                                    className="opacity-75"
-                                                    fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8v8z"
-                                                />
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                                             </svg>
                                             Processing...
                                         </span>
                                     ) : (
-                                        plan ? `Pay €${plan.amount}` : "Pay"
+                                        form.paymentMethod === "uae"
+                                            ? "Submit"
+                                            : (plan ? `Pay €${plan.amount}` : "Pay")
                                     )}
+
                                 </Button>
 
                             </form>
@@ -759,6 +776,14 @@ const BecomeMember = () => {
                     // Optionally redirect or refresh membership
                     navigate("/workout-library"); // Or wherever you want to send them
                 }}
+            />
+            <AppModal
+                open={receiptModalOpen}
+                onClose={() => {setReceiptModalOpen(false); navigate("/");}}
+                variant="success"
+                title="Receipt Submitted!"
+                message="Thanks for uploading your payment receipt. We’ll verify it shortly and activate your membership."
+                primaryText="Okay, got it →"
             />
             <Footer />
         </>

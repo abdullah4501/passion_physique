@@ -70,7 +70,6 @@ const VideoModal = ({ open, onClose, videoId, title }) => {
     video.addEventListener('abort', handleAbort);
 
     return () => {
-      console.log('Cleaning up video event listeners');
       video.removeEventListener('loadstart', handleLoadStart);
       video.removeEventListener('loadeddata', handleLoadedData);
       video.removeEventListener('error', handleError);
@@ -81,7 +80,6 @@ const VideoModal = ({ open, onClose, videoId, title }) => {
   }, [videoSrc]);
 
   if (!open) {
-    console.log('VideoModal not rendered: open=false');
     return null;
   }
 
@@ -145,25 +143,21 @@ const WorkoutLibrary = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      console.log('No token found, user is not logged in. isMember: false');
       setIsMember(false);
       setUserLoading(false);
       return;
     }
 
-    console.log('Fetching membership status');
     fetch(`${import.meta.env.VITE_API_URL}/api/members/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
-        console.log('Membership response status:', res.status);
         if (!res.ok) {
           throw new Error(`HTTP error! Status: ${res.status}`);
         }
         return res.json();
       })
       .then((data) => {
-        console.log('Membership status:', data.isMember);
         setIsMember(data.isMember);
         setUserLoading(false);
       })
@@ -176,17 +170,14 @@ const WorkoutLibrary = () => {
 
   // Fetch workout videos
   useEffect(() => {
-    console.log('Fetching workout videos');
     fetch(`${import.meta.env.VITE_API_URL}/api/workout-library`)
       .then((res) => {
-        console.log('Workout videos response status:', res.status);
         if (!res.ok) {
           throw new Error(`HTTP error! Status: ${res.status}`);
         }
         return res.json();
       })
       .then((data) => {
-        console.log('Workout videos fetched:', data.videos.length);
         setWorkoutVideos(data.videos);
         setLoading(false);
       })
@@ -197,7 +188,6 @@ const WorkoutLibrary = () => {
   }, []);
 
   const handlePlay = (video: any) => {
-    console.log('Attempting to play video:', video.title, 'ID:', video._id);
     setActiveVideo(video);
     setModalOpen(true);
   };
@@ -259,7 +249,8 @@ const WorkoutLibrary = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" ref={cardsRef}>
             {!loading &&
               workoutVideos.map((video: any, index: number) => {
-                const isLocked = video.forMembersOnly && !isMember;
+                const token = localStorage.getItem('token');
+                const isLocked = video.forMembersOnly ? !isMember : !token;
                 return (
                   <motion.div
                     key={video._id}
