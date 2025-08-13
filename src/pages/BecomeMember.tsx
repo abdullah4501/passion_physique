@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import bannerImg from '@/assets/loginSection.png';
@@ -20,6 +20,7 @@ const paymentOptions = [
 const BecomeMember = () => {
     const { planId } = useParams(); // must match route: /become-member/:planId
     const navigate = useNavigate();
+    const location = useLocation();
     const heroRef = useRef(null);
     const heroInView = useInView(heroRef, { once: true, margin: "-100px" });
     const stripe = useStripe();
@@ -104,8 +105,9 @@ const BecomeMember = () => {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
+        const priceId = sessionStorage.getItem("selectedPlanPriceId");
         if (!token) {
-            navigate("/login", { replace: true });
+            navigate(`/login?redirect=/plans/become-a-member/payment/${priceId}`, { replace: true });
             return;
         }
     }, [navigate]);
@@ -779,7 +781,7 @@ const BecomeMember = () => {
             />
             <AppModal
                 open={receiptModalOpen}
-                onClose={() => {setReceiptModalOpen(false); navigate("/");}}
+                onClose={() => { setReceiptModalOpen(false); navigate("/"); }}
                 variant="success"
                 title="Receipt Submitted!"
                 message="Thanks for uploading your payment receipt. We’ll verify it shortly and activate your membership."

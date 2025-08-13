@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import bannerImg from '@/assets/gallery/register.png';
 import SectionImg from '@/assets/loginSection.png';
 import { motion, useInView } from 'framer-motion';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
 
 const titleVariants = {
     hidden: { opacity: 0, y: 40, scale: 0.97 },
@@ -20,14 +20,19 @@ const Login = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
 
-      useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const redirectTo = params.get('redirect');
+
+
+    useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user) {
-          navigate(`/profile/${user.id}`);
-          return;
+            navigate(`/profile/${user.id}`);
+            return;
         }
-      }, [id, navigate]);
+    }, [id, navigate]);
 
 
     const handleChange = (e) => {
@@ -49,15 +54,26 @@ const Login = () => {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.msg || 'Login failed');
+
             setSuccess('Login successful! Redirecting...');
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('token', data.token);
-            setTimeout(() => navigate('/'), 1200); // Redirect after 1.2s
+
+            // 🟢 Corrected setTimeout function
+            setTimeout(() => {
+                if (redirectTo) {
+                    navigate(redirectTo, { replace: true });
+                } else {
+                    navigate('/'); // default page if no redirect param
+                }
+            }, 1200); // Redirect after 1.2s
+
         } catch (err) {
             setError(err.message || 'Something went wrong');
         }
         setLoading(false);
     };
+
 
     return (
         <>

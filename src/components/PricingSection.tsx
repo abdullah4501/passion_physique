@@ -95,7 +95,7 @@ const PricingSection = () => {
                   <div className="flex md:flex-row flex-col justify-between items-start mb-4">
                     <div className="flex-1 md:pr-6 pr-0">
                       <h3 className="text-[26px] font-light text-white mb-3">{plan.name}</h3>
-                      <p className="text-white text-[14px] font-light leading-relaxed mb-4">
+                      <p className="text-white text-[14px] font-light leading-relaxed mb-4 line-clamp-4 overflow-hidden text-ellipsis">
                         {plan.description}
                       </p>
                     </div>

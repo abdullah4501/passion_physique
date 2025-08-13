@@ -101,6 +101,19 @@ const CoachingPlan = () => {
 
     }, []);
 
+    const handleJoinNow = (priceId) => {
+        sessionStorage.setItem("selectedPlanPriceId", priceId);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            // Not logged in: Send to login, with a redirect back to the payment page
+            navigate(`/login?redirect=/plans/become-a-member/payment/${priceId}`);
+            return;
+        }
+        // Logged in: Go directly to payment page
+        navigate(`/plans/become-a-member/payment/${priceId}`);
+    };
+
+
 
     return (
         <>
@@ -185,10 +198,10 @@ const CoachingPlan = () => {
                                         {
                                             plan.priceId === (activePlan?.priceId || activePlan?.plan)
                                                 ? <span className="text-green-500 font-bold">ACTIVE</span>
-                                                : <Link
-                                                    to={`/plans/become-a-member/payment/${plan.priceId}`}
+                                                : <Button
+                                                    onClick={() => handleJoinNow(plan.priceId)}
                                                     className="bg-primary hover:bg-primary/90 text-white py-3 px-10 text-[12px] font-[600] transition-all duration-300 rounded-none md:w-auto w-full md:mt-0 mt-4"
-                                                >{activePlan ? "UPGRADE" : "JOIN NOW"}</Link>
+                                                >{activePlan ? "UPGRADE" : "JOIN NOW"}</Button>
                                         }
 
                                     </div>
