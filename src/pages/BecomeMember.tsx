@@ -30,7 +30,9 @@ const BecomeMember = () => {
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [receiptModalOpen, setReceiptModalOpen] = useState(false);
     const [receiptFile, setReceiptFile] = useState<File | null>(null);
-
+    const searchParams = new URLSearchParams(location.search);
+    const redirect = searchParams.get('redirect') || '/workout-library';
+    
 
     // Plan state
     const [plan, setPlan] = useState(null);
@@ -218,8 +220,6 @@ const BecomeMember = () => {
                 setProcessing(false);
                 return;
             }
-            // ────────────────────────────────────────────────────────────────────────────
-
             // Stripe branch (unchanged)
             if (!stripe || !elements) {
                 setStripeError("Stripe is not loaded");
@@ -775,8 +775,7 @@ const BecomeMember = () => {
                 open={successModalOpen}
                 onClose={() => {
                     setSuccessModalOpen(false);
-                    // Optionally redirect or refresh membership
-                    navigate("/workout-library"); // Or wherever you want to send them
+                    navigate(redirect); // Or wherever you want to send them
                 }}
             />
             <AppModal

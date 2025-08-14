@@ -24,6 +24,7 @@ import BecomeMember from "./pages/BecomeMember";
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutSession from "./pages/CheckoutSession";
+import CheckoutEbook from "./pages/CheckoutEbook";
 
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="login" element={<Login />} />
             <Route path="profile/:id" element={<Profile />} />
             <Route path="plans/become-a-member/payment/:planId" element={<BecomeMember />} />
+            <Route path="coaching-ebooks/payment/:ebookId" element={<CheckoutEbook />} />
             <Route path="session/payment/:productId" element={<CheckoutSession />} />
             <Route path="supplement-guidance/payment/:producttId" element={<CheckoutSession />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

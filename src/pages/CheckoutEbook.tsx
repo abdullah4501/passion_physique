@@ -2,22 +2,21 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import bannerImg from '@/assets/session/banner.png';
-import bannerImg2 from '@/assets/bg/guidanceBg.png';
-import bg from "@/assets/bg/Plans.png";
+import bannerImg from '@/assets/ebooks/checkoutBg.png';
 import { motion, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { authFetch } from '@/utils/authFetch';
-import { useStripe, useElements } from '@stripe/react-stripe-js';
-import { CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js';
+import { useStripe, useElements, CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js';
 import PaymentSuccessModal from "@/components/PaymentSuccessModal";
+import AppModal from '@/components/AppModal';
 
 const paymentOptions = [
+    { key: "uae", label: "UAE Bank Transfer (SEPA)" },
     { key: "stripe", label: "Stripe" },
 ];
 
-const CheckoutSession = () => {
-    const { productId } = useParams(); // Changed from sessionId to productId for generic use
+const EbookCheckout = () => {
+    const { ebookId } = useParams(); // from /checkout/ebook/:ebookId
     const navigate = useNavigate();
     const location = useLocation();
     const heroRef = useRef(null);
@@ -27,61 +26,67 @@ const CheckoutSession = () => {
     const [processing, setProcessing] = useState(false);
     const [stripeError, setStripeError] = useState("");
     const [successModalOpen, setSuccessModalOpen] = useState(false);
+    const [receiptModalOpen, setReceiptModalOpen] = useState(false);
+    const [receiptFile, setReceiptFile] = useState<File | null>(null);
+
+    // Ebook state
+    const [ebook, setEbook] = useState(null);
+    const [ebookLoading, setEbookLoading] = useState(true);
+    const [ebookError, setEbookError] = useState("");
     const [savedCards, setSavedCards] = useState([]);
     const [defaultCardId, setDefaultCardId] = useState('');
     const [useSavedCard, setUseSavedCard] = useState(true);
-    const [form, setForm] = useState({
-        firstName: "",
-        lastName: "",
-        email: "",
-        cardNumber: "",
-        expDate: "",
-        cvv: "",
-        paymentMethod: "stripe",
-        saveInfo: false,
-        agreed: false,
-    });
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const defaultCard = savedCards.find(card => card.id === defaultCardId) || savedCards[0];
 
-    // Determine product type from URL
-    const productType = location.pathname.includes('session') ? 'session' : 'supplement-guidance';
-    const apiEndpoint = productType === 'session' ? `/api/sessions` : `/api/guidance`;
-    const pageTitle = productType === 'session' ? '1-on-1 Session' : 'Supplement Guidance';
-    const breadcrumbPath = productType === 'session' ? 'Home / 1-on-1 Session / Payment' : 'Home / Supplement Guidance / Payment';
+    // Fetch ebook details
+    useEffect(() => {
+        if (!ebookId) return;
+        setEbookLoading(true);
+        fetch(`${import.meta.env.VITE_API_URL}/api/ebooks/${ebookId}`, {
+            headers: { "Authorization": `Bearer ${localStorage.getItem('token')}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data?.ebook) {
+                    setEbook(data.ebook);
+                    setEbookError("");
+                } else {
+                    setEbookError("Ebook not found.");
+                }
+                setEbookLoading(false);
+            })
+            .catch(() => {
+                setEbookError("Could not load ebook details");
+                setEbookLoading(false);
+            });
+    }, [ebookId]);
 
-    // Fetch saved cards and default card
+    // Fetch saved cards & default card
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) return;
-
         fetch(`${import.meta.env.VITE_API_URL}/api/payments/saved-cards`, {
             headers: { "Authorization": `Bearer ${token}` }
         })
             .then(res => res.json())
-            .then(data => {
-                setSavedCards(data.cards || []);
-            });
-
+            .then(data => setSavedCards(data.cards || []));
         fetch(`${import.meta.env.VITE_API_URL}/api/payments/default-card`, {
             headers: { "Authorization": `Bearer ${token}` }
         })
             .then(res => res.json())
-            .then(data => {
-                setDefaultCardId(data.defaultCardId || "");
-            });
+            .then(data => setDefaultCardId(data.defaultCardId || ""));
     }, []);
 
-    // Redirect to login if no token
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            navigate("/login", { replace: true });
-            return;
-        }
-    }, [navigate]);
+    // Autofill user info (if needed)
+    const [form, setForm] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        paymentMethod: "stripe",
+        saveInfo: false,
+        agreed: false,
+    });
 
-    // Fetch user info
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user'));
         if (user) {
@@ -90,7 +95,7 @@ const CheckoutSession = () => {
                 {},
                 navigate
             ).then(data => {
-                if (data) {
+                if (data?.user) {
                     setForm(prev => ({
                         ...prev,
                         firstName: data.user.firstName,
@@ -102,65 +107,87 @@ const CheckoutSession = () => {
         }
     }, [navigate]);
 
-    // Fetch product data
-    useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL}${apiEndpoint}`)
-            .then(res => res.json())
-            .then(data => {
-                setProduct(productType === 'session' ? data.sessions[0] : data.supplementGuidance[0]);
-                setLoading(false);
-            })
-            .catch(() => setLoading(false));
-    }, [apiEndpoint, productType]);
-
     // Handle input changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        if (name === "cvv") {
-            const numericValue = value.replace(/\D/g, "").slice(0, 4);
-            setForm((prev) => ({
-                ...prev,
-                [name]: numericValue,
-            }));
-            return;
-        }
         setForm((prev) => ({
             ...prev,
             [name]: type === "checkbox" ? checked : value,
         }));
     };
 
-    // Handle payment submission
+    // Payment submit logic (adapts to ebook)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setStripeError("");
         setProcessing(true);
-
-        const token = localStorage.getItem("token");
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (!token || !user) {
-            setStripeError("Please log in to continue.");
-            setProcessing(false);
-            return;
-        }
-        if (!form.agreed) {
-            setStripeError("Please agree to the Privacy & Terms.");
-            setProcessing(false);
-            return;
-        }
-        if (!stripe || !elements) {
-            setStripeError("Stripe is not loaded");
-            setProcessing(false);
-            return;
-        }
+    
         try {
-            let paymentMethodId = null;
+            if (!form.agreed) {
+                alert("Please agree to the Privacy & Terms.");
+                setProcessing(false);
+                return;
+            }
+            const user = JSON.parse(localStorage.getItem("user"));
+            const token = localStorage.getItem("token");
+            if (!user || !token) {
+                setStripeError("Please login again.");
+                setProcessing(false);
+                return;
+            }
 
+            // UAE/SEPA bank transfer flow
+            if (form.paymentMethod === "uae") {
+                if (!receiptFile) {
+                    setStripeError("Please upload your payment receipt.");
+                    setProcessing(false);
+                    return;
+                }
+                if (!ebook?._id) {
+                    setStripeError("Ebook not found.");
+                    setProcessing(false);
+                    return;
+                }
+                const fd = new FormData();
+                fd.append("ebookId", ebook._id);
+                fd.append("receipt", receiptFile);
+
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/receipts/ebook`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${token}` },
+                    body: fd,
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data?.error || "Failed to submit receipt");
+                setReceiptModalOpen(true);
+                setReceiptFile(null);
+                setProcessing(false);
+                return;
+            }
+
+            if (!stripe || !elements) {
+                setStripeError("Stripe is not loaded");
+                setProcessing(false);
+                return;
+            }
+    
+            let paymentMethodId = null;
+    
             if (form.paymentMethod === "stripe" && savedCards.length > 0 && useSavedCard) {
-                const defaultCard = savedCards.find(card => card.id === defaultCardId) || savedCards[0];
-                paymentMethodId = defaultCard.id;
+                const chosen = savedCards.find(c => c.id === defaultCardId) || savedCards[0];
+                paymentMethodId = chosen?.id;
+                if (!paymentMethodId) {
+                    setStripeError("No saved card found.");
+                    setProcessing(false);
+                    return;
+                }
             } else {
                 const cardElement = elements.getElement(CardNumberElement);
+                if (!cardElement) {
+                    setStripeError("Card input not found");
+                    setProcessing(false);
+                    return;
+                }
                 const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
                     type: "card",
                     card: cardElement,
@@ -169,10 +196,15 @@ const CheckoutSession = () => {
                         email: form.email,
                     },
                 });
-                if (pmError) throw pmError;
+                if (pmError) {
+                    setStripeError(pmError.message || "Could not create payment method");
+                    setProcessing(false);
+                    return;
+                }
                 paymentMethodId = paymentMethod.id;
             }
-
+    
+            // 1. CREATE PAYMENT INTENT (same endpoint as sessions)
             const intentRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-payment-intent`, {
                 method: "POST",
                 headers: {
@@ -180,7 +212,7 @@ const CheckoutSession = () => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    amount: product.amount,
+                    amount: ebook.price,
                     currency: "eur",
                     saveCard: form.saveInfo,
                     ...(paymentMethodId ? { paymentMethodId } : {}),
@@ -188,12 +220,11 @@ const CheckoutSession = () => {
             });
             const { clientSecret, error: intentErr } = await intentRes.json();
             if (!intentRes.ok || !clientSecret) throw new Error(intentErr || "Payment initiation failed.");
-
+    
+            // 2. CONFIRM PAYMENT WITH STRIPE
             let confirmResult;
             if (form.paymentMethod === "stripe" && savedCards.length > 0 && useSavedCard) {
-                confirmResult = await stripe.confirmCardPayment(clientSecret, {
-                    payment_method: paymentMethodId,
-                });
+                confirmResult = await stripe.confirmCardPayment(clientSecret, { payment_method: paymentMethodId });
             } else {
                 const cardElement = elements.getElement(CardNumberElement);
                 confirmResult = await stripe.confirmCardPayment(clientSecret, {
@@ -206,13 +237,14 @@ const CheckoutSession = () => {
                     }
                 });
             }
-
+    
             const { paymentIntent, error: confirmError } = confirmResult;
             if (confirmError) throw confirmError;
             if (!paymentIntent || paymentIntent.status !== "succeeded") {
                 throw new Error("Payment did not succeed. Please try again.");
             }
-
+    
+            // 3. MARK PURCHASE (same as sessions)
             const purchaseRes = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases`, {
                 method: "POST",
                 headers: {
@@ -221,10 +253,10 @@ const CheckoutSession = () => {
                 },
                 body: JSON.stringify({
                     user: user.id,
-                    itemType: productType,
-                    itemId: product.id,
-                    itemName: product.name,
-                    amount: product.amount,
+                    itemType: "ebook",
+                    itemId: ebook._id.toString(),
+                    itemName: ebook.title,
+                    amount: ebook.price,
                     stripePaymentId: paymentIntent.id,
                 }),
             });
@@ -232,18 +264,12 @@ const CheckoutSession = () => {
                 const { error } = await purchaseRes.json();
                 throw new Error(error || "Failed to save purchase.");
             }
-
+    
             setSuccessModalOpen(true);
         } catch (err) {
             setStripeError(err.message || "Payment failed.");
-            console.error("Payment error:", err);
         }
         setProcessing(false);
-    };
-
-    const heroVariants = {
-        hidden: { opacity: 0, y: 44, scale: 0.96 },
-        visible: { opacity: 1, y: 0, scale: 1 }
     };
 
     return (
@@ -251,33 +277,39 @@ const CheckoutSession = () => {
             <Header />
             <section className="relative w-full h-[45vh] flex items-center justify-center overflow-hidden">
                 <img
-                    src={productType==='session'? bannerImg : bannerImg2}
-                    alt={pageTitle}
-                    className="absolute inset-0 w-full h-full object-cover object-center"
+                    src={bannerImg}
+                    alt="profile"
+                    className="absolute inset-0 w-full h-full object-cover object-top"
                     draggable={false}
                 />
-                <div className="absolute inset-0" />
+                <div className="absolute inset-0 bg-black/60" />
                 <div className="relative z-10 flex flex-col items-center justify-center w-full">
                     <motion.h1
                         ref={heroRef}
                         className="text-[66px] font-bold uppercase leading-[80px] mb-4 select-none page-title"
-                        variants={heroVariants}
+                        variants={{
+                            hidden: { opacity: 0, y: 40, scale: 0.97 },
+                            visible: { opacity: 1, y: 0, scale: 1 }
+                        }}
                         initial="hidden"
                         animate={heroInView ? "visible" : "hidden"}
                         transition={{ duration: 0.85, ease: [0.42, 0, 0.2, 1] }}
                     >
-                        <span className="text-primary">{pageTitle.split(' ')[0]}</span>{" "}
-                        <span className="text-white">{pageTitle.split(' ')[1]}</span>
+                        <span className="text-primary">COACHING </span>
+                        <span className="text-white">E-BOOKS</span>
                     </motion.h1>
                     <motion.div
-                        variants={heroVariants}
+                        variants={{
+                            hidden: { opacity: 0, y: 40, scale: 0.97 },
+                            visible: { opacity: 1, y: 0, scale: 1 }
+                        }}
                         initial="hidden"
                         animate={heroInView ? "visible" : "hidden"}
-                        transition={{ duration: 1, delay: 0.15, ease: [0.42, 0, 0.2, 1] }}
+                        transition={{ duration: 1, delay: 0.14, ease: [0.42, 0, 0.2, 1] }}
                         className="flex flex-col items-center"
                     >
                         <span className="text-white font-bold text-[26px] leading-[26px] breadcrumbs">
-                            {breadcrumbPath}
+                            Home / Coaching E-Books / Payment
                         </span>
                     </motion.div>
                 </div>
@@ -287,34 +319,61 @@ const CheckoutSession = () => {
                     <h2 className="text-white font-[700] tracking-[4%] text-[36px] mb-12 mt-6">
                         Payment Details
                     </h2>
-                    <div className="grid grid-cols-2 gap-16">
+                    <div className=" grid grid-cols-2 gap-16">
+
                         {/* Payment Form */}
                         <div className="lg:col-span-1 col-span-2 w-full order-2 lg:order-1">
                             <form className="flex flex-col gap-5 mb-8" onSubmit={handleSubmit}>
-                                <div className="border-b border-[#acacac] pb-3">
+                                {/* Your Info */}
+                                <div className="border-b border-[#acacac] mb-7 pb-3">
                                     <h2 className="text-white text-[24px] font-[600]">Your Info</h2>
                                 </div>
-                                <>
-                                    <div>
-                                        <label className="block text-[#fff] font-[600] text-[18px] mb-2" htmlFor="firstName">
-                                            First Name:
-                                        </label>
-                                        <p className='mt-4 text-[16px] font-[400]'>{form.firstName}</p>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[#fff] font-[600] text-[18px] mb-2" htmlFor="lastName">
-                                            Last Name:
-                                        </label>
-                                        <p className='mt-4 text-[16px] font-[400]'>{form.lastName}</p>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[#fff] font-[600] text-[18px] mb-2" htmlFor="email">
-                                            Email Address:
-                                        </label>
-                                        <p className='mt-4 text-[16px] font-[400]'>{form.email}</p>
-                                    </div>
-                                </>
-                                <div className="border-b border-[#acacac] pb-3 mt-4">
+                                <div>
+                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="firstName">
+                                        First Name*
+                                    </label>
+                                    <input
+                                        id="firstName"
+                                        name="firstName"
+                                        value={form.firstName}
+                                        onChange={handleChange}
+                                        className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                        autoComplete="off"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="lastName">
+                                        Last Name*
+                                    </label>
+                                    <input
+                                        id="lastName"
+                                        name="lastName"
+                                        value={form.lastName}
+                                        onChange={handleChange}
+                                        className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                        autoComplete="off"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="email">
+                                        Email Address*
+                                    </label>
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        value={form.email}
+                                        onChange={handleChange}
+                                        className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                        autoComplete="off"
+                                        required
+                                    />
+                                </div>
+
+                                {/* Payment Info */}
+                                <div className="border-b border-[#acacac]  pb-3 mt-4">
                                     <h2 className="text-white text-[24px] font-[600]">Payment Info</h2>
                                 </div>
                                 <div>
@@ -323,13 +382,11 @@ const CheckoutSession = () => {
                                 {form.paymentMethod === "stripe" && savedCards.length > 0 && useSavedCard ? (
                                     <div className="flex items-center justify-between mb-4">
                                         <span className="text-white text-lg">
-                                            {(savedCards.find(card => card.id === defaultCardId) || savedCards[0]).brand.charAt(0).toUpperCase() +
-                                                (savedCards.find(card => card.id === defaultCardId) || savedCards[0]).brand.slice(1)}
+                                            {defaultCard?.brand?.charAt(0).toUpperCase() + defaultCard?.brand?.slice(1)}
                                             {" xxxx xxxx xxxx "}
-                                            {(savedCards.find(card => card.id === defaultCardId) || savedCards[0]).last4}
+                                            {defaultCard?.last4}
                                             {" end at "}
-                                            {String((savedCards.find(card => card.id === defaultCardId) || savedCards[0]).exp_month).padStart(2, "0")}/
-                                            {String((savedCards.find(card => card.id === defaultCardId) || savedCards[0]).exp_year).slice(-2)}
+                                            {String(defaultCard?.exp_month).padStart(2, "0")}/{String(defaultCard?.exp_year).slice(-2)}
                                         </span>
                                         <Button
                                             type="button"
@@ -386,7 +443,7 @@ const CheckoutSession = () => {
                                                     <label className="block text-[#ccc] font-light text-[16px] mb-2">Card Number*</label>
                                                     <div className="w-full bg-[#363636] text-white h-[38px] px-4 flex items-center focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none">
                                                         <CardNumberElement
-                                                            className="flex-1"
+                                                            className="flex-1 "
                                                             options={{
                                                                 style: {
                                                                     base: {
@@ -450,61 +507,68 @@ const CheckoutSession = () => {
                                             </>
                                         ) : (
                                             <>
+                                                <p className="text-white text-[16px] mb-4">
+                                                    Transfer via bank and upload your payment receipt. Your ebook will unlock after verification.
+                                                </p>
                                                 <div>
-                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cardNumber">
-                                                        Card Number*
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                        Account Holder
                                                     </label>
-                                                    <input
-                                                        id="cardNumber"
-                                                        name="cardNumber"
-                                                        value={form.cardNumber}
-                                                        onChange={handleChange}
-                                                        className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                        required
-                                                    />
+                                                    <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none transition-all rounded-none flex items-center">
+                                                        The Passion Physique LLC
+                                                    </p>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <div className="w-[48%]">
-                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="expDate">
-                                                            Expiration Date*
+                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2">
+                                                            Account number
                                                         </label>
-                                                        <input
-                                                            id="expDate"
-                                                            name="expDate"
-                                                            type="text"
-                                                            placeholder="MM/YY"
-                                                            value={form.expDate}
-                                                            maxLength={5}
-                                                            onChange={e => {
-                                                                let value = e.target.value.replace(/\D/g, '');
-                                                                if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                                                                if (value.length >= 2 && parseInt(value.slice(0, 2)) > 12) {
-                                                                    value = '12' + value.slice(2);
-                                                                }
-                                                                setForm(prev => ({ ...prev, expDate: value }));
-                                                            }}
-                                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                            required
-                                                        />
+                                                        <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none transition-all rounded-none flex items-center">
+                                                            9012850782
+                                                        </p>
                                                     </div>
                                                     <div className="w-[48%]">
-                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cvv">
-                                                            CVV*
+                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                            IBAN
                                                         </label>
-                                                        <input
-                                                            id="cvv"
-                                                            name="cvv"
-                                                            type="text"
-                                                            value={form.cvv}
-                                                            onChange={handleChange}
-                                                            maxLength={4}
-                                                            pattern="\d*"
-                                                            inputMode="numeric"
-                                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                            autoComplete="off"
-                                                            required
-                                                        />
+                                                        <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none transition-all rounded-none flex items-center">AE500860000009012850782</p>
                                                     </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                        BIC
+                                                    </label>
+                                                    <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none transition-all rounded-none flex items-center">
+                                                        WIOBAEADXXX
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                        Bank Address
+                                                    </label>
+                                                    <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none transition-all rounded-none flex items-center">
+                                                        Etihad Airways Centre 5th Floor, Abu Dhabi, UAE
+                                                    </p>
+                                                </div>
+                                                <div className="mb-4">
+                                                    <input
+                                                        id="receipt"
+                                                        type="file"
+                                                        accept="image/png,image/jpeg"
+                                                        className="hidden"
+                                                        onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                                                    />
+                                                    <label
+                                                        htmlFor="receipt"
+                                                        className="inline-flex items-center justify-center bg-[#ff3c33] hover:bg-[#e03228] text-white font-[600] text-[16px] px-6 h-[42px] rounded-none cursor-pointer transition-all"
+                                                    >
+                                                        Upload Payment Receipt
+                                                    </label>
+                                                    {receiptFile && (
+                                                        <div className="mt-2 text-[#ccc] text-sm">
+                                                            Selected: <span className="text-white">{receiptFile.name}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </>
                                         )}
@@ -552,78 +616,69 @@ const CheckoutSession = () => {
                                     {processing ? (
                                         <span className="flex items-center gap-2">
                                             <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                                                <circle
-                                                    className="opacity-25"
-                                                    cx="12"
-                                                    cy="12"
-                                                    r="10"
-                                                    stroke="currentColor"
-                                                    strokeWidth="4"
-                                                    fill="none"
-                                                />
-                                                <path
-                                                    className="opacity-75"
-                                                    fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8v8z"
-                                                />
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                                             </svg>
                                             Processing...
                                         </span>
                                     ) : (
-                                        product ? `Pay €${product.amount}` : "Pay"
+                                        form.paymentMethod === "uae"
+                                            ? "Submit"
+                                            : (ebook ? `Pay €${ebook.price}` : "Pay")
                                     )}
                                 </Button>
                             </form>
                         </div>
+
+                        {/* Ebook summary */}
                         <div className='lg:col-span-1 col-span-2 w-full order-1 lg:order-2'>
                             <div className='pt-10'>
-                                {loading ? (
-                                    <div className="text-[#ccc] text-lg pt-8">Loading product details...</div>
-                                ) : !product ? (
-                                    <div className="text-red-500 text-lg pt-8">Currently there is no product available!</div>
-                                ) : (
-                                    
+                                {ebookLoading ? (
+                                    <div className="text-[#ccc] text-lg pt-8">Loading ebook details...</div>
+                                ) : ebookError ? (
+                                    <div className="text-red-500 text-lg pt-8">{ebookError}</div>
+                                ) : ebook ? (
                                     <>
-                                    
                                         <div
                                             className="bg-[#2E2E2E] md:px-[45px] px-[15px] py-[40px] transition-all duration-300 md:flex-row flex-col justify-between h-full mb-10"
                                         >
-                                            <div>
-                                                <div className="flex justify-between items-start mb-4 md:flex-row flex-col">
-                                                    <div className="flex-1 md:pr-6 pr-0">
-                                                        <p className="text-primary text-[14px] font-bold tracking-[1px]">FOR ALL</p>
-                                                        <h3 className="text-[26px] font-light text-white mb-3">{product.name}</h3>
-                                                        <p className="text-white text-[14px] font-light leading-relaxed mb-4 md:pr-6 pr-0">
-                                                            {product.description}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-right pricing-info">
-                                                        <div className="text-[36px] font-light text-white">€{product.amount}</div>
-                                                    </div>
+                                            <div className="flex justify-between items-start mb-4 md:flex-row flex-col">
+                                                <div className="flex-1 md:pr-6 pr-0 ">
+                                                    <h3 className="text-[26px] font-light text-white mb-3">{ebook.title}</h3>
+                                                    <p className="text-white text-[14px] font-light leading-relaxed mb-4 md:pr-6 pr-0">
+                                                        {ebook.description}
+                                                    </p>
                                                 </div>
+                                                <div className="text-right pricing-info">
+                                                    <div className="text-[36px] font-light text-white">€{ebook.price}</div>
+                                                    <div className="text-white text-[18px] font-light">E-Book</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between md:flex-row flex-col">
+                                                <p className="text-primary text-[14px] font-medium">{ebook.forMembersOnly ? "FOR MEMBERS ONLY" : "FOR ALL"}</p>
                                             </div>
                                         </div>
                                         <div className="flex flex-col gap-3 border-t border-[#acacac] pt-5">
                                             <div className="flex items-center justify-between text-[15px] font-normal">
-                                                <span className="text-[#fff] text-[16px] font-[500]">Subtotal</span>
-                                                <span className="text-[#fff] text-[16px] font-[500]">€{product.amount}</span>
+                                                <span className="text-[#fff] text-[16px] font-[500] ">Subtotal</span>
+                                                <span className="text-[#fff] text-[16px] font-[500] ">€{ebook.price}</span>
                                             </div>
                                             <div className="flex items-center justify-between text-[15px] font-normal">
-                                                <span className="text-[#fff] text-[16px] font-[500]">Additional processing fee</span>
-                                                <span className="text-[#fff] text-[16px] font-[500]">€0</span>
+                                                <span className="text-[#fff] text-[16px] font-[500] ">Additional processing fee</span>
+                                                <span className="text-[#fff] text-[16px] font-[500] ">€0</span>
                                             </div>
                                             <div className="flex items-center justify-between mt-3 border-t border-[#acacac] pt-5">
                                                 <div className=''>
-                                                    <span className="block text-[#fff] text-[16px] font-[500]">Total</span>
+                                                    <span className="block text-[#fff] text-[16px] font-[500] ">Total</span>
                                                     <span className="block text-[#acacac] text-[14px] font-[400]">
                                                         Including €0 in taxes
                                                     </span>
                                                 </div>
-                                                <span className="text-white text-[36px] font-[500]">€{product.amount}</span>
+                                                <span className="text-white text-[36px] font-[500]">€{ebook.price}</span>
                                             </div>
                                         </div>
                                     </>
-                                )}
+                                ) : null}
                             </div>
                         </div>
                     </div>
@@ -633,12 +688,21 @@ const CheckoutSession = () => {
                 open={successModalOpen}
                 onClose={() => {
                     setSuccessModalOpen(false);
-                   productType == 'session'? navigate("/session") : navigate("/supplement-guidance")
+                    navigate("/e-books"); // or redirect to download page if needed
                 }}
+            />
+            <AppModal
+                open={receiptModalOpen}
+                onClose={() => { setReceiptModalOpen(false); navigate("/e-books"); }}
+                variant="success"
+                title="Receipt Submitted!"
+                message="Thanks for uploading your payment receipt. We’ll verify it shortly and unlock your ebook."
+                primaryText="Okay, got it →"
             />
             <Footer />
         </>
     );
 };
 
-export default CheckoutSession;
+export default EbookCheckout;
+

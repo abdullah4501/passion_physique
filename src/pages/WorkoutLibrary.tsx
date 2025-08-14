@@ -38,8 +38,7 @@ const VideoModal = ({ open, onClose, videoId, title }) => {
         setVideoSrc(data.signedUrl);
         setError(null);
       })
-      .catch((error) => {
-        console.error('Error fetching signed URL:', error.message);
+      .catch(() => {
         setError('Failed to load video. Please try again.');
       });
   }, [open, videoId]);
@@ -51,31 +50,15 @@ const VideoModal = ({ open, onClose, videoId, title }) => {
       return;
     }
 
-    const handleLoadStart = () => console.log('Video load started:', videoSrc);
-    const handleLoadedData = () => console.log('Video data loaded successfully');
     const handleError = (e: Event) => {
       const error = (e.target as HTMLVideoElement).error;
-      console.error('Video error:', error?.message || 'Unknown error', 'Code:', error?.code);
       setError('Failed to play video. Please try again.');
     };
-    const handleCanPlay = () => console.log('Video can play');
-    const handleStalled = () => console.log('Video stalled');
-    const handleAbort = () => console.log('Video load aborted');
 
-    video.addEventListener('loadstart', handleLoadStart);
-    video.addEventListener('loadeddata', handleLoadedData);
     video.addEventListener('error', handleError);
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('stalled', handleStalled);
-    video.addEventListener('abort', handleAbort);
 
     return () => {
-      video.removeEventListener('loadstart', handleLoadStart);
-      video.removeEventListener('loadeddata', handleLoadedData);
       video.removeEventListener('error', handleError);
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('stalled', handleStalled);
-      video.removeEventListener('abort', handleAbort);
     };
   }, [videoSrc]);
 
@@ -115,6 +98,7 @@ const VideoModal = ({ open, onClose, videoId, title }) => {
     </div>
   );
 };
+
 
 // Card and title animation variants
 const cardVariants = {
@@ -161,8 +145,7 @@ const WorkoutLibrary = () => {
         setIsMember(data.isMember);
         setUserLoading(false);
       })
-      .catch((error) => {
-        console.error('Error fetching membership status:', error);
+      .catch(() => {
         setIsMember(false);
         setUserLoading(false);
       });
@@ -181,8 +164,7 @@ const WorkoutLibrary = () => {
         setWorkoutVideos(data.videos);
         setLoading(false);
       })
-      .catch((error) => {
-        console.error('Error fetching videos:', error);
+      .catch(() => {
         setLoading(false);
       });
   }, []);
@@ -339,5 +321,6 @@ const WorkoutLibrary = () => {
     </>
   );
 };
+
 
 export default WorkoutLibrary;

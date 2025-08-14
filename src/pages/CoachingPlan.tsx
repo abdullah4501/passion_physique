@@ -3,10 +3,9 @@ import bannerImg from '@/assets/gallery/plan_banner.png';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import bg from "@/assets/bg/Plans.png";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, useAnimation, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 
 // For heading
@@ -54,6 +53,9 @@ const CoachingPlan = () => {
     const [activePlan, setActivePlan] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+    const redirect = searchParams.get('redirect');
 
     useEffect(() => {
         setLoading(true);
@@ -110,9 +112,8 @@ const CoachingPlan = () => {
             return;
         }
         // Logged in: Go directly to payment page
-        navigate(`/plans/become-a-member/payment/${priceId}`);
+        navigate(`/plans/become-a-member/payment/${priceId}${redirect ? `?redirect=${redirect}` : ''}`);
     };
-
 
 
     return (

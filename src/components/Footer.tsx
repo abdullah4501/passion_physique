@@ -142,7 +142,7 @@ const Footer = () => {
         </div>
       </div>
       <div className='copyright py-8 border-t '>
-        <p className=" text-white text-center text-[14px] leading-[24px] tracking-[1.4px]">&copy; {new Date().getFullYear()} the passion physique - All copyright reserved</p>
+        <p className=" text-white text-center text-[14px] leading-[24px] tracking-[1.4px]">&copy; {new Date().getFullYear()} the passion physique - Website Designed By <a href="https://www.bmmarketing.ae" className="underline" target="_blank">BM</a></p>
       </div>
     </footer>
   );

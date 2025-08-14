@@ -1,50 +1,8 @@
 import { Button } from '@/components/ui/button';
-import download from '@/assets/icons/download.png';
-import ebookCover1 from '@/assets/ebooks/ebook-1.png';
-import ebookCover2 from '@/assets/ebooks/ebook-2.png';
-import ebookCover3 from '@/assets/ebooks/ebook-1.png';
-import ebookCover4 from '@/assets/ebooks/ebook-1.png';
+import DownloadIcon from '@/assets/icons/download.png';
 import { motion, useAnimation, useInView } from 'framer-motion';
-import { useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-
-const ebooks = [
-  {
-    id: 1,
-    title: "Coaching E-Book 1",
-    price: "€50.00",
-    isForAll: true,
-    cover: ebookCover1,
-  },
-  {
-    id: 2,
-    title: "Coaching E-Book 2",
-    price: "€70.00",
-    isForAll: false,
-    cover: ebookCover2,
-  },
-  {
-    id: 3,
-    title: "Coaching E-Book 3",
-    price: "€70.00",
-    isForAll: false,
-    cover: ebookCover3,
-  },
-  {
-    id: 4,
-    title: "Coaching E-Book 4",
-    price: "€70.00",
-    isForAll: false,
-    cover: ebookCover4,
-  }
-];
-
-// Animation variants
-const sectionFade = {
-  hidden: { opacity: 0, y: 60 },
-  visible: { opacity: 1, y: 0 }
-};
-
+import { useRef, useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
 const cardFlip = {
   hidden: { opacity: 0, rotateY: 80, scale: 0.9 },
@@ -52,15 +10,123 @@ const cardFlip = {
 };
 
 export default function EbooksSection() {
-  // section-level animation controller
   const sectionRef = useRef(null);
   const inView = useInView(sectionRef, { once: false, margin: "-100px" });
   const controls = useAnimation();
+  const navigate = useNavigate();
 
+  // State
+  const [ebooks, setEbooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isMember, setIsMember] = useState(false);
+  const [purchases, setPurchases] = useState([]);
+  const [downloading, setDownloading] = useState('');
+
+  // Auth
+  const token = localStorage.getItem('token');
+  const isLoggedIn = !!token;
+
+  // Fetch first 4 ebooks
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${import.meta.env.VITE_API_URL}/api/ebooks?limit=4`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined
+    })
+      .then(res => res.json())
+      .then(data => {
+        setEbooks((data.ebooks || []).slice(0, 4)); // fallback if no ?limit param
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [token]);
+
+  // Member status
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setIsMember(false);
+      return;
+    }
+    fetch(`${import.meta.env.VITE_API_URL}/api/members/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setIsMember(!!data.isMember))
+      .catch(() => setIsMember(false));
+  }, [isLoggedIn, token]);
+
+  // Purchases
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setPurchases([]);
+      return;
+    }
+    fetch(`${import.meta.env.VITE_API_URL}/api/purchases/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setPurchases(data.purchases || []))
+      .catch(() => setPurchases([]));
+  }, [isLoggedIn, token]);
+
+  // Purchased ebook IDs (use itemId)
+  const purchasedEbookIds = new Set(
+    purchases.filter(p => p.itemType === 'ebook' && p.itemId).map(p => p.itemId)
+  );
+
+  // Anim
   useEffect(() => {
     if (inView) controls.start("visible");
     else controls.start("hidden");
   }, [inView, controls]);
+
+  // Download handler
+  const handleDownload = async (ebook) => {
+    setDownloading(ebook._id);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ebooks/${ebook._id}/download`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.status === 200) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${ebook.title}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Download failed.");
+      }
+    } catch (err) {
+      alert("Download failed.");
+    }
+    setDownloading('');
+  };
+
+  // Action (download or go to checkout)
+  const handleAction = (ebook) => {
+    if (!isLoggedIn) {
+      navigate(`/login?redirect=/e-books`);
+      return;
+    }
+    if (ebook.forMembersOnly && !isMember) {
+      alert("This ebook is for members only. Become a member to access.");
+      return;
+    }
+    if (purchasedEbookIds.has(ebook._id)) {
+      handleDownload(ebook);
+      return;
+    }
+    // Not purchased, go to checkout
+    if (ebook.price > 0 && !ebook.isFree) {
+      navigate(`/coaching-ebooks/payment/${ebook._id}`);
+    } else {
+      window.open(`${import.meta.env.VITE_API_URL}${ebook.ebookUrl}?t=${Date.now()}`, "_blank");
+    }
+  };
 
   return (
     <motion.section
@@ -68,7 +134,10 @@ export default function EbooksSection() {
       className="py-[60px] mt-[60px]"
       initial="hidden"
       animate={controls}
-      variants={sectionFade}
+      variants={{
+        hidden: { opacity: 0, y: 60 },
+        visible: { opacity: 1, y: 0 }
+      }}
     >
       <div className="mx-auto md:px-[45px] px-[15px]">
         {/* Header */}
@@ -81,7 +150,6 @@ export default function EbooksSection() {
             exclusive free content for subscribed clients and access premium eBooks.
           </p>
         </div>
-
         {/* Books Grid */}
         <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[40px] mb-[20px]"
@@ -91,46 +159,66 @@ export default function EbooksSection() {
           initial={false}
           animate={controls}
         >
-          {ebooks.map((ebook, i) => (
-            <motion.div
-              key={ebook.id}
-              className="flex flex-col items-start"
-              variants={cardFlip}
-              whileHover={{ scale: 1.04, rotateY: 2 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 18 }}
-            >
-              {/* Book Cover Card */}
-              <div className="bg-[#2E2E2E] w-full flex flex-col items-center justify-center px-[60px] py-[25px] overflow-hidden shadow-md shadow-black/10">
-                <img
-                  src={ebook.isForAll ? ebook.cover : ebookCover2}
-                  alt={ebook.title}
-                  className="w-[180px] h-[240px] object-contain"
-                  style={{ aspectRatio: '3/4' }}
-                />
-              </div>
-              {/* Info Row: badge, title, download, price */}
-              <div className="flex items-center justify-between gap-2 w-full mt-5">
-                <span className={`text-[14px] font-semibold tracking-[1px] ${ebook.isForAll ? 'text-[#ED232A]' : 'text-[#ED232A]'}`} style={{ minWidth: "fit-content" }}>
-                  {ebook.isForAll ? 'FOR ALL' : 'FOR MEMBERS ONLY'}
-                </span>
-                <img
-                  src={download}
-                  alt="Download"
-                  className="w-6 h-6 mx-2"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-2 w-full mt-5">
-                <span className="flex-1 text-white text-[20px] font-normal">{ebook.title}</span>
-                <span className="text-white text-[16px] font-normal">{ebook.price}</span>
-              </div>
-            </motion.div>
-          ))}
+          {loading
+            ? Array(4).fill(0).map((_, i) => (
+                <div key={i} className="bg-[#2E2E2E] h-[320px] w-full rounded shadow animate-pulse" />
+              ))
+            : ebooks.map((ebook, i) => {
+                const shouldBlur = !isLoggedIn || (ebook.forMembersOnly && !isMember);
+                const isPurchased = purchasedEbookIds.has(ebook._id);
+                return (
+                  <motion.div
+                    key={ebook._id}
+                    className="flex flex-col items-start"
+                    variants={cardFlip}
+                    whileHover={{ scale: 1.04, rotateY: 2 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+                  >
+                    {/* Book Cover */}
+                    <div className="bg-[#2E2E2E] w-full flex flex-col items-center justify-center px-[60px] py-[25px] overflow-hidden shadow-md shadow-black/10">
+                      <img
+                        src={ebook.coverUrl ? `${import.meta.env.VITE_API_URL}${ebook.coverUrl}` : ''}
+                        alt={ebook.title}
+                        className={
+                          "w-[180px] h-[240px] object-contain transition-all duration-200" +
+                          (shouldBlur ? " blur-[3px] brightness-90 grayscale" : "")
+                        }
+                        style={{ aspectRatio: '3/4' }}
+                        draggable={false}
+                      />
+                    </div>
+                    {/* Info Row */}
+                    <div className="flex items-center justify-between gap-2 w-full mt-5">
+                      <span className={`text-[14px] font-semibold tracking-[1px] ${ebook.forMembersOnly ? 'text-[#ED232A]' : 'text-[#ED232A]'}`} style={{ minWidth: "fit-content" }}>
+                        {ebook.forMembersOnly ? 'FOR MEMBERS ONLY' : 'FOR ALL'}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="rounded-full hover:bg-primary transition-all duration-150 p-2"
+                        onClick={() => handleAction(ebook)}
+                        disabled={shouldBlur || downloading === ebook._id}
+                      >
+                        <img src={DownloadIcon} alt="Download" className="object-contain" draggable={false} />
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 w-full mt-5">
+                      <span className="flex-1 text-white text-[20px] font-normal">{ebook.title}</span>
+                      {isPurchased ? (
+                        <span className="text-green-400 text-[15px] font-semibold ml-2">Purchased</span>
+                      ) : (ebook.price > 0 && !ebook.isFree && (
+                        <span className="text-white text-[16px] font-normal">€{ebook.price}</span>
+                      ))}
+                    </div>
+                  </motion.div>
+                );
+              })}
         </motion.div>
         {/* Read More Button */}
         <div className="text-center mt-[55px]">
-            <Link to={'/e-books'} className="hero-button px-[45px]">
-              READ MORE
-            </Link>
+          <Link to={'/e-books'} className="hero-button px-[45px]">
+            READ MORE
+          </Link>
         </div>
       </div>
     </motion.section>
