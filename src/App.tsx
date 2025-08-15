@@ -26,7 +26,6 @@ import { loadStripe } from '@stripe/stripe-js';
 import CheckoutSession from "./pages/CheckoutSession";
 import CheckoutEbook from "./pages/CheckoutEbook";
 
-
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const queryClient = new QueryClient();
