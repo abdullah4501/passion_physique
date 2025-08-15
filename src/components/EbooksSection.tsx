@@ -3,6 +3,7 @@ import DownloadIcon from '@/assets/icons/download.png';
 import { motion, useAnimation, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import MemberRequiredModal from '@/components/MemberRequiredModal';
 
 const cardFlip = {
   hidden: { opacity: 0, rotateY: 80, scale: 0.9 },
@@ -21,6 +22,7 @@ export default function EbooksSection() {
   const [isMember, setIsMember] = useState(false);
   const [purchases, setPurchases] = useState([]);
   const [downloading, setDownloading] = useState('');
+  const [showMemberModal, setShowMemberModal] = useState(false);
 
   // Auth
   const token = localStorage.getItem('token');
@@ -79,23 +81,65 @@ export default function EbooksSection() {
     else controls.start("hidden");
   }, [inView, controls]);
 
-  // Download handler
+
+  // Handle download/purchase/checkout
+  const handleAction = (ebook) => {
+    if (!isLoggedIn) {
+      navigate(`/login?redirect=/e-books`);
+      return;
+    }
+    if (ebook.forMembersOnly && !isMember) {
+      setShowMemberModal(true);
+      return;
+    }
+
+    // 👇 If purchased, trigger download
+    if (purchasedEbookIds.has(ebook._id)) {
+      handleDownload(ebook);
+      return;
+    }
+    if (ebook.isFree && isMember) {
+      handleDownload(ebook);
+      return;
+    }
+    // Not purchased, open checkout
+    if (ebook.price > 0) {
+      navigate(`/coaching-ebooks/payment/${ebook._id}`);
+    } else {
+      // Free e-book
+      handleDownload(ebook);
+    }
+  };
+
+  // 👇 ADDED: Download logic for purchased ebook
   const handleDownload = async (ebook) => {
     setDownloading(ebook._id);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ebooks/${ebook._id}/download`, {
+      // 👇 Use /download for purchased, /secure-download for free
+      let url;
+      if (ebook.isFree) {
+        url = `${import.meta.env.VITE_API_URL}/api/ebooks/${ebook._id}/secure-download`;
+      } else {
+        url = `${import.meta.env.VITE_API_URL}/api/ebooks/${ebook._id}/download`;
+      }
+
+      const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.status === 200) {
         const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
+        const ext = ebook.mimeType === 'application/pdf' ? '.pdf'
+          : ebook.mimeType === 'image/jpeg' ? '.jpg'
+            : ebook.mimeType === 'image/png' ? '.png' : '';
+        const fileName = `${ebook.title}${ext}`;
+        const downloadUrl = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `${ebook.title}.pdf`;
+        a.href = downloadUrl;
+        a.download = fileName;
         document.body.appendChild(a);
         a.click();
         a.remove();
-        window.URL.revokeObjectURL(url);
+        window.URL.revokeObjectURL(downloadUrl);
       } else {
         const data = await res.json();
         alert(data.error || "Download failed.");
@@ -104,28 +148,6 @@ export default function EbooksSection() {
       alert("Download failed.");
     }
     setDownloading('');
-  };
-
-  // Action (download or go to checkout)
-  const handleAction = (ebook) => {
-    if (!isLoggedIn) {
-      navigate(`/login?redirect=/e-books`);
-      return;
-    }
-    if (ebook.forMembersOnly && !isMember) {
-      alert("This ebook is for members only. Become a member to access.");
-      return;
-    }
-    if (purchasedEbookIds.has(ebook._id)) {
-      handleDownload(ebook);
-      return;
-    }
-    // Not purchased, go to checkout
-    if (ebook.price > 0 && !ebook.isFree) {
-      navigate(`/coaching-ebooks/payment/${ebook._id}`);
-    } else {
-      window.open(`${import.meta.env.VITE_API_URL}${ebook.ebookUrl}?t=${Date.now()}`, "_blank");
-    }
   };
 
   return (
@@ -161,58 +183,64 @@ export default function EbooksSection() {
         >
           {loading
             ? Array(4).fill(0).map((_, i) => (
-                <div key={i} className="bg-[#2E2E2E] h-[320px] w-full rounded shadow animate-pulse" />
-              ))
+              <div key={i} className="bg-[#2E2E2E] h-[320px] w-full rounded shadow animate-pulse" />
+            ))
             : ebooks.map((ebook, i) => {
-                const shouldBlur = !isLoggedIn || (ebook.forMembersOnly && !isMember);
-                const isPurchased = purchasedEbookIds.has(ebook._id);
-                return (
-                  <motion.div
-                    key={ebook._id}
-                    className="flex flex-col items-start"
-                    variants={cardFlip}
-                    whileHover={{ scale: 1.04, rotateY: 2 }}
-                    transition={{ type: 'spring', stiffness: 200, damping: 18 }}
-                  >
-                    {/* Book Cover */}
-                    <div className="bg-[#2E2E2E] w-full flex flex-col items-center justify-center px-[60px] py-[25px] overflow-hidden shadow-md shadow-black/10">
-                      <img
-                        src={ebook.coverUrl ? `${import.meta.env.VITE_API_URL}${ebook.coverUrl}` : ''}
-                        alt={ebook.title}
-                        className={
-                          "w-[180px] h-[240px] object-contain transition-all duration-200" +
-                          (shouldBlur ? " blur-[3px] brightness-90 grayscale" : "")
-                        }
-                        style={{ aspectRatio: '3/4' }}
-                        draggable={false}
-                      />
-                    </div>
-                    {/* Info Row */}
-                    <div className="flex items-center justify-between gap-2 w-full mt-5">
-                      <span className={`text-[14px] font-semibold tracking-[1px] ${ebook.forMembersOnly ? 'text-[#ED232A]' : 'text-[#ED232A]'}`} style={{ minWidth: "fit-content" }}>
-                        {ebook.forMembersOnly ? 'FOR MEMBERS ONLY' : 'FOR ALL'}
-                      </span>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="rounded-full hover:bg-primary transition-all duration-150 p-2"
-                        onClick={() => handleAction(ebook)}
-                        disabled={shouldBlur || downloading === ebook._id}
-                      >
-                        <img src={DownloadIcon} alt="Download" className="object-contain" draggable={false} />
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between gap-2 w-full mt-5">
-                      <span className="flex-1 text-white text-[20px] font-normal">{ebook.title}</span>
-                      {isPurchased ? (
-                        <span className="text-green-400 text-[15px] font-semibold ml-2">Purchased</span>
-                      ) : (ebook.price > 0 && !ebook.isFree && (
-                        <span className="text-white text-[16px] font-normal">€{ebook.price}</span>
-                      ))}
-                    </div>
-                  </motion.div>
-                );
-              })}
+              const shouldBlur = !isLoggedIn || (ebook.forMembersOnly && !isMember);
+              const isPurchased = purchasedEbookIds.has(ebook._id);
+              return (
+                <motion.div
+                  key={ebook._id}
+                  className="flex flex-col items-start"
+                  variants={cardFlip}
+                  whileHover={{ scale: 1.04, rotateY: 2 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+                >
+                  {/* Book Cover */}
+                  <div className="bg-[#2E2E2E] w-full flex flex-col items-center justify-center px-[60px] py-[25px] overflow-hidden shadow-md shadow-black/10">
+                    <img
+                      src={ebook.coverUrl ? `${import.meta.env.VITE_API_URL}${ebook.coverUrl}` : ''}
+                      alt={ebook.title}
+                      className={
+                        "w-[180px] h-[240px] object-contain transition-all duration-200" +
+                        (shouldBlur ? " blur-[3px] brightness-90 grayscale" : "")
+                      }
+                      style={{ aspectRatio: '3/4' }}
+                      draggable={false}
+                    />
+                  </div>
+                  {/* Info Row */}
+                  <div className="flex items-center justify-between gap-2 w-full mt-5">
+                    <span className={`text-[14px] font-semibold tracking-[1px] ${ebook.forMembersOnly ? 'text-[#ED232A]' : 'text-[#ED232A]'}`} style={{ minWidth: "fit-content" }}>
+                      {ebook.forMembersOnly ? 'FOR MEMBERS ONLY' : 'FOR ALL'}
+                    </span>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="rounded-full hover:bg-primary transition-all duration-150 p-2"
+                      onClick={() => handleAction(ebook)}
+                    // disabled={shouldBlur || downloading === ebook._id}
+                    >
+                      <img src={DownloadIcon} alt="Download" className="object-contain" draggable={false} />
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 w-full mt-5">
+                    <span className="flex-1 text-white text-[20px] font-normal">{ebook.title}</span>
+                    {isPurchased ? (
+                      <span className="text-green-400 text-[15px] font-semibold ml-2">Purchased</span>
+                    ) : (ebook.isFree && isMember ? (
+                      <span className="text-green-400 text-[17px] font-semibold ml-2">Free</span>
+                    ) : (
+                      ebook.price > 0 && (
+                        <span className="text-white text-[17px] font-normal ml-2">
+                          €{ebook.price}
+                        </span>
+                      )
+                    ))}
+                  </div>
+                </motion.div>
+              );
+            })}
         </motion.div>
         {/* Read More Button */}
         <div className="text-center mt-[55px]">
@@ -221,6 +249,8 @@ export default function EbooksSection() {
           </Link>
         </div>
       </div>
+
+      <MemberRequiredModal open={showMemberModal} onClose={() => setShowMemberModal(false)} />
     </motion.section>
   );
 }

@@ -88,8 +88,8 @@ const Ebooks = () => {
     const purchasedEbookIds = new Set(
         purchases
             .filter((p) => p.itemType === "ebook" && p.itemId) // Make sure your backend is saving ebookId in purchases!
-            .map((p) => p.itemId)            
-        );
+            .map((p) => p.itemId)
+    );
 
     // Handle download/purchase/checkout
     const handleAction = (ebook) => {
@@ -107,13 +107,16 @@ const Ebooks = () => {
             handleDownload(ebook);
             return;
         }
-
+        if (ebook.isFree && isMember) {
+            handleDownload(ebook);
+            return;
+        }
         // Not purchased, open checkout
-        if (ebook.price > 0 && !ebook.isFree) {
+        if (ebook.price > 0) {
             navigate(`/coaching-ebooks/payment/${ebook._id}`);
         } else {
             // Free e-book
-            window.open(`${import.meta.env.VITE_API_URL}${ebook.ebookUrl}?t=${Date.now()}`, "_blank");
+            handleDownload(ebook);
         }
     };
 
@@ -121,19 +124,31 @@ const Ebooks = () => {
     const handleDownload = async (ebook) => {
         setDownloading(ebook._id);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ebooks/${ebook._id}/download`, {
+            // 👇 Use /download for purchased, /secure-download for free
+            let url;
+            if (ebook.isFree) {
+                url = `${import.meta.env.VITE_API_URL}/api/ebooks/${ebook._id}/secure-download`;
+            } else {
+                url = `${import.meta.env.VITE_API_URL}/api/ebooks/${ebook._id}/download`;
+            }
+    
+            const res = await fetch(url, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.status === 200) {
                 const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
+                const ext = ebook.mimeType === 'application/pdf' ? '.pdf'
+                            : ebook.mimeType === 'image/jpeg' ? '.jpg'
+                            : ebook.mimeType === 'image/png' ? '.png' : '';
+                const fileName = `${ebook.title}${ext}`;
+                const downloadUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url;
-                a.download = `${ebook.title}.pdf`;
+                a.href = downloadUrl;
+                a.download = fileName;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
-                window.URL.revokeObjectURL(url);
+                window.URL.revokeObjectURL(downloadUrl);
             } else {
                 const data = await res.json();
                 alert(data.error || "Download failed.");
@@ -143,6 +158,7 @@ const Ebooks = () => {
         }
         setDownloading('');
     };
+    
 
     return (
         <>
@@ -238,7 +254,6 @@ const Ebooks = () => {
                                                         variant="ghost"
                                                         className="rounded-full hover:bg-primary transition-all duration-150 p-2"
                                                         onClick={() => handleAction(ebook)}
-                                                        disabled={shouldBlur || downloading === ebook._id}
                                                     >
                                                         <img
                                                             src={DownloadIcon}
@@ -250,11 +265,16 @@ const Ebooks = () => {
                                                     {/* Show green Purchased badge OR price */}
                                                     {isPurchased ? (
                                                         <span className="text-green-400 text-[15px] font-semibold ml-2">Purchased</span>
-                                                    ) : (ebook.price > 0 && !ebook.isFree && (
-                                                        <span className="text-white text-[17px] font-normal ml-2">
-                                                            €{ebook.price}
-                                                        </span>
+                                                    ) : (ebook.isFree && isMember ? (
+                                                        <span className="text-green-400 text-[17px] font-semibold ml-2">Free</span>
+                                                    ) : (
+                                                        ebook.price > 0 && (
+                                                            <span className="text-white text-[17px] font-normal ml-2">
+                                                                €{ebook.price}
+                                                            </span>
+                                                        )
                                                     ))}
+
                                                 </div>
                                             </div>
                                             <div className="text-white text-[14px] font-normal mt-2 mb-0 leading-[24px] pr-0 md:pr-[25px]">

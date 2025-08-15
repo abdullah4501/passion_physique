@@ -640,24 +640,39 @@ const EbookCheckout = () => {
                                 ) : ebook ? (
                                     <>
                                         <div
-                                            className="bg-[#2E2E2E] md:px-[45px] px-[15px] py-[40px] transition-all duration-300 md:flex-row flex-col justify-between h-full mb-10"
-                                        >
-                                            <div className="flex justify-between items-start mb-4 md:flex-row flex-col">
-                                                <div className="flex-1 md:pr-6 pr-0 ">
-                                                    <h3 className="text-[26px] font-light text-white mb-3">{ebook.title}</h3>
-                                                    <p className="text-white text-[14px] font-light leading-relaxed mb-4 md:pr-6 pr-0">
-                                                        {ebook.description}
-                                                    </p>
+                                        className="bg-[#2E2E2E] md:px-[45px] px-[15px] py-[40px] transition-all duration-300 flex md:flex-row flex-col justify-between h-full mb-10 gap-4 items-center"
+                                        style={{ minHeight: 180 }}
+                                       
+                                    >
+                                        {/* Book Cover (blurred if not logged in or not member for members-only book) */}
+                                        <div className="overflow-hidden relative">
+                                            <img
+                                                src={ebook.coverUrl ? `${import.meta.env.VITE_API_URL}${ebook.coverUrl}` : ''}
+                                                alt={ebook.title}
+                                                className="h-[180px] object-contain transition-all duration-200"
+                                            />
+                                        </div>
+                                        {/* Info Side */}
+                                        <div className="flex-1 flex flex-col justify-center h-full relative">
+                                            <div className="flex flex-row items-start justify-between">
+                                                <div>
+                                                    <span className={`block text-[14px] font-semibold mb-1 uppercase tracking-wide text-primary`}>
+                                                        {ebook.forMembersOnly ? "FOR MEMBERS ONLY" : "FOR ALL"}
+                                                    </span>
+                                                    <span className="block text-white text-[20px] font-normal mb-1">{ebook.title}</span>
                                                 </div>
-                                                <div className="text-right pricing-info">
-                                                    <div className="text-[36px] font-light text-white">€{ebook.price}</div>
-                                                    <div className="text-white text-[18px] font-light">E-Book</div>
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <span className="text-white text-[17px] font-normal ml-2">
+                                                        €{ebook.price}
+                                                    </span>
+
                                                 </div>
                                             </div>
-                                            <div className="flex items-center justify-between md:flex-row flex-col">
-                                                <p className="text-primary text-[14px] font-medium">{ebook.forMembersOnly ? "FOR MEMBERS ONLY" : "FOR ALL"}</p>
+                                            <div className="text-white text-[14px] font-normal mt-2 mb-0 leading-[24px] pr-0 md:pr-[25px]">
+                                                {ebook.description}
                                             </div>
                                         </div>
+                                    </div>
                                         <div className="flex flex-col gap-3 border-t border-[#acacac] pt-5">
                                             <div className="flex items-center justify-between text-[15px] font-normal">
                                                 <span className="text-[#fff] text-[16px] font-[500] ">Subtotal</span>
