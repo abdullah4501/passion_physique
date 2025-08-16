@@ -34,59 +34,71 @@ const faqData = [
     {
         id: "item-1",
         question: "1. What's the difference between Basic and Full plans?",
-        answer: "Basic Includes Nutrition, Supplements, Cardio, Recovery, Posing, Weekly Chats, Form Checks, And Updates — But No Workout Plan.\nFull Includes Everything, Plus A Custom Workout Program And More Interaction."
+        answer:
+            "Basic includes nutrition, supplements, cardio, recovery, posing, weekly chats, form checks, and updates — but no workout plan.\nFull includes everything, plus a custom workout program and more interaction."
     },
     {
         id: "item-2",
         question: "2. How do I pay?",
-        answer: "Payment information and methods will be provided here."
+        answer:
+            "Via UAE Bank Transfer (SEPA), Payoneer, or Stripe. A 3–6% fee applies to Payoneer and Stripe."
     },
     {
         id: "item-3",
         question: "3. Will I receive an invoice?",
-        answer: "Invoice information will be provided here."
+        answer:
+            "Yes, immediately after payment — in line with UAE VAT Law and global consumer protection."
     },
     {
         id: "item-4",
         question: "4. Are refunds possible?",
-        answer: "Refund policy information will be provided here."
+        answer:
+            "No. All payments are final. Please review the Terms before purchasing."
     },
     {
         id: "item-5",
         question: "5. Can I contact you during the plan?",
-        answer: "Contact information and availability will be provided here."
+        answer:
+            "Yes. Both plans include mandatory coaching chats and weekly form checks:\n• Basic: 2x/week\n• Full: 4x/week"
     },
     {
         id: "item-6",
         question: "6. Is my data private?",
-        answer: "Data privacy and security information will be provided here."
+        answer:
+            "Yes. All data is confidential and accessed only by Petros Pasiollari. Nothing is shared without written consent."
     },
     {
         id: "item-7",
         question: "7. How do I start?",
-        answer: "Getting started instructions will be provided here."
+        answer:
+            "After payment, you’ll receive your invoice and access to a custom onboarding questionnaire."
     },
     {
         id: "item-8",
         question: "8. What if I have injuries or a unique schedule?",
-        answer: "Information about accommodations for injuries and unique schedules will be provided here."
+        answer:
+            "Plans are adapted to your lifestyle, training level, and health needs."
     },
     {
         id: "item-9",
         question: "9. Do I need a gym?",
-        answer: "Gym requirements and alternatives will be provided here."
+        answer:
+            "• Basic: Gym optional but recommended\n• Full: Gym is mandatory"
     },
     {
         id: "item-10",
         question: "10. Are eBooks included?",
-        answer: "eBook information and inclusions will be provided here."
+        answer:
+            "Yes — 1 eBook is free for clients.\n4 additional premium eBooks will be payable."
     },
     {
         id: "item-11",
         question: "11. What if I can’t perform an exercise from the workout library?",
-        answer: "eBook information and inclusions will be provided here."
+        answer:
+            "The library is designed with variety and flexibility in mind. If a specific exercise isn’t possible, I’ll provide alternatives that match your equipment and training style."
     }
 ];
+
 
 import { useState } from "react";
 
