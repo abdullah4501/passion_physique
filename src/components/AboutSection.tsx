@@ -19,6 +19,7 @@ const AboutSection = () => {
       text: "Specialized support for women at all life stages"
     }
   ];
+  
 
   return (
     <section className="py-[30px] bg-[#000000]">
