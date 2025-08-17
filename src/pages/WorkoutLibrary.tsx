@@ -172,8 +172,38 @@ const WorkoutLibrary = () => {
   const handlePlay = (video: any) => {
     setActiveVideo(video);
     setModalOpen(true);
+  
+    // Save video to user's library when they try to watch
+    const token = localStorage.getItem('token');
+    if (token && video._id) {
+      fetch(`${import.meta.env.VITE_API_URL}/api/library/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ videoId: video._id }),
+      });
+    }
+  };
+  
+  const handleView = (video) => {
+    // 1. Open the video player/modal/stream as you do now
+    window.open(`${import.meta.env.VITE_API_URL.replace('/api', '')}${video.videoUrl}`, '_blank');
+    
+    // 2. Save video to user's library (fire and forget)
+    const token = localStorage.getItem('token');
+    fetch(`${import.meta.env.VITE_API_URL}/library/save`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ videoId: video._id }),
+    });
   };
 
+  
   return (
     <>
       <Header />

@@ -7,6 +7,8 @@ import { motion, useInView } from 'framer-motion';
 import { authFetch } from '@/utils/authFetch';
 import PaymentInfo from '@/components/PaymentInfo';
 import ActivePlan from '@/components/ActivePlan';
+import PurchasedEbooks from '@/components/purchasedEbooks';
+import SavedLibrary from '@/components/SavedLibrary';
 
 
 const titleVariants = {
@@ -173,165 +175,199 @@ const Profile = () => {
                     </motion.div>
                 </div>
             </section>
-            <section className="w-full py-[125px] bg-black">
-                <div className="container grid grid-cols-4 gap-16">
-                    {/* Vertical Tabs */}
-                    <div className="col-span-1">
-                        <div className="flex flex-col gap-1 bg-[#2e2e2e] rounded-[2px] py-6 px-6">
-                            {tabList.map((tab) => (
-                                <button
-                                    key={tab.key}
-                                    className={`text-left px-3 py-3 text-[16px] font-[400] rounded-none transition-colors duration-200
-                    ${activeTab === tab.key
-                                            ? "bg-[#000] text-white"
-                                            : "bg-transparent text-[#fff] hover:bg-[#222]"
-                                        }
-                  `}
-                                    style={{ letterSpacing: 0.2 }}
-                                    onClick={() => setActiveTab(tab.key)}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
+            <section className="w-full py-[60px] md:py-[125px] bg-background">
+                <div className="container mx-auto px-4">
+
+                    {/* Mobile Tabs - Horizontal scrollable */}
+                    <div className="block md:hidden mb-8">
+                        <div className="overflow-x-auto">
+                            <div className="flex gap-2 bg-muted rounded-lg p-4 min-w-max">
+                                {tabList.map((tab) => (
+                                    <button
+                                        key={tab.key}
+                                        className={`text-left px-3 py-3 text-[16px] font-[400] rounded-none transition-colors duration-200
+                                        ${activeTab === tab.key
+                                                ? "bg-[#000] text-white"
+                                                : "bg-transparent text-[#fff] hover:bg-[#222]"
+                                            }
+                                        `}
+                                        onClick={() => setActiveTab(tab.key)}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                    {/* Tab Content */}
-                    <div className="col-span-3 w-full">
-                        {activeTab === 'info' && (
-                            <>
-                                <div className="border-b border-[#acacac] mb-7 pb-1">
-                                    <h2 className="text-white text-[24px] font-[600]">Change Your Info</h2>
-                                </div>
-                                {infoLoading ? (
-                                    <div className="text-[#ccc] text-lg pt-8">Loading...</div>
-                                ) : (
-                                    <form className="flex flex-col gap-5 mb-8" onSubmit={handleInfoSave}>
+
+                    {/* Desktop and Mobile Content Layout */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-16">
+
+                        {/* Desktop Vertical Tabs */}
+                        <div className="hidden md:block md:col-span-1">
+                            <div className="flex flex-col gap-1 bg-muted rounded-lg py-6 px-6">
+                                {tabList.map((tab) => (
+                                    <button
+                                        key={tab.key}
+                                        className={`text-left px-3 py-3 text-[16px] font-[400] rounded-none transition-colors duration-200
+                                        ${activeTab === tab.key
+                                                ? "bg-[#000] text-white"
+                                                : "bg-transparent text-[#fff] hover:bg-primary"
+                                            }
+                                        `}
+                                        onClick={() => setActiveTab(tab.key)}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Tab Content */}
+                        <div className="col-span-1 md:col-span-3 w-full">
+                            {activeTab === 'info' && (
+                                <>
+                                    <div className="border-b border-border mb-7 pb-3">
+                                        <h2 className="text-foreground text-[24px] font-semibold">Change Your Info</h2>
+                                    </div>
+                                    {infoLoading ? (
+                                        <div className="text-muted-foreground text-lg pt-8">Loading...</div>
+                                    ) : (
+                                        <form className="flex flex-col gap-5 mb-8" onSubmit={handleInfoSave}>
+                                            <div>
+                                                <label className="block text-muted-foreground font-medium text-[16px] mb-2" htmlFor="firstName">
+                                                    First Name*
+                                                </label>
+                                                <input
+                                                    id="firstName"
+                                                    type="text"
+                                                    name="firstName"
+                                                    value={info.firstName}
+                                                    onChange={handleInfoChange}
+                                                    className="w-full bg-muted text-foreground h-[42px] px-4 text-[14px] font-normal border border-border rounded-md outline-none focus:ring-2 focus:ring-ring transition-all duration-200"
+                                                    autoComplete="off"
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-muted-foreground font-medium text-[16px] mb-2" htmlFor="lastName">
+                                                    Last Name*
+                                                </label>
+                                                <input
+                                                    id="lastName"
+                                                    type="text"
+                                                    name="lastName"
+                                                    value={info.lastName}
+                                                    onChange={handleInfoChange}
+                                                    className="w-full bg-muted text-foreground h-[42px] px-4 text-[14px] font-normal border border-border rounded-md outline-none focus:ring-2 focus:ring-ring transition-all duration-200"
+                                                    autoComplete="off"
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-muted-foreground font-medium text-[16px] mb-2" htmlFor="email">
+                                                    Email Address*
+                                                </label>
+                                                <input
+                                                    id="email"
+                                                    type="email"
+                                                    name="email"
+                                                    value={info.email}
+                                                    onChange={handleInfoChange}
+                                                    className="w-full bg-muted text-foreground h-[42px] px-4 text-[14px] font-normal border border-border rounded-md outline-none focus:ring-2 focus:ring-ring transition-all duration-200"
+                                                    autoComplete="off"
+                                                    required
+                                                />
+                                            </div>
+                                            {infoError && <div className="text-destructive text-[15px]">{infoError}</div>}
+                                            {infoMsg && <div className="text-green-600 text-[15px]">{infoMsg}</div>}
+                                            <button
+                                                type="submit"
+                                                className="w-[120px] h-[45px] mt-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-[16px] transition-all duration-200 rounded-md"
+                                            >
+                                                Save
+                                            </button>
+                                        </form>
+                                    )}
+
+                                    <div className="border-b border-border mb-7 pb-3">
+                                        <h2 className="text-foreground text-[24px] font-semibold">Change Your Password</h2>
+                                    </div>
+                                    <form className="flex flex-col gap-5 mb-8" onSubmit={handlePwSave}>
                                         <div>
-                                            <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="firstName">
-                                                First Name*
+                                            <label className="block text-muted-foreground font-medium text-[16px] mb-2" htmlFor="currentPassword">
+                                                Current Password*
                                             </label>
                                             <input
-                                                id="firstName"
-                                                type="text"
-                                                name="firstName"
-                                                value={info.firstName}
-                                                onChange={handleInfoChange}
-                                                className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                                id="currentPassword"
+                                                type="password"
+                                                value={pwForm.currentPassword}
+                                                onChange={handlePwChange}
+                                                placeholder="Type your current password here"
+                                                className="w-full bg-muted text-foreground h-[42px] px-4 text-[14px] font-normal border border-border rounded-md outline-none focus:ring-2 focus:ring-ring transition-all duration-200"
                                                 autoComplete="off"
                                                 required
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="lastName">
-                                                Last Name*
+                                            <label className="block text-muted-foreground font-medium text-[16px] mb-2" htmlFor="newPassword">
+                                                New Password*
                                             </label>
                                             <input
-                                                id="lastName"
-                                                type="text"
-                                                name="lastName"
-                                                value={info.lastName}
-                                                onChange={handleInfoChange}
-                                                className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                                id="newPassword"
+                                                type="password"
+                                                value={pwForm.newPassword}
+                                                onChange={handlePwChange}
+                                                placeholder="Type your new password here"
+                                                className="w-full bg-muted text-foreground h-[42px] px-4 text-[14px] font-normal border border-border rounded-md outline-none focus:ring-2 focus:ring-ring transition-all duration-200"
                                                 autoComplete="off"
                                                 required
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="email">
-                                                Email Address*
+                                            <label className="block text-muted-foreground font-medium text-[16px] mb-2" htmlFor="confirmPassword">
+                                                Confirm Password*
                                             </label>
                                             <input
-                                                id="email"
-                                                type="email"
-                                                name="email"
-                                                value={info.email}
-                                                onChange={handleInfoChange}
-                                                className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
+                                                id="confirmPassword"
+                                                type="password"
+                                                value={pwForm.confirmPassword}
+                                                onChange={handlePwChange}
+                                                placeholder="Type your password confirmation here"
+                                                className="w-full bg-muted text-foreground h-[42px] px-4 text-[14px] font-normal border border-border rounded-md outline-none focus:ring-2 focus:ring-ring transition-all duration-200"
                                                 autoComplete="off"
                                                 required
                                             />
                                         </div>
-                                        {infoError && <div className="text-red-500 text-[15px]">{infoError}</div>}
-                                        {infoMsg && <div className="text-green-500 text-[15px]">{infoMsg}</div>}
+                                        {pwError && <div className="text-destructive text-[15px]">{pwError}</div>}
+                                        {pwMsg && <div className="text-green-600 text-[15px]">{pwMsg}</div>}
                                         <button
                                             type="submit"
-                                            className="w-[120px] h-[45px] mt-2 bg-[#ff3c33] hover:bg-[#e03228] text-white font-[600] text-[16px] transition-all duration-150 rounded-none"
+                                            className="w-[120px] h-[45px] mt-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-[16px] transition-all duration-200 rounded-md"
+                                            disabled={pwLoading}
                                         >
-                                            Save
+                                            {pwLoading ? "Saving..." : "Save"}
                                         </button>
                                     </form>
-                                )}
-                                <div className="border-b border-[#acacac] mb-7 pb-1">
-                                    <h2 className="text-white text-[24px] font-[600]">Change Your Password</h2>
-                                </div>
-                                <form className="flex flex-col gap-5 mb-8" onSubmit={handlePwSave}>
-                                    <div>
-                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="currentPassword">
-                                            Current Password*
-                                        </label>
-                                        <input
-                                            id="currentPassword"
-                                            type="password"
-                                            value={pwForm.currentPassword}
-                                            onChange={handlePwChange}
-                                            placeholder="Type your current password here"
-                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                            autoComplete="off"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="newPassword">
-                                            New Password*
-                                        </label>
-                                        <input
-                                            id="newPassword"
-                                            type="password"
-                                            value={pwForm.newPassword}
-                                            onChange={handlePwChange}
-                                            placeholder="Type your new password here"
-                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                            autoComplete="off"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="confirmPassword">
-                                            Confirm Password*
-                                        </label>
-                                        <input
-                                            id="confirmPassword"
-                                            type="password"
-                                            value={pwForm.confirmPassword}
-                                            onChange={handlePwChange}
-                                            placeholder="Type your password confirmation here"
-                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                            autoComplete="off"
-                                            required
-                                        />
-                                    </div>
-                                    {pwError && <div className="text-red-500 text-[15px]">{pwError}</div>}
-                                    {pwMsg && <div className="text-green-500 text-[15px]">{pwMsg}</div>}
-                                    <button
-                                        type="submit"
-                                        className="w-[120px] h-[45px] mt-2 bg-[#ff3c33] hover:bg-[#e03228] text-white font-[600] text-[16px] transition-all duration-150 rounded-none"
-                                        disabled={pwLoading}
-                                    >
-                                        {pwLoading ? "Saving..." : "Save"}
-                                    </button>
-                                </form>
-                            </>
-                        )}
+                                </>
+                            )}
 
-                        {activeTab === 'payment' && <PaymentInfo />}
-                        {activeTab === 'activePlan' && <ActivePlan />}
+                            {activeTab === 'payment' && (
+                                <PaymentInfo />
+                            )}
 
-                        {activeTab !== 'info' && activeTab !== 'password' && activeTab !== 'payment' && activeTab !=='activePlan' && (
-                            <div className="text-[#ccc] text-lg pt-8">
-                                This section will be available soon.
-                            </div>
-                        )}
+                            {activeTab === 'activePlan' && (
+                                <ActivePlan />
+                            )}
 
+                            {activeTab === 'ebook' && (
+                                <PurchasedEbooks />
+                            )}
+
+                            {activeTab === 'library' && (
+                                <SavedLibrary />
+                            )}
+                        </div>
                     </div>
                 </div>
             </section>
