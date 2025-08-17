@@ -7,7 +7,7 @@ import { motion, useInView } from 'framer-motion';
 import { authFetch } from '@/utils/authFetch';
 import PaymentInfo from '@/components/PaymentInfo';
 import ActivePlan from '@/components/ActivePlan';
-import PurchasedEbooks from '@/components/purchasedEbooks';
+import PurchasedEbooks from '@/components/PurchasedEbooks';
 import SavedLibrary from '@/components/SavedLibrary';
 
 
