@@ -14,12 +14,12 @@ const Footer = () => {
     { label: 'About Us', href: '/about-us' },
     { label: 'Coaching Plans', href: '/plans' },
     { label: 'E-Books', href: '/e-books' },
-    { label: '1-on-1 Session', href: '/sessions' },
+    { label: '1-on-1 Session', href: '/session' },
     { label: 'Supplement Guidance', href: '/supplement-guidance' },
   ];
 
   const quickLinks2 = [
-    { label: '1-on-1 Q&A Video Call', href: '/' },
+    { label: '1-on-1 Q&A Video Call', href: '/session' },
     { label: 'Privacy Policy', href: '/privacy-policy' },
     { label: 'Terms, Conditions & Refund Policy', href: '/terms-and-conditions' },
     { label: 'FAQs', href: '/faqs' },

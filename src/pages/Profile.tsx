@@ -181,13 +181,13 @@ const Profile = () => {
                     {/* Mobile Tabs - Horizontal scrollable */}
                     <div className="block md:hidden mb-8">
                         <div className="overflow-x-auto">
-                            <div className="flex gap-2 bg-muted rounded-lg p-4 min-w-max">
+                            <div className="flex bg-muted min-w-max">
                                 {tabList.map((tab) => (
                                     <button
                                         key={tab.key}
-                                        className={`text-left px-3 py-3 text-[16px] font-[400] rounded-none transition-colors duration-200
+                                        className={`text-left px-3 py-3 text-[12px] font-[600] rounded-none transition-colors duration-200 border-r border-gray-600
                                         ${activeTab === tab.key
-                                                ? "bg-[#000] text-white"
+                                                ? "bg-[#ED2C2C] text-white"
                                                 : "bg-transparent text-[#fff] hover:bg-[#222]"
                                             }
                                         `}

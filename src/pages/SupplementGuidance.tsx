@@ -236,9 +236,11 @@ const SupplementGuidance = () => {
                             animate={featuresInView ? "visible" : "hidden"}
                             transition={{ duration: 0.7, delay: 0.44, ease: [0.42, 0, 0.2, 1] }}
                         >
-                            <Button className="hero-button px-[45px]">
+                            {guidance && (
+                            <Link to={`/supplement-guidance/payment/${guidance._id}`} className="hero-button px-[45px]">
                                 BOOK NOW
-                            </Button>
+                            </Link>
+                            )}
                         </motion.div>
                     </div>
                 </motion.div>

@@ -3,6 +3,7 @@ import trainerImage from '@/assets/trainer-image.png';
 import icon1 from "@/assets/about/icon1.png"
 import icon2 from "@/assets/about/icon2.png"
 import icon3 from "@/assets/about/icon3.png"
+import { Link } from 'react-router-dom';
 
 const AboutSection = () => {
   const features = [
@@ -39,9 +40,9 @@ const AboutSection = () => {
             </p>
             
             
-            <Button className="hero-button px-[45px]">
+            <Link to={'/about-us'} className="hero-button px-[45px]" >
               READ MORE
-            </Button>
+            </Link>
           </div>    
           {/* Image */}
           <div className="relative animate-slide-in-right">

@@ -253,9 +253,11 @@ const Sessions = () => {
                         animate={featuresInView ? "visible" : "hidden"}
                         transition={{ duration: 0.7, delay: 0.39, ease: [0.42, 0, 0.2, 1] }}
                     >
-                        <Button className="hero-button px-[45px]">
+                        {session && (
+                        <Link to={`/session/payment/${session._id}`} className="hero-button px-[45px]">
                             BOOK NOW
-                        </Button>
+                        </Link>
+                        )}
                     </motion.div>
                 </div>
             </motion.div>
