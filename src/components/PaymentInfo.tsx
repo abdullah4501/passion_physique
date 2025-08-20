@@ -10,7 +10,7 @@ import {
 } from '@stripe/react-stripe-js';
 import ConfirmModal from "./ConfirmModal";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY); // Set in your .env
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY); // Set in your .env
 
 const PaymentForm = ({ onCardAdded }) => {
     const stripe = useStripe();

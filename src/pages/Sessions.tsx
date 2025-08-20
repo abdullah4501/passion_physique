@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import bg from "@/assets/bg/Plans.png";
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const sessionFeatures = [
     "Training strategy & program analysis",
@@ -40,16 +40,17 @@ const featureItemVariants = {
 const Sessions = () => {
     const [session, setSession] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
     useEffect(() => {
         fetch(`${import.meta.env.VITE_API_URL}/api/sessions`)
             .then(res => res.json())
             .then(data => {
                 if (data.sessions && data.sessions.length > 0) {
-                  setSession(data.sessions[0]);
+                    setSession(data.sessions[0]);
                 }
                 setLoading(false);
-              })
-              
+            })
+
             .catch(() => setLoading(false));
     }, []);
     // Animation refs
@@ -61,8 +62,11 @@ const Sessions = () => {
 
     const featuresRef = useRef(null);
     const featuresInView = useInView(featuresRef, { once: false, margin: "-100px" });
+    const token = localStorage.getItem('token');
+    const isLoggedIn = !!token; 
 
-    return (<>
+    return (
+    <>
         <Header />
         {/* HERO/BANNER */}
         <section className="relative w-full h-[45vh] flex items-center justify-center overflow-hidden">
@@ -157,6 +161,12 @@ const Sessions = () => {
                                     style={{
                                         letterSpacing: '1px',
                                         outline: 'none'
+                                    }}
+                                    onClick={() => {
+                                        if (!isLoggedIn) {
+                                            localStorage.setItem('redirectAfterAuth', window.location.pathname + window.location.search);
+                                            navigate('/login');
+                                        }
                                     }}
                                 >
                                     BOOK NOW
@@ -254,9 +264,9 @@ const Sessions = () => {
                         transition={{ duration: 0.7, delay: 0.39, ease: [0.42, 0, 0.2, 1] }}
                     >
                         {session && (
-                        <Link to={`/session/payment/${session._id}`} className="hero-button px-[45px]">
-                            BOOK NOW
-                        </Link>
+                            <Link to={`/session/payment/${session._id}`} className="hero-button px-[45px]">
+                                BOOK NOW
+                            </Link>
                         )}
                     </motion.div>
                 </div>

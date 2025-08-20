@@ -22,6 +22,8 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const from = location.state?.from?.pathname || '/';
+
     const params = new URLSearchParams(location.search);
     const redirectTo = params.get('redirect');
 
@@ -58,13 +60,18 @@ const Login = () => {
             setSuccess('Login successful! Redirecting...');
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('token', data.token);
+            const redirect = localStorage.getItem('redirectAfterAuth');
 
             // 🟢 Corrected setTimeout function
             setTimeout(() => {
                 if (redirectTo) {
                     navigate(redirectTo, { replace: true });
-                } else {
-                    navigate('/'); // default page if no redirect param
+                }
+                else if (redirect) {
+                    navigate(redirect, { replace: true });
+                }
+                else {
+                    navigate('/');
                 }
             }, 1200); // Redirect after 1.2s
 

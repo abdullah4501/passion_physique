@@ -157,16 +157,19 @@ const Header: React.FC = () => {
                 )}
               </div>
             ) : (
-              <Link to={'/register'} className="hero-button px-[25px] hover:bg-red-700">
+              <Button onClick={() => {
+                localStorage.setItem('redirectAfterAuth', window.location.pathname + window.location.search);
+                navigate('/register');
+              }} className="hero-button px-[25px] hover:bg-red-700" >
                 LOGIN OR REGISTER
-              </Link>
+              </Button>
             )}
           </div>
           <div className='flex gap-4 items-center lg:hidden'>
             {user && (
-            <Link to={`/profile/${user.id}`} >
-              <User size={20} className="text-foreground" />
-            </Link>
+              <Link to={`/profile/${user.id}`} >
+                <User size={20} className="text-foreground" />
+              </Link>
             )}
             <button
               className="text-foreground"

@@ -37,6 +37,25 @@ const headingVariants = {
     hidden: { opacity: 0, y: 42 },
     visible: { opacity: 1, y: 0 }
 };
+const PLAN_ORDER = [
+    'BASIC12M',
+    'FULL12M',
+    'BASIC6M',
+    'FULL6M',
+    'BASIC3M',
+    'FULL3M',
+    'BASIC1M',
+    'FULL1M'
+];
+function normalizePlanName(name = '') {
+    return String(name).replace(/[^a-z0-9]/gi, '').toUpperCase();
+}
+
+function getPlanOrderIndex(planName) {
+    const key = normalizePlanName(planName);
+    const idx = PLAN_ORDER.indexOf(key);
+    return idx === -1 ? Infinity : idx;
+}
 
 const CoachingPlan = () => {
     // Plans section animation
@@ -60,9 +79,29 @@ const CoachingPlan = () => {
     useEffect(() => {
         setLoading(true);
         fetch(`${import.meta.env.VITE_API_URL}/api/coachingplans/stripe`)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! Status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(data => {
-                setPlans(data.plans || []); // assuming { plans: [...] } in response
+                const rawPlans = data.plans || [];
+
+                // stable sort: create array with original index so unknown items keep relative order
+                const withIndex = rawPlans.map((p, i) => ({ plan: p, originalIndex: i }));
+                withIndex.sort((a, b) => {
+                    const ia = getPlanOrderIndex(a.plan.name);
+                    const ib = getPlanOrderIndex(b.plan.name);
+                    if (ia === ib) {
+                        // either both matched same slot, or both are Infinity -> preserve original order
+                        return a.originalIndex - b.originalIndex;
+                    }
+                    return ia - ib; // lower index => earlier in array (Infinity goes to the end)
+                });
+
+                const sorted = withIndex.map(x => x.plan);
+                setPlans(sorted);
                 setLoading(false);
             })
             .catch(() => {
@@ -70,6 +109,7 @@ const CoachingPlan = () => {
                 setLoading(false);
             });
     }, []);
+
 
     // Heading animation for "Basic VS Full COACHING PLANS"
     const tableSectionRef = useRef(null);

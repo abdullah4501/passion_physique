@@ -71,12 +71,12 @@ const CheckoutSession = () => {
                 setDefaultCardId(data.defaultCardId || "");
             });
     }, []);
+    const currentPage = window.location.pathname;
 
-    // Redirect to login if no token
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
-            navigate("/login", { replace: true });
+            navigate(`/login?redirect=${currentPage}`, { replace: true });
             return;
         }
     }, [navigate]);
