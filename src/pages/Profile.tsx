@@ -9,6 +9,8 @@ import PaymentInfo from '@/components/PaymentInfo';
 import ActivePlan from '@/components/ActivePlan';
 import SavedLibrary from '@/components/SavedLibrary';
 import PurchasedEbooks from '@/components/PurchasedEbooks';
+import OtpModal from "@/components/OtpModal";
+
 
 
 const titleVariants = {
@@ -42,6 +44,16 @@ const Profile = () => {
     const [pwMsg, setPwMsg] = useState('');
     const [pwError, setPwError] = useState('');
     const [pwLoading, setPwLoading] = useState(false);
+    const [otpModal, setOtpModal] = useState({
+        open: false,
+        mode: null, // "profile" or "password"
+        pendingInfo: null,
+        pendingPw: null,
+    });
+    const [otp, setOtp] = useState('');
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [otpError, setOtpError] = useState('');
+
 
     // Redirect if user not logged in or ID doesn't match
     useEffect(() => {
@@ -84,22 +96,20 @@ const Profile = () => {
         e.preventDefault();
         setInfoMsg('');
         setInfoError('');
+        // 1. Send OTP to email first
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(info),
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/send-otp-for-update`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ email: info.email }),
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.msg || 'Failed to update profile');
-            setInfoMsg('Profile updated successfully!');
-            // Optionally update localStorage
-            const user = JSON.parse(localStorage.getItem('user'));
-            localStorage.setItem('user', JSON.stringify({ ...user, ...info }));
+            if (!res.ok) throw new Error(data.msg || "Failed to send OTP.");
+            // 2. Open OTP modal and store pending info
+            setOtp('');
+            setOtpError('');
+            setOtpModal({ open: true, mode: "profile", pendingInfo: info, pendingPw: null });
         } catch (err) {
             setInfoError(err.message);
         }
@@ -114,30 +124,77 @@ const Profile = () => {
         setPwMsg('');
         setPwError('');
         setPwLoading(true);
+
         if (pwForm.newPassword !== pwForm.confirmPassword) {
             setPwError('New passwords do not match.');
             setPwLoading(false);
             return;
         }
         try {
+            // 1. Send OTP to email first
             const token = localStorage.getItem('token');
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}/change-password`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(pwForm),
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/send-otp-for-update`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ email: info.email }),
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.msg || 'Failed to change password');
-            setPwMsg('Password changed successfully!');
-            setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            if (!res.ok) throw new Error(data.msg || "Failed to send OTP.");
+            setOtp('');
+            setOtpError('');
+            setOtpModal({ open: true, mode: "password", pendingInfo: null, pendingPw: { ...pwForm } });
         } catch (err) {
             setPwError(err.message);
         }
         setPwLoading(false);
     };
+    const handleOtpSubmit = async () => {
+        setOtpError('');
+        setOtpLoading(true);
+        const token = localStorage.getItem('token');
+        if (otpModal.mode === "profile" && otpModal.pendingInfo) {
+            // Submit profile update + OTP
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ...otpModal.pendingInfo, otp }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.msg || 'Failed to update profile');
+                setInfoMsg('Profile updated successfully!');
+                const user = JSON.parse(localStorage.getItem('user'));
+                localStorage.setItem('user', JSON.stringify({ ...user, ...otpModal.pendingInfo }));
+                setOtpModal({ open: false, mode: null, pendingInfo: null, pendingPw: null });
+            } catch (err) {
+                setOtpError(err.message);
+            }
+        } else if (otpModal.mode === "password" && otpModal.pendingPw) {
+            // Submit password change + OTP
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${id}/change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ...otpModal.pendingPw, otp, email: info.email }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.msg || 'Failed to change password');
+                setPwMsg('Password changed successfully!');
+                setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                setOtpModal({ open: false, mode: null, pendingInfo: null, pendingPw: null });
+            } catch (err) {
+                setOtpError(err.message);
+            }
+        }
+        setOtpLoading(false);
+    };
+
 
     return (
         <>
@@ -372,6 +429,16 @@ const Profile = () => {
                 </div>
             </section>
             <Footer />
+            <OtpModal
+                open={otpModal.open}
+                onClose={() => setOtpModal({ open: false, mode: null, pendingInfo: null, pendingPw: null })}
+                onSubmit={handleOtpSubmit}
+                value={otp}
+                onChange={e => setOtp(e.target.value)}
+                loading={otpLoading}
+                error={otpError}
+            />
+
         </>
     );
 };

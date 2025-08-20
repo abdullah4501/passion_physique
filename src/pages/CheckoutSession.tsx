@@ -222,7 +222,7 @@ const CheckoutSession = () => {
                 body: JSON.stringify({
                     user: user.id,
                     itemType: productType,
-                    itemId: product.id,
+                    itemId: product._id,
                     itemName: product.name,
                     amount: product.amount,
                     stripePaymentId: paymentIntent.id,
