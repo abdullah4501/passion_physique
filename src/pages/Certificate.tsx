@@ -63,17 +63,9 @@ const Certificate = () => {
   const titleInView = useInView(titleRef, { once: true, margin: '-100px' });
 
   async function handleDownload(cert: CertificateItem) {
-    if (!cert.pdfUrl) return; // not allowed
+    if (!cert.pdfUrl) return;
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Please log in as a member to download.');
-        return;
-      }
-      const res = await fetch(apiUrl(cert.pdfUrl), {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: 'include',
-      });
+      const res = await fetch(apiUrl(cert.pdfUrl));
       if (!res.ok) {
         const msg = await res.text().catch(() => '');
         throw new Error(`Download failed (${res.status}) ${msg}`);
@@ -88,9 +80,10 @@ const Certificate = () => {
       setTimeout(() => URL.revokeObjectURL(a.href), 1500);
     } catch (err) {
       console.error(err);
-      alert('Could not download this file. If you are a member, please re-login and try again.');
+      alert('Could not download this file.');
     }
   }
+  
 
   return (
     <>
@@ -174,9 +167,7 @@ const Certificate = () => {
                       <img
                         src={imgSrc}
                         alt={cert.name}
-                        className={`h-[180px] object-contain transition ${
-                          canDownload ? '' : 'blur-[2px] scale-[1.02] opacity-80'
-                        }`}
+                        className={`h-[180px] object-contain transition `}
                         draggable={false}
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).src = '/favicon.ico';
@@ -198,7 +189,6 @@ const Certificate = () => {
                           </span>
                         </div>
                         <div className="flex flex-col items-center gap-3">
-                          {canDownload ? (
                             <button
                               onClick={() => handleDownload(cert)}
                               title="Download"
@@ -211,21 +201,7 @@ const Certificate = () => {
                                 draggable={false}
                               />
                             </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="opacity-50 cursor-not-allowed"
-                              title="Login as member to download"
-                              aria-disabled="true"
-                            >
-                              <img
-                                src={DownloadIcon}
-                                alt="Download (members only)"
-                                className="object-contain"
-                                draggable={false}
-                              />
-                            </button>
-                          )}
+                           
                         </div>
                       </div>
                       <div className="text-white text-[14px] font-normal mt-2 mb-0 leading-[24px] md:pr-[25px] pr-0">
