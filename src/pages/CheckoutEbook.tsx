@@ -149,10 +149,12 @@ const EbookCheckout = () => {
                     return;
                 }
                 const fd = new FormData();
-                fd.append("ebookId", ebook._id);
+                fd.append("priceId", ebook._id);              // backend expects 'priceId'
+                fd.append("purchasedType", "Ebook");          // clearly specify type
                 fd.append("receipt", receiptFile);
+                
 
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/receipts/ebook`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/receipts`, {
                     method: "POST",
                     headers: { Authorization: `Bearer ${token}` },
                     body: fd,

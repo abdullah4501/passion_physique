@@ -54,7 +54,7 @@ const Profile = () => {
     const [otpLoading, setOtpLoading] = useState(false);
     const [otpError, setOtpError] = useState('');
     const [infoSaving, setInfoSaving] = useState(false);
-    const [pwSendingOtp, setPwSendingOtp] = useState(false); 
+    const [pwSendingOtp, setPwSendingOtp] = useState(false);
 
 
     // Redirect if user not logged in or ID doesn't match
@@ -94,73 +94,73 @@ const Profile = () => {
     const handleInfoChange = (e) => {
         setInfo({ ...info, [e.target.name]: e.target.value });
     };
-const handleInfoSave = async (e) => {
-  e.preventDefault();
-  setInfoMsg('');
-  setInfoError('');
-  setInfoSaving(true);
+    const handleInfoSave = async (e) => {
+        e.preventDefault();
+        setInfoMsg('');
+        setInfoError('');
+        setInfoSaving(true);
 
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                navigate('/login');
+                return;
+            }
+
+            const normalizedEmail = (info.email || '').trim().toLowerCase();
+
+            // 0. (Optional) quick client-side validation
+            if (!normalizedEmail) {
+                setInfoError('Please enter a valid email.');
+                setInfoSaving(false);
+                return;
+            }
+
+            // 1. Call check-email first (so we don't send OTP to an email that already exists)
+            const checkRes = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/check-email`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: normalizedEmail }),
+            });
+            const checkData = await parseJsonOrThrow(checkRes);
+            if (checkData.exists) {
+                setInfoError('Email already registered by another user. Please choose a different email.');
+                setInfoSaving(false);
+                return;
+            }
+
+            // 2. Send OTP (since email is free or owned by current user)
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/send-otp-for-update`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ email: normalizedEmail }),
+            });
+            const data = await parseJsonOrThrow(res);
+
+            // 3. Open OTP modal and store pending info
+            setOtp('');
+            setOtpError('');
+            setOtpModal({ open: true, mode: "profile", pendingInfo: { ...info, email: normalizedEmail }, pendingPw: null });
+        } catch (err) {
+            setInfoError(err.message || 'Failed to start update');
+        } finally {
+            setInfoSaving(false);
+        }
+    };
+    async function parseJsonOrThrow(res) {
+        const text = await res.text();
+        try {
+            const json = JSON.parse(text || '{}');
+            if (!res.ok) throw new Error(json.msg || `Request failed (${res.status})`);
+            return json;
+        } catch (err) {
+            const preview = text ? text.substring(0, 300) : `Status ${res.status}`;
+            throw new Error(`Unexpected server response: ${preview}`);
+        }
     }
-
-    const normalizedEmail = (info.email || '').trim().toLowerCase();
-
-    // 0. (Optional) quick client-side validation
-    if (!normalizedEmail) {
-      setInfoError('Please enter a valid email.');
-      setInfoSaving(false);
-      return;
-    }
-
-    // 1. Call check-email first (so we don't send OTP to an email that already exists)
-    const checkRes = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/check-email`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email: normalizedEmail }),
-    });
-    const checkData = await parseJsonOrThrow(checkRes);
-    if (checkData.exists) {
-      setInfoError('Email already registered by another user. Please choose a different email.');
-      setInfoSaving(false);
-      return;
-    }
-
-    // 2. Send OTP (since email is free or owned by current user)
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/send-otp-for-update`, {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ email: normalizedEmail }),
-    });
-    const data = await parseJsonOrThrow(res);
-
-    // 3. Open OTP modal and store pending info
-    setOtp('');
-    setOtpError('');
-    setOtpModal({ open: true, mode: "profile", pendingInfo: { ...info, email: normalizedEmail }, pendingPw: null });
-  } catch (err) {
-    setInfoError(err.message || 'Failed to start update');
-  } finally {
-    setInfoSaving(false);
-  }
-};
-async function parseJsonOrThrow(res) {
-  const text = await res.text();
-  try {
-    const json = JSON.parse(text || '{}');
-    if (!res.ok) throw new Error(json.msg || `Request failed (${res.status})`);
-    return json;
-  } catch (err) {
-    const preview = text ? text.substring(0, 300) : `Status ${res.status}`;
-    throw new Error(`Unexpected server response: ${preview}`);
-  }
-}
 
 
     // Password change form
@@ -168,45 +168,42 @@ async function parseJsonOrThrow(res) {
         setPwForm({ ...pwForm, [e.target.id]: e.target.value });
     };
     const handlePwSave = async (e) => {
-    e.preventDefault();
-    setPwMsg('');
-    setPwError('');
-    setPwLoading(true);
-    setPwSendingOtp(true);
+        e.preventDefault();
+        setPwMsg('');
+        setPwError('');
+        setPwLoading(true);
+        setPwSendingOtp(true);
 
-    if (pwForm.newPassword !== pwForm.confirmPassword) {
-        setPwError('New passwords do not match.');
-        setPwLoading(false);
-        setPwSendingOtp(false);
-        return;
-    }
+        if (pwForm.newPassword !== pwForm.confirmPassword) {
+            setPwError('New passwords do not match.');
+            setPwLoading(false);
+            setPwSendingOtp(false);
+            return;
+        }
 
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) { navigate('/login'); return; }
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) { navigate('/login'); return; }
 
-        const normalizedEmail = (info.email || '').trim().toLowerCase();
+            const normalizedEmail = (info.email || '').trim().toLowerCase();
 
-        // If you want to check email here as well (rare because password change uses same email),
-        // you can reuse check-email; but usually password change should just send OTP to current account email.
-        // We'll still call send-otp-for-update directly:
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/send-otp-for-password-change`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ email: normalizedEmail }), // still needed to match backend, or just omit body
+            });
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/send-otp-for-update`, {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ email: normalizedEmail }),
-        });
-        const data = await parseJsonOrThrow(res);
+            const data = await parseJsonOrThrow(res);
 
-        setOtp('');
-        setOtpError('');
-        setOtpModal({ open: true, mode: "password", pendingInfo: null, pendingPw: { ...pwForm } });
-    } catch (err) {
-        setPwError(err.message || 'Failed to request OTP');
-    } finally {
-        setPwLoading(false);
-        setPwSendingOtp(false);
-    }
+            setOtp('');
+            setOtpError('');
+            setOtpModal({ open: true, mode: "password", pendingInfo: null, pendingPw: { ...pwForm } });
+        } catch (err) {
+            setPwError(err.message || 'Failed to request OTP');
+        } finally {
+            setPwLoading(false);
+            setPwSendingOtp(false);
+        }
     };
 
     const handleOtpSubmit = async () => {
@@ -402,7 +399,7 @@ async function parseJsonOrThrow(res) {
                                             <button
                                                 type="submit"
                                                 className="w-[120px] h-[45px] mt-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-[16px] transition-all duration-200 rounded-md"
-                                                  disabled={infoSaving}
+                                                disabled={infoSaving}
                                             >
                                                 {infoSaving ? 'Sending OTP...' : 'Save'}
                                             </button>

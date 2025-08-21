@@ -205,6 +205,7 @@ const BecomeMember = () => {
 
             const fd = new FormData();
             fd.append("priceId", plan.priceId);
+            fd.append('purchasedType', 'coaching plan');
             fd.append("receipt", receiptFile);
 
             const res = await fetch(`${import.meta.env.VITE_API_URL}/api/receipts`, {

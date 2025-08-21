@@ -43,6 +43,7 @@ const Header: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     setUser(null);
     setOpen(false);
     window.location.reload();
