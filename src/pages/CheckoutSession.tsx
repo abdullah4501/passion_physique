@@ -11,8 +11,10 @@ import { authFetch } from '@/utils/authFetch';
 import { useStripe, useElements } from '@stripe/react-stripe-js';
 import { CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js';
 import PaymentSuccessModal from "@/components/PaymentSuccessModal";
+import AppModal from '@/components/AppModal';
 
 const paymentOptions = [
+    { key: "uae", label: "UAE Bank Transfer (SEPA)" },
     { key: "stripe", label: "Stripe" },
 ];
 
@@ -43,6 +45,8 @@ const CheckoutSession = () => {
     });
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [receiptModalOpen, setReceiptModalOpen] = useState(false);
+    const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
     // Determine product type from URL
     const productType = location.pathname.includes('session') ? 'session' : 'supplement-guidance';
@@ -148,6 +152,38 @@ const CheckoutSession = () => {
             setProcessing(false);
             return;
         }
+            if (form.paymentMethod === "uae") {
+        if (!receiptFile) {
+            setStripeError("Please upload your bank receipt before submitting.");
+            setProcessing(false);
+            return;
+        }
+        if (!product?._id) {
+            setStripeError("Product not found.");
+            setProcessing(false);
+            return;
+        }
+        const fd = new FormData();
+        fd.append("priceId", product._id);
+        fd.append("purchasedType", productType); // "session" or "supplement-guidance"
+        fd.append("receipt", receiptFile);
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/receipts`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: fd,
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || "Failed to submit receipt");
+            setSuccessModalOpen(true);
+            setReceiptFile(null);
+        } catch (err) {
+            setStripeError(err.message || "Payment failed.");
+        }
+        setProcessing(false);
+        return; 
+    }
         if (!stripe || !elements) {
             setStripeError("Stripe is not loaded");
             setProcessing(false);
@@ -450,61 +486,68 @@ const CheckoutSession = () => {
                                             </>
                                         ) : (
                                             <>
+                                                <p className="text-white text-[16px] mb-4">
+                                                    Transfer via bank and upload your payment receipt. Your ebook will unlock after verification.
+                                                </p>
                                                 <div>
-                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cardNumber">
-                                                        Card Number*
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                        Account Holder
                                                     </label>
-                                                    <input
-                                                        id="cardNumber"
-                                                        name="cardNumber"
-                                                        value={form.cardNumber}
-                                                        onChange={handleChange}
-                                                        className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                        required
-                                                    />
+                                                    <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none transition-all rounded-none flex items-center">
+                                                        The Passion Physique LLC
+                                                    </p>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <div className="w-[48%]">
-                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="expDate">
-                                                            Expiration Date*
+                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2">
+                                                            Account number
                                                         </label>
-                                                        <input
-                                                            id="expDate"
-                                                            name="expDate"
-                                                            type="text"
-                                                            placeholder="MM/YY"
-                                                            value={form.expDate}
-                                                            maxLength={5}
-                                                            onChange={e => {
-                                                                let value = e.target.value.replace(/\D/g, '');
-                                                                if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                                                                if (value.length >= 2 && parseInt(value.slice(0, 2)) > 12) {
-                                                                    value = '12' + value.slice(2);
-                                                                }
-                                                                setForm(prev => ({ ...prev, expDate: value }));
-                                                            }}
-                                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                            required
-                                                        />
+                                                        <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none transition-all rounded-none flex items-center">
+                                                            9012850782
+                                                        </p>
                                                     </div>
                                                     <div className="w-[48%]">
-                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" htmlFor="cvv">
-                                                            CVV*
+                                                        <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                            IBAN
                                                         </label>
-                                                        <input
-                                                            id="cvv"
-                                                            name="cvv"
-                                                            type="text"
-                                                            value={form.cvv}
-                                                            onChange={handleChange}
-                                                            maxLength={4}
-                                                            pattern="\d*"
-                                                            inputMode="numeric"
-                                                            className="w-full bg-[#363636] text-white h-[38px] px-4 text-[14px] font-normal border-none outline-none focus:ring-2 focus:ring-primary transition-all duration-200 rounded-none"
-                                                            autoComplete="off"
-                                                            required
-                                                        />
+                                                        <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none transition-all rounded-none flex items-center">AE500860000009012850782</p>
                                                     </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                        BIC
+                                                    </label>
+                                                    <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none transition-all rounded-none flex items-center">
+                                                        WIOBAEADXXX
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[#ccc] font-light text-[16px] mb-2" >
+                                                        Bank Address
+                                                    </label>
+                                                    <p className="w-full bg-[#363636] text-white h-[38px] px-4 text-[16px] font-semibold border-none outline-none transition-all rounded-none flex items-center">
+                                                        Etihad Airways Centre 5th Floor, Abu Dhabi, UAE
+                                                    </p>
+                                                </div>
+                                                <div className="mb-4">
+                                                    <input
+                                                        id="receipt"
+                                                        type="file"
+                                                        accept="image/png,image/jpeg"
+                                                        className="hidden"
+                                                        onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                                                    />
+                                                    <label
+                                                        htmlFor="receipt"
+                                                        className="inline-flex items-center justify-center bg-[#ff3c33] hover:bg-[#e03228] text-white font-[600] text-[16px] px-6 h-[42px] rounded-none cursor-pointer transition-all"
+                                                    >
+                                                        Upload Payment Receipt
+                                                    </label>
+                                                    {receiptFile && (
+                                                        <div className="mt-2 text-[#ccc] text-sm">
+                                                            Selected: <span className="text-white">{receiptFile.name}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </>
                                         )}
@@ -636,6 +679,14 @@ const CheckoutSession = () => {
                    productType == 'session'? navigate("/session") : navigate("/supplement-guidance")
                 }}
             />
+        <AppModal
+            open={receiptModalOpen}
+            onClose={() => { setReceiptModalOpen(false); navigate("/e-books"); }}
+            variant="success"
+            title="Receipt Submitted!"
+            message="Thanks for uploading your payment receipt. We’ll verify it shortly and unlock your ebook."
+            primaryText="Okay, got it →"
+        />
             <Footer />
         </>
     );
