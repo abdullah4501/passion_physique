@@ -10,7 +10,6 @@ import { useStripe, useElements } from '@stripe/react-stripe-js';
 import { CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js';
 import PaymentSuccessModal from "@/components/PaymentSuccessModal"; // adjust the path if needed
 import AppModal from '@/components/AppModal';
-import { Link } from "react-router-dom";
 
 const paymentOptions = [
     { key: "uae", label: "UAE Bank Transfer (SEPA)" },
@@ -715,13 +714,14 @@ const BecomeMember = () => {
                                     />
                                     <span>
                                         I reeded the{" "}
-                                        <Link to="/privacy-policy"
+                                        <a
+                                            href="#"
                                             className="underline text-white hover:text-[#ff3131] transition-all"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
                                             Privacy & Terms, Conditions & Refund Policy
-                                        </Link>
+                                        </a>
                                     </span>
                                 </label>
                                 {stripeError && <div className="text-red-500 mt-2">{stripeError}</div>}

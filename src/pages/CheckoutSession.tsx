@@ -11,7 +11,6 @@ import { authFetch } from '@/utils/authFetch';
 import { useStripe, useElements } from '@stripe/react-stripe-js';
 import { CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js';
 import PaymentSuccessModal from "@/components/PaymentSuccessModal";
-import {Link} from "react-router-dom";
 
 const paymentOptions = [
     { key: "stripe", label: "Stripe" },
@@ -534,13 +533,14 @@ const CheckoutSession = () => {
                                     />
                                     <span>
                                         I read the{" "}
-                                        <Link to="/privacy-policy"
+                                        <a
+                                            href="#"
                                             className="underline text-white hover:text-[#ff3131] transition-all"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
                                             Privacy & Terms, Conditions & Refund Policy
-                                        </Link>
+                                        </a>
                                     </span>
                                 </label>
                                 {stripeError && <div className="text-red-500 mt-2">{stripeError}</div>}
