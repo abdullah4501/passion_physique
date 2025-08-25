@@ -156,7 +156,7 @@ const Login = () => {
                                         />
                                     </div>
                                     <Link
-                                        to={"/"}
+                                        to={"/forgot-password"}
                                         className="underline text-white hover:text-[#ff3c33] transition-all text-[16px]"
                                     >
                                         Forget your Password?

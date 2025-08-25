@@ -25,6 +25,8 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutSession from "./pages/CheckoutSession";
 import CheckoutEbook from "./pages/CheckoutEbook";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -47,7 +49,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-        <ScrollToTop />
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="about-us" element={<About />} />
@@ -67,6 +69,8 @@ const App = () => (
             <Route path="coaching-ebooks/payment/:ebookId" element={<CheckoutEbook />} />
             <Route path="session/payment/:productId" element={<CheckoutSession />} />
             <Route path="supplement-guidance/payment/:producttId" element={<CheckoutSession />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
