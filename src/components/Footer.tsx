@@ -85,7 +85,7 @@ const Footer = () => {
             <div className="space-y-4 w-full flex flex-col items-center lg:items-start">
               <div className="flex items-center gap-3">
                 <img src={phone} />
-                <span className="text-white text-sm">05000000000</span>
+                <span className="text-white text-sm">+971 582 298808</span>
               </div>
               <div className="flex items-center gap-3">
                 <img src={email} />

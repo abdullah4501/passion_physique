@@ -162,7 +162,7 @@ const About = () => {
             >
               <h2 className="section-heading">
                 Professional Introduction<br />
-                <span className="text-[#ED232A] uppercase">Petros Pasiollari</span>
+                <span className="text-[#ED232A] uppercase">Eirini Kanonidou</span>
               </h2>
               <p className="text-[#ffffff] text-[15px] leading-[25px] my-4  font-normal">
                 Eirini Stergia Kanonidou is more than a coach — she’s lived the journey. For over a year, she’s stood by my side, personally and professionally, transforming her body and mindset while losing over 10 kilograms. As I always say: “It’s not just about the number on the scale — it’s about health, mindset, strength, and only then, shape.”

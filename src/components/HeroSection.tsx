@@ -8,7 +8,7 @@ import 'swiper/css/effect-fade';
 import 'swiper/css/pagination';
 
 import heroImage2 from '@/assets/hero-bg2.png';
-import heroImage from '@/assets/hero-bg.png';
+import heroImage from '@/assets/hero-bg3.png';
 import heroImage3 from '@/assets/hero-bg.png';
 import { Link } from 'react-router-dom';
 
@@ -39,19 +39,19 @@ const slides = [
     description: "Push beyond your limits with our expert-designed training programs. Backed by cutting-edge research and delivered with unwavering passion for your success.",
     buttonText: "BEGIN TRANSFORMATION"
   },
-  {
-    id: 3,
-    backgroundImage: heroImage3,
-    title: (
-      <>
-        <span className="text-primary">ELEVATE</span> YOUR FITNESS,
-        <br />
-        EMBRACE <span className="text-primary">EXCELLENCE.</span>
-      </>
-    ),
-    description: "Experience the perfect fusion of scientific methodology and passionate mentorship. Transform not just your body, but your entire relationship with fitness.",
-    buttonText: "DISCOVER MORE"
-  }
+  // {
+  //   id: 3,
+  //   backgroundImage: heroImage3,
+  //   title: (
+  //     <>
+  //       <span className="text-primary">ELEVATE</span> YOUR FITNESS,
+  //       <br />
+  //       EMBRACE <span className="text-primary">EXCELLENCE.</span>
+  //     </>
+  //   ),
+  //   description: "Experience the perfect fusion of scientific methodology and passionate mentorship. Transform not just your body, but your entire relationship with fitness.",
+  //   buttonText: "DISCOVER MORE"
+  // }
 ];
 
 const headingVariants = {
