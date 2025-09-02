@@ -89,7 +89,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center gap-3">
                 <img src={email} />
-                <span className="text-white text-sm">info@thepassionphysique.com</span>
+                <span className="text-white text-sm">thepassionphysique@gmail.com</span>
               </div>
             </div>
           </div>

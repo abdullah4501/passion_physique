@@ -1,6 +1,6 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import bannerImg from '@/assets/bg/workoutBg.png';
+import bannerImg from '@/assets/hero-bg3.png';
 import DownloadIcon from '@/assets/icons/download.png';
 
 import { motion, useInView } from 'framer-motion';

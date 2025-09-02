@@ -1,6 +1,6 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import bannerImg from '@/assets/bg/workoutBg.png';
+import bannerImg from '@/assets/hero-bg2.png';
 import playicon from '@/assets/workout/play-circle.png';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';

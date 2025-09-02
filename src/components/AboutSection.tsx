@@ -34,7 +34,7 @@ const AboutSection = () => {
             </h2>
             
             <p className="text-white/80 text-[15px] mb-8 leading-relaxed">
-              Petros Pasiollari and Eirini Stergia Kanoniou lead The Passion Physique, offering personalized, science-based 
+              Petros Pasiollari and Eirini Stergia Kanonidou lead The Passion Physique, offering personalized, science-based 
               coaching. Petros blends fitness, tech, and blockchain, while Eirini specializes in women's health and fitness. 
               Together, they help clients achieve lasting balance and strength.
             </p>
