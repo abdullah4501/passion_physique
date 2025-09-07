@@ -10,7 +10,7 @@ import { useStripe, useElements } from '@stripe/react-stripe-js';
 import { CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js';
 import PaymentSuccessModal from "@/components/PaymentSuccessModal"; // adjust the path if needed
 import AppModal from '@/components/AppModal';
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const paymentOptions = [
     { key: "uae", label: "UAE Bank Transfer (SEPA)" },
@@ -33,7 +33,9 @@ const BecomeMember = () => {
     const [receiptFile, setReceiptFile] = useState<File | null>(null);
     const searchParams = new URLSearchParams(location.search);
     const redirect = searchParams.get('redirect') || '/workout-library';
-
+    const [isDowngrade, setIsDowngrade] = useState(false);
+    const [prorationAmount, setProrationAmount] = useState(null);
+    const [clientSecret, setClientSecret] = useState(null);
 
     // Plan state
     const [plan, setPlan] = useState(null);
@@ -185,6 +187,7 @@ const BecomeMember = () => {
             setProcessing(false);
             return;
         }
+
         // Auth/user checks
         const user = JSON.parse(localStorage.getItem('user'));
         const token = localStorage.getItem('token');
@@ -193,14 +196,17 @@ const BecomeMember = () => {
             setProcessing(false);
             return;
         }
+
         // ── SEPA (UAE Bank Transfer) flow ───────────────────────────────────────────
         if (form.paymentMethod === "uae") {
             if (!receiptFile) {
                 setStripeError("Please upload your payment receipt.");
+                setProcessing(false);
                 return;
             }
             if (!plan?.priceId) {
                 setStripeError("Plan not found.");
+                setProcessing(false);
                 return;
             }
 
@@ -215,13 +221,18 @@ const BecomeMember = () => {
                 body: fd,
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data?.error || "Failed to submit receipt");
+            if (!res.ok) {
+                setStripeError(data?.error || "Failed to submit receipt");
+                setProcessing(false);
+                return;
+            }
             setReceiptModalOpen(true);
             setReceiptFile(null);
 
             setProcessing(false);
             return;
         }
+
         // Stripe.js loaded check
         if (!stripe || !elements) {
             setStripeError("Stripe is not loaded");
@@ -229,17 +240,13 @@ const BecomeMember = () => {
             return;
         }
 
-        let paymentMethodId = null; // What we will send to the backend
-
+        let paymentMethodId = null;
         try {
-            // ---- 1. Get the payment method ----
-
+            // --- 1. Get Payment Method ---
             if (form.paymentMethod === "stripe" && savedCards.length > 0 && useSavedCard) {
-                // Use saved card's paymentMethodId from backend (NO need to createPaymentMethod or use CardNumberElement)
                 const defaultCard = savedCards.find(card => card.id === defaultCardId) || savedCards[0];
                 paymentMethodId = defaultCard.id;
             } else {
-                // Create payment method from card input
                 const cardElement = elements.getElement(CardNumberElement);
                 if (!cardElement) {
                     setStripeError("Card input not found");
@@ -258,9 +265,8 @@ const BecomeMember = () => {
                 paymentMethodId = paymentMethod.id;
             }
 
-            // ---- 2. Call backend to create Stripe Subscription ----
-
-            const subRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-subscription`, {
+            // --- 2. Call backend to subscribe/upgrade/downgrade ---
+            const subRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/subscribe`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -268,29 +274,38 @@ const BecomeMember = () => {
                 },
                 body: JSON.stringify({
                     priceId: plan.priceId,
-                    paymentMethodId, // pass paymentMethodId (from new or saved card)
+                    paymentMethodId,
                     saveCard: form.saveInfo,
                 }),
             });
             const data = await subRes.json();
             if (!subRes.ok) throw new Error(data.error || "Could not start subscription");
 
-            // Defensive: Check for latest_invoice and payment_intent
-            const invoice = data.subscription?.latest_invoice;
+            // --- 3. Handle proration/payment ---
+            const subscription = data.subscription;
+            const invoice = subscription?.latest_invoice;
             const paymentIntent = invoice?.payment_intent;
             const clientSecret = paymentIntent?.client_secret;
-            let transactionId = data.subscription.id;
+            const amountDue = invoice?.amount_due ? (invoice.amount_due / 100).toFixed(2) : plan.amount;
+            setProrationAmount(amountDue);
+            setClientSecret(clientSecret || null);
 
-            // ---- 3. Confirm payment if needed ----
-            if (clientSecret) {
+            if (!clientSecret || amountDue === "0.00") {
+                // No payment required (downgrade/lateral move)
+                setIsDowngrade(true);
+                setProcessing(false);
+                pollMembershipStatus();
+                return;
+            } else {
+                // Payment required (upgrade/proration)
+                setIsDowngrade(false);
+
                 let confirmResult;
                 if (form.paymentMethod === "stripe" && savedCards.length > 0 && useSavedCard) {
-                    // Using a saved card → only pass payment_method
                     confirmResult = await stripe.confirmCardPayment(clientSecret, {
                         payment_method: paymentMethodId
                     });
                 } else {
-                    // New card → pass card element and billing details
                     const cardElement = elements.getElement(CardNumberElement);
                     confirmResult = await stripe.confirmCardPayment(clientSecret, {
                         payment_method: {
@@ -309,73 +324,46 @@ const BecomeMember = () => {
                     setProcessing(false);
                     return;
                 }
-
                 if (confirmedPI.status === "succeeded") {
-                    // Success, create member in DB
-                    await saveMember(plan, confirmedPI.id, "paid", data.subscription.id);
-                    setSuccessModalOpen(true);
+                    pollMembershipStatus();
                 } else {
                     setStripeError("Payment not completed.");
+                    setProcessing(false);
                 }
-            } else {
-                // No payment required (e.g. trial) — create member right away
-                await saveMember(plan, data.subscription.id, "paid", data.subscription.id);
-                setSuccessModalOpen(true);
             }
 
         } catch (err) {
-            setStripeError(err.message || "Failed to start subscription");
-            console.error("Stripe error:", err);
-        }
-
-        setProcessing(false);
-
-        // --- Helper: Save member in backend ---
-        async function saveMember(plan, transactionId, paymentStatus, subscriptionId) {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/members`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    planId: plan.priceId,
-                    transactionId,
-                    paymentStatus,
-                    amount: plan.amount,
-                    startDate: new Date().toISOString(),
-                    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
-                    subscriptionId,   // <-- ADD THIS LINE
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setStripeError(data.error || "Failed to save member. Please contact support.");
-                throw new Error(data.error || "Failed to save member");
-            }
-            // Save to purchases endpoint
-            const purchaseRes = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    user: user.id,
-                    itemType: "coaching plan",
-                    itemId: plan.priceId,
-                    itemName: plan.name,
-                    amount: plan.amount,
-                    stripePaymentId: transactionId,
-                })
-            });
-            const purchaseData = await purchaseRes.json();
-            if (!purchaseRes.ok) {
-                setStripeError(purchaseData.error || "Failed to save purchase. Please contact support.");
-                throw new Error(purchaseData.error || "Failed to save purchase");
-            }
+            setStripeError(err.message || "Failed to update subscription");
+            setProcessing(false);
         }
     };
+
+    async function pollMembershipStatus() {
+        const token = localStorage.getItem("token");
+        let attempts = 0;
+        const maxAttempts = 15; // Up to 30 seconds if interval is 2s
+        setStripeError(""); // clear error
+        setProcessing(true); // keep loader up!
+        const poll = setInterval(async () => {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/active`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.plan && data.plan.paymentStatus === "paid") {
+                clearInterval(poll);
+                setProcessing(false);
+                setSuccessModalOpen(true); // show modal
+            } else if (data.plan && data.plan.paymentStatus === "failed") {
+                clearInterval(poll);
+                setProcessing(false);
+                setStripeError("Payment failed. Please try another card or contact support.");
+            } else if (++attempts >= maxAttempts) {
+                clearInterval(poll);
+                setProcessing(false);
+                setStripeError("Membership activation is taking longer than expected. Please contact support if your card was charged.");
+            }
+        }, 2000);
+    }
 
 
     return (
@@ -734,19 +722,20 @@ const BecomeMember = () => {
                                 >
                                     {processing ? (
                                         <span className="flex items-center gap-2">
-                                            <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                            </svg>
+                                            {/* spinner svg */}
                                             Processing...
                                         </span>
                                     ) : (
                                         form.paymentMethod === "uae"
                                             ? "Submit"
-                                            : (plan ? `Pay €${plan.amount}` : "Pay")
+                                            : isDowngrade
+                                                ? "Downgrade"
+                                                : (prorationAmount
+                                                    ? `Pay €${prorationAmount}`
+                                                    : plan ? `Pay €${plan.amount}` : "Pay")
                                     )}
-
                                 </Button>
+
 
                             </form>
                         </div>
