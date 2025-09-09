@@ -349,7 +349,9 @@ const BecomeMember = () => {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             const data = await res.json();
-            if (data.plan && data.plan.paymentStatus === "paid") {
+
+            console.log("[response]:", data);
+            if (data.plan && data.plan.paymentStatus === "active") {
                 clearInterval(poll);
                 setProcessing(false);
                 setSuccessModalOpen(true); // show modal
