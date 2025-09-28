@@ -128,14 +128,14 @@ const Footer = () => {
           <div className="w-full lg:w-[20%] flex flex-col items-center lg:items-start text-center lg:text-left lg:pt-[40px]">
             <h3 className="text-white font-normal leading-[28px] text-[16px] mb-6">Follow Us:</h3>
             <div className="flex w-[75%] justify-between">
-              <a href="#" className='text-[14px] '>
+              <a href="https://www.instagram.com/thepassionphysique" className='text-[14px] '>
                 <img src={instagram} />
               </a>
-              <a href="#" className='text-[14px] '>
-                <img src={facebook} />
+              <a href="https://youtube.com/@thepassionphysique" className='text-[14px] '>
+              <i className="fa-brands fa-youtube text-[34px]"></i>
               </a>
-              <a href="#" className='text-[14px] '>
-                <img src={X} />
+              <a href="https://www.tiktok.com/@thepassionphysique" className='text-[14px] '>
+              <i className="fa-brands fa-tiktok text-[32px]"></i>
               </a>
             </div>
           </div>

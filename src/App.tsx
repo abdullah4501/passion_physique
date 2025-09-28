@@ -60,7 +60,7 @@ const App = () => (
             <Route path="workout-library" element={<WorkoutLibrary />} />
             <Route path="faqs" element={<Faq />} />
             <Route path="terms-and-conditions" element={<TermsConditions />} />
-            <Route path="certificate" element={<Certificate />} />
+            <Route path="certificates" element={<Certificate />} />
             <Route path="privacy-policy" element={<PrivacyPolicy />} />
             <Route path="register" element={<Register />} />
             <Route path="login" element={<Login />} />

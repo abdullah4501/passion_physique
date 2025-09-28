@@ -14,7 +14,7 @@ const navItems = [
   { label: 'Supplement Guidance', href: '/supplement-guidance' },
   { label: 'Library', href: '/workout-library' },
   { label: 'FAQs', href: '/faqs' },
-  { label: 'Certificate', href: '/certificate' },
+  { label: 'Certificates', href: '/certificates' },
 ];
 
 const Header: React.FC = () => {
