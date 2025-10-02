@@ -395,11 +395,6 @@ const CategoryVideoCard = ({
               <img src={playicon} className="w-[60px] h-[60px]" />
             </div>
           )}
-          <div className="absolute bottom-0 left-0">
-            <span className="bg-primary px-[45px] py-1 text-[12px] tracking-[1.2px] font-medium text-white">
-              LEVEL {video.level}
-            </span>
-          </div>
         </div>
       </div>
 

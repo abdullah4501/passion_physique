@@ -230,7 +230,6 @@ const CoachingPlan = () => {
                                             </div>
                                             <div className="text-right pricing-info">
                                                 <div className="text-[36px] font-light text-white">€{plan.amount}</div>
-                                                <div className="text-white text-[18px] font-light">{plan.period}</div>
                                             </div>
                                         </div>
                                     </div>
